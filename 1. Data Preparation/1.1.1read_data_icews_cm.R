@@ -11,7 +11,7 @@ library(plyr)
 #Set filename
 file_name<- "data_icews_cm.csv"
 #Assign Path were all ICEWS Files 
-path<- "~/ICEWS Project/Data/Raw Data/ICEWS"
+path<- "~/ICEWS-Project/Data/Raw Data/ICEWS"
 #set Working Directory
 setwd(path)
 

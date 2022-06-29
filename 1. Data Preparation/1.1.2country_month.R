@@ -13,7 +13,7 @@ library(tidyverse)
 #for Clara
 setwd("~/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa")
 #for Maria-Anna
-setwd("~/ICEWS Project/")
+setwd("~/ICEWS-Project/")
 rm(list=ls())
 ###################################################
 ############ Prepare Dataset ######################
