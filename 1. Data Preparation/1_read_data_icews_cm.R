@@ -2,6 +2,7 @@
 library(plyr)
 
 
+
 #Set working directory with all ICEWS Files 
 #directory Clara
 #directory<- "Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Downloaded"

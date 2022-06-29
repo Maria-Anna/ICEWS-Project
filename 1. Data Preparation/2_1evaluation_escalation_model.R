@@ -1,6 +1,7 @@
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #Compare data set 2001 to 2015 with Blair and Sambanis (2020)
 
+
 #load Blair and Sambanis (2020) and keep relevant variables
 
 X1mo_data_check<-X1mo_data %>% select(year, month,country_name, gov_opp_accommodations, gov_opp_low_level, gov_opp_nonviol_repression, opp_gov_demands, opp_gov_low_level,gov_reb_accommodations, gov_reb_low_level, gov_reb_nonviol_repression, reb_gov_demands, reb_gov_low_level ) %>%
