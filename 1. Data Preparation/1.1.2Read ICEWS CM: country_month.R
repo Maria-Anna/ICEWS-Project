@@ -15,6 +15,7 @@ setwd("~/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa")
 #for Maria-Anna
 setwd("~/ICEWS-Project")
 rm(list=ls())
+
 ###################################################
 ############ Prepare Dataset ######################
 ###################################################
@@ -176,16 +177,6 @@ names(events_africa)[names(events_africa) == "lvl0"] <- "CAMEO_root"
 
 data_icews_cm<-events_africa
 
-################################################################
-############Export Full Prio Dataset###########################
-###############################################################
 
-#Load, save and remove
-#save(data_icews_cm, file = "data_icews_cm.Rdata")
-#write.csv(data_icews_cm, file = "data_icews_cm.csv", row.names = FALSE)
-#rm(data)
-#rm(events_africa)
-#load("data.Rdata")
-#load("data_cm.Rdata")
 
 
