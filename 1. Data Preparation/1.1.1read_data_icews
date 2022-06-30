@@ -1,0 +1,3 @@
+In this File we read the icews Data from dataverse.harvard.edu and then we keep only the observations in Africa, and save this in the new generated Dataset events_africa. 
+For the Year 2017 there is a Typo in the Cameo.Code which is corrected. 
+

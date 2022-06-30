@@ -12,14 +12,11 @@ library(dplyr)
 
 #Set filename
 file_name<- "data_icews_cm.csv"
-<<<<<<< HEAD:1. Data Preparation/1.1.1read_data_icews_cm.R
-#Assign Path were all ICEWS Files 
-=======
+
 #Assign Path were all ICEWS Files (Für die Zukunft wenn wir die Daten auf Github haben)
->>>>>>> 8b464445d8ef75f5951ead45df878c2d61568222:1. Data Preparation/1.1read_data_icews_cm.R
-path<- "~/ICEWS-Project/Data/Raw Data/ICEWS"
+#path<- "~/ICEWS-Project/Data/Raw Data/ICEWS"
 #set Working Directory
-setwd(path)
+#setwd(path)
 
 #List with all names of all tab and tsv files in the working directory 
 names_files_tab = list.files( pattern= "*.tab")
@@ -74,8 +71,6 @@ list_africa_total<-lapply(list_all_ICEWS, function(x) dplyr::filter(x, Country %
 #Dataset of events that fulfill condition
 events_africa_total<-reshape::merge_all(list_africa_total)
 
-#Export dataset
-#write.table(events_africa_total, file= "events_africa_total.tsv", sep= "\t", quote= FALSE )
 
 #Keep only observations where source, target and country in the same country
 events_africa_total$Country<-as.character(events_africa_total$Country)
@@ -84,7 +79,7 @@ events_africa_total$Target.Country<-as.character(events_africa_total$Target.Coun
 events_africa<- subset(events_africa_total, events_africa_total$Country==events_africa_total$Source.Country & events_africa_total$Country==events_africa_total$Target.Country)
 
 #Export dataset
-write.table(events_africa, file= "events_africa.tsv", sep= "\t", quote= FALSE )
+write.csv(events_africa, file= "~/ICEWS-Project/Data/Preparation Data/events_africa.csv")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 ####################################################

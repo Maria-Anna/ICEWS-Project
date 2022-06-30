@@ -13,31 +13,26 @@ library(tidyverse)
 #for Clara
 setwd("~/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa")
 #for Maria-Anna
-setwd("~/ICEWS-Project/")
+setwd("~/ICEWS-Project")
 rm(list=ls())
 ###################################################
 ############ Prepare Dataset ######################
 ###################################################
 
 #Load ICEWS Africa dataset
-events_africa<- read.delim("data_icews_cm.csv",header = TRUE,sep= "\t")
+events_africa<- read.csv("~/ICEWS-Project/Data/Preparation Data/events_africa.csv")
 events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
-data<-events_africa
+
 
 #Add variables
-data$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
-data$Year_month<-format(as.Date(data$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
-data$Month<-as.numeric(format(as.Date(data$Event.Date, format="%Y-%m-%d"), "%m"))
+events_africa$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
+events_africa$Year_month<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
+events_africa$Month<-as.numeric(format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"), "%m"))
 
-#Remove events data set
-rm(events_africa)
 
 #Uniquely identify observations
-data$ID<- cumsum(!duplicated(data))
+events_africa$ID<- cumsum(!duplicated(events_africa))
 
-#Save new data set
-data_cm<-data
-rm(data)
 
 #Summary data set: 1320102 observations and 24 variables
 
@@ -46,12 +41,12 @@ rm(data)
 ######################################################
 
 #Upload Country data from Fritz et al. (2021)
-cm_data = fread("cm_data.csv")
+cm_data = fread("~/ICEWS-Project/Data/cm_data.csv")
 
 #Keep per Country the Country ID
 country_code <-cm_data[,c(6:7)]
 country_code<-country_code[!duplicated(country_code),]
-rm(cm_data)
+#rm(cm_data)
 
 #Country Code Remarks:
 #In total 55 Countries (incl.Israel)
@@ -91,41 +86,41 @@ country_code<-subset(country_code,country_id!="192")#for South Africa keep Count
 country_code<-subset(country_code,country_name!="Sudan" & country_name!="Tanzania")
 
 #Change Country names to uniform country names
-data_cm$Country<-as.character(data_cm$Country) #Set country name as character value
+events_africa$Country<-as.character(events_africa$Country) #Set country name as character value
 
 #for Country:
-data_cm["Country"][data_cm["Country"]=="Democratic Republic of Congo"] <- "Congo, DRC" #Change to Congo, DRC
-data_cm["Country"][data_cm["Country"]=="Gambia"] <- "The Gambia" #Change to The Gambia
+events_africa["Country"][events_africa["Country"]=="Democratic Republic of Congo"] <- "Congo, DRC" #Change to Congo, DRC
+events_africa["Country"][events_africa["Country"]=="Gambia"] <- "The Gambia" #Change to The Gambia
 
-#for Source Country:
-data_cm["Source.Country"][data_cm["Source.Country"]=="Democratic Republic of Congo"] <- "Congo, DRC" #Change to Congo, DRC
-data_cm["Source.Country"][data_cm["Source.Country"]=="Gambia"] <- "The Gambia" #Change to The Gambia
+#for Source Country
+events_africa["Source.Country"][events_africa["Source.Country"]=="Democratic Republic of Congo"] <- "Congo, DRC" #Change to Congo, DRC
+events_africa["Source.Country"][events_africa["Source.Country"]=="Gambia"] <- "The Gambia" #Change to The Gambia
 
 #for Target Country:
-data_cm["Target.Country"][data_cm["Target.Country"]=="Democratic Republic of Congo"] <- "Congo, DRC" #Change to Congo, DRC
-data_cm["Target.Country"][data_cm["Target.Country"]=="Gambia"] <- "The Gambia" #Change to The Gambia
+events_africa["Target.Country"][events_africa["Target.Country"]=="Democratic Republic of Congo"] <- "Congo, DRC" #Change to Congo, DRC
+events_africa["Target.Country"][events_africa["Target.Country"]=="Gambia"] <- "The Gambia" #Change to The Gambia
 
 #Generate Country ID Variable
 
 #for countries with same ID across years:
-data_cm<-merge(data_cm,country_code, by.x = "Country", by.y="country_name", all=T, sort=F)
+events_africa<-merge(events_africa,country_code, by.x = "Country", by.y="country_name", all=T, sort=F)
 
 #for countries with changing ID across years:
 
 #for Tanzania: till 1996-02 Country ID 236, from 1996-02 Country ID 242
-data_cm$country_id[data_cm$Year_month<"1996-02" & data_cm$Country=="Tanzania"]<- "236"
-data_cm$country_id[data_cm$Year_month>="1996-02" & data_cm$Country=="Tanzania"]<- "242"
+events_africa$country_id[events_africa$Year_month<"1996-02" & events_africa$Country=="Tanzania"]<- "236"
+events_africa$country_id[events_africa$Year_month>="1996-02" & events_africa$Country=="Tanzania"]<- "242"
 
 #for Sudan: till 1996-02 Country ID 236, from 1996-02 Country ID 242
-data_cm$country_id[data_cm$Year_month<"2011-07" & data_cm$Country=="Sudan"]<- "59"
-data_cm$country_id[data_cm$Year_month>"2011-07" & data_cm$Country=="Sudan"]<- "245"
+events_africa$country_id[events_africa$Year_month<"2011-07" & events_africa$Country=="Sudan"]<- "59"
+events_africa$country_id[events_africa$Year_month>"2011-07" & events_africa$Country=="Sudan"]<- "245"
 
 ##############
 #Month ID
 ##############
 
 #Upload Country data from Fritz et al. (2021)
-cm_data = fread("cm_data.csv")
+cm_data = fread("~/ICEWS-Project/Data/cm_data.csv")
 
 #Generate Month Code list for Year-month
 month_code<-cm_data[,c(1,10)] #keep for each year-month the month_id
@@ -133,19 +128,19 @@ month_code<-month_code[!duplicated(month_code),] #drop duplicates
 month_code$date<-format(as.Date(month_code$date, format="%Y-%m-%d"),"%Y-%m")#change date format for merging
 
 #Generate month ID
-data_cm<-merge(data_cm,month_code, by.x = "Year_month", by.y="date", sort=F)
+events_africa<-merge(events_africa,month_code, by.x = "Year_month", by.y="date", sort=F)
 
 ##############
 #Keys
 ##############
 
 #key_cm: monthid_countryid
-data_cm$key_cm<-paste(data_cm$month_id,data_cm$country_id,sep="_")
-data_cm$key_cm[data_cm$Year_month=="2011-07" & data_cm$Country=="Sudan"]<-NA  #gen missings for Sudan
+events_africa$key_cm<-paste(events_africa$month_id,events_africa$country_id,sep="_")
+events_africa$key_cm[events_africa$Year_month=="2011-07" & events_africa$Country=="Sudan"]<-NA  #gen missings for Sudan
 
 #key_cy: year_countryid
-data_cm$key_cy<-paste(data_cm$Year,data_cm$country_id,sep="_")
-data_cm$key_cy[data_cm$Year_month=="2011-07" & data_cm$Country=="Sudan"]<-NA  #gen missings for Sudan
+events_africa$key_cy<-paste(events_africa$Year,events_africa$country_id,sep="_")
+events_africa$key_cy[events_africa$Year_month=="2011-07" & events_africa$Country=="Sudan"]<-NA  #gen missings for Sudan
 
 ###############
 #CAMEO ROOT
@@ -161,35 +156,36 @@ data("cameo_codes")
 cameo_codes<-cameo_codes[,c("name","lvl0")]
 
 #merge with data by event text
-data_cm<-merge(data_cm,cameo_codes, by.x="Event.Text", by.y="name")
+events_africa<-merge(events_africa,cameo_codes, by.x="Event.Text", by.y="name")
 
 ###############
 #Variable Names
 ###############
 
 #year
-names(data_cm)[names(data_cm) == "Year"] <- "year"
+names(events_africa)[names(events_africa) == "Year"] <- "year"
 
 #month
-names(data_cm)[names(data_cm) == "Month"] <- "month"
+names(events_africa)[names(events_africa) == "Month"] <- "month"
 
 #date
-data_cm$date<-format(as.Date(data_cm$Event.Date, format="%Y-%m-%d"),"%Y-%m-01") 
+events_africa$date<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y-%m-01") 
 
 #cameo root code
-names(data_cm)[names(data_cm) == "lvl0"] <- "CAMEO_root"
+names(events_africa)[names(events_africa) == "lvl0"] <- "CAMEO_root"
 
+data_icews_cm<-events_africa
 
 ################################################################
 ############Export Full Prio Dataset###########################
 ###############################################################
 
 #Load, save and remove
-save(data,file="data.Rdata")
-save(data_cm, file = "data_cm.Rdata")
-rm(data)
-rm(data_cm)
-load("data.Rdata")
-load("data_cm.Rdata")
+#save(data_icews_cm, file = "data_icews_cm.Rdata")
+#write.csv(data_icews_cm, file = "data_icews_cm.csv", row.names = FALSE)
+#rm(data)
+#rm(events_africa)
+#load("data.Rdata")
+#load("data_cm.Rdata")
 
 
