@@ -63,12 +63,12 @@ states_africa<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Buru
 #Dataset: Events in Africa, from Africa and to Africa
 ######################################################
 
-#Events with Source.Country, Target.Country and Country Africa
+#Events where Source.Country, Target.Country and Country an African Country
 
-#List with datasets that fulfill above condition
+#List with datasets that fulfill above named condition
 list_africa_total<-lapply(list_all_ICEWS, function(x) dplyr::filter(x, Country %in% states_africa & Source.Country %in% states_africa & Target.Country %in% states_africa))
 
-#Dataset of events that fulfill condition
+#Dataset of events that fulfill above named condition
 events_africa_total<-reshape::merge_all(list_africa_total)
 
 
