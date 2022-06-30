@@ -246,19 +246,5 @@ names(data_prio)[names(data_prio) == "gid"] <- "pg_id"
 #cameo root code
 names(data_prio)[names(data_prio) == "lvl0"] <- "CAMEO_root"
 
-################################################################
-############Export Full Prio Dataset###########################
-###############################################################
-
-#Load, save and remove
-save(data,file="data.Rdata")
-save(prio,file="prio.Rdata")
-save(data_prio, file = "data_prio.Rdata")
-rm(data)
-rm(prio)
-rm(data_prio)
-load("prio.Rdata")
-load("data.Rdata")
-load("data_prio.Rdata")
 
 
