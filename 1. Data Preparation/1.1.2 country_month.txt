@@ -1,8 +1,0 @@
-The following is done in the "country_month" File:
-
-1. The "events_africa" data set (from "read_data_icews") were added following variables: "Id", "country_id", "month_id", "key_cm", "key_cy", "CAMEO_root" and "date". The variables were extracted from the "cm_data" data set in Fritz et al. (2021).
-2. The "data_icews_cm" data set was generated. The data set contains all events between 1995-2020 that happen within African countries and further ID variables. The data set contains 1320102 rows and 30 columns.
-3. Reason behind generating new extended data set: the icews data set contains only event data. We are also insterested in structural variables such as gdp and population. We further need the target variable "state based conflict" from the Fritz el al. (2021) data set. Thats the reason why we need to merge the exisitng dataset with "cm_data". We do this later on.
-
-
-
