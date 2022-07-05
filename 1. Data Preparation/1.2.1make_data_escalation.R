@@ -1,30 +1,33 @@
+###################################################THE ESCALATION VARIABLES########################################
+
 #Load packages
 library(haven)
 library(dplyr)
-library(data.table)
 
-rm(list=ls())
-
+#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################
 ###### Load Data #####################
 ######################################
 
-data_icews_cm<- fread("~/ICEWS-Project/Data/data_icews_cm.csv")
+#For Clara
+load("/Users/clarita/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Data Sets/data_icews_cm.Rdata")
+
+#For Maria-Anna
+load("C:/Users/NUTELLA/Downloads/data_cm.Rdata")
 
 #Modify Variables
-data_icews_cm$year <- as.numeric(data_icews_cm$year)
-
-data_icews_cm<- data_icews_cm %>% mutate(Country = replace(Country, Country == "Congo", "Democratic Republic of Congo"),
-                                   Country = replace(Country, Country ==  "Congo, DRC", "Democratic Republic of Congo"),
-                                   Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"))
-
+data<-data_cm
+data$year <- as.numeric(data$year)
+data<- data %>% mutate(Country = replace(Country, Country ==  "Congo, DRC", "Democratic Republic of Congo"),
+                       Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"))
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+######################################
+### Escalation Variables ############
+######################################
 
-######################################
-### Variables for escalation model ###
-######################################
+levels(factor(data$CAMEO.Code))
 
 low_level_violence<- c("145", "1451","1452","1453", "1454", "170", "180", "183", "171", "175", "186", "191","193")
 
@@ -152,81 +155,83 @@ rebels<-c("Radicals / Extremists / Fundamentalists","Organized Violent","Rebel",
 opposition<-c("Dissident","Protestors / Popular Opposition / Mobs","Exiles","Opposition Major Party (Out of Government)","Opposition Minor Party (Out of Government)","Opposition Provincial Party (Out of Government)","Opposition Municipal Party (Out of Government)","Banned Parties")
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#########################################
+####### Make Data #######################
+#########################################
 
-##############################################
-####### Make Data ############################
-##############################################
+#Generate 10 new variables
 
-# Data with the above Variables, new cols are binary
-data_icews_cm <- data_icews_cm %>% mutate(low_level_violence = case_when(CAMEO.Code %in% low_level_violence ~ 1,           
-                                                   !CAMEO.Code %in% low_level_violence ~ 0),
-                     
-                     non_violent_repression = case_when(CAMEO.Code %in% non_violent_repression ~ 1,           
-                                                        !CAMEO.Code %in% non_violent_repression ~ 0),
-                     
-                     demand = case_when(CAMEO.Code %in% demand ~ 1,           
-                                        !CAMEO.Code %in% demand ~ 0),
-                    
-                     accommodations = case_when(CAMEO.Code %in% accommodations ~ 1,           
-                                                !CAMEO.Code %in% accommodations ~ 0),
-                     
-                     source_government = case_when(grepl(paste(government, collapse="|"), Source.Sectors)~1,
-                                           !grepl(paste(government, collapse="|"), Source.Sectors)~0),
-                     
-                     source_rebels = case_when( grepl(paste(rebels, collapse="|"), Source.Sectors)~1,
-                                         !grepl(paste(rebels, collapse="|"), Source.Sectors)~0),
-                     
-                     source_opposition = case_when( grepl(paste(opposition, collapse="|"), Source.Sectors)~1,
-                                            !grepl(paste(opposition, collapse="|"), Source.Sectors)~0),
-                     
-                     target_government = case_when(grepl(paste(government, collapse="|"), Target.Sectors)~1,
-                                                   !grepl(paste(government, collapse="|"), Target.Sectors)~0),
-                     
-                     target_rebels = case_when( grepl(paste(rebels, collapse="|"), Target.Sectors)~1,
-                                                !grepl(paste(rebels, collapse="|"), Target.Sectors)~0),
-                     
-                     target_opposition = case_when( grepl(paste(opposition, collapse="|"), Target.Sectors)~1,
-                                                !grepl(paste(opposition, collapse="|"), Target.Sectors)~0))
+data <- data %>% mutate(low_level_violence = case_when(CAMEO.Code %in% low_level_violence ~ 1,           
+                                                       !CAMEO.Code %in% low_level_violence ~ 0),
+                        
+                        non_violent_repression = case_when(CAMEO.Code %in% non_violent_repression ~ 1,           
+                                                           !CAMEO.Code %in% non_violent_repression ~ 0),
+                        
+                        demand = case_when(CAMEO.Code %in% demand ~ 1,           
+                                           !CAMEO.Code %in% demand ~ 0),
+                        
+                        accommodations = case_when(CAMEO.Code %in% accommodations ~ 1,           
+                                                   !CAMEO.Code %in% accommodations ~ 0),
+                        
+                        source_government = case_when(grepl(paste(government, collapse="|"), Source.Sectors)~1,
+                                                      !grepl(paste(government, collapse="|"), Source.Sectors)~0),
+                        
+                        source_rebels = case_when( grepl(paste(rebels, collapse="|"), Source.Sectors)~1,
+                                                   !grepl(paste(rebels, collapse="|"), Source.Sectors)~0),
+                        
+                        source_opposition = case_when( grepl(paste(opposition, collapse="|"), Source.Sectors)~1,
+                                                       !grepl(paste(opposition, collapse="|"), Source.Sectors)~0),
+                        
+                        target_government = case_when(grepl(paste(government, collapse="|"), Target.Sectors)~1,
+                                                      !grepl(paste(government, collapse="|"), Target.Sectors)~0),
+                        
+                        target_rebels = case_when( grepl(paste(rebels, collapse="|"), Target.Sectors)~1,
+                                                   !grepl(paste(rebels, collapse="|"), Target.Sectors)~0),
+                        
+                        target_opposition = case_when( grepl(paste(opposition, collapse="|"), Target.Sectors)~1,
+                                                       !grepl(paste(opposition, collapse="|"), Target.Sectors)~0))
 
-#allocation Version 1 R
-#SOURCE:
-data_icews_cm <- data_icews_cm %>%
+#Allocate to one sector in case of ambiguous sector mapping
+
+#SOURCE SECTOR:
+
+data <- data %>%
   mutate(source_rebels = case_when(source_government != 0 & source_opposition != 0 &  source_rebels != 0 ~ 0,
                                    TRUE ~ source_rebels))
-data_icews_cm <- data_icews_cm %>%
+data <- data %>%
   mutate(source_government = case_when( source_government != 0 & source_opposition != 0 & source_rebels==0~ 0,
                                         TRUE ~ source_government))
-data_icews_cm <- data_icews_cm %>%
+data <- data %>%
   mutate(source_rebels = case_when(source_opposition != 0 & source_rebels != 0 & source_government==0 ~ 1,
                                    TRUE ~ source_rebels),
          source_opposition = case_when(source_opposition != 0 & source_rebels != 0 & source_government==0 ~ 0,
                                        TRUE ~ source_opposition))
-data_icews_cm <- data_icews_cm %>%
+data <- data %>%
   mutate(across(c(source_rebels,source_government,source_opposition), ~case_when(source_opposition == 0 & source_rebels != 0 & source_government!=0~ 0 , TRUE~1*(.))))
 
 
-#TARGET
-data_icews_cm <- data_icews_cm %>%
+#TARGET SECTOR:
+data <- data %>%
   mutate(target_rebels = case_when(target_government != 0 & target_opposition != 0 &  target_rebels != 0 ~ 0,
                                    TRUE ~ target_rebels))
 
 
-data_icews_cm <- data_icews_cm %>%
+data <- data %>%
   mutate(target_government = case_when( target_government != 0 & target_opposition != 0 & target_rebels==0~ 0,
                                         TRUE ~ target_government))
 
-data_icews_cm <- data_icews_cm %>%
+data <- data %>%
   mutate(target_rebels = case_when(target_opposition != 0 & target_rebels != 0 & target_government==0 ~ 1,
                                    TRUE ~ target_rebels),
          target_opposition = case_when(target_opposition != 0 & target_rebels != 0 & target_government==0 ~ 0,
                                        TRUE ~ target_opposition))
-data_icews_cm <- data_icews_cm %>%
+data <- data %>%
   mutate(across(c(target_rebels,target_government,target_opposition), ~case_when(target_opposition == 0 & target_rebels != 0 & target_government!=0  ~ 0 , TRUE~1*(.))))
 
 
+# Generate final 10 variables
 
-# Data with actors, new variables are binary
-data_icews_cm<- data_icews_cm %>% mutate( gov_opp_accommodations     =      case_when(source_government == 1 & target_opposition == 1 &  accommodations == 1 ~ 1,
+data<- data %>% mutate( gov_opp_accommodations     =      case_when(source_government == 1 & target_opposition == 1 &  accommodations == 1 ~ 1,
                                                                     TRUE ~ 0),
                         
                         gov_opp_low_level          =      case_when(source_government == 1 & target_opposition == 1 &  low_level_violence == 1 ~ 1,
@@ -246,10 +251,10 @@ data_icews_cm<- data_icews_cm %>% mutate( gov_opp_accommodations     =      case
                         
                         gov_reb_low_level          =      case_when(source_government == 1 & target_rebels == 1 &  low_level_violence == 1 ~ 1,
                                                                     TRUE ~ 0),
-                    
+                        
                         gov_reb_nonviol_repression =      case_when(source_government == 1 & target_rebels == 1 &  non_violent_repression == 1 ~ 1,
                                                                     TRUE ~ 0),
-                
+                        
                         reb_gov_demands            =      case_when(source_rebels == 1 & target_government == 1 &  demand == 1 ~ 1,
                                                                     TRUE ~ 0),
                         
@@ -259,9 +264,9 @@ data_icews_cm<- data_icews_cm %>% mutate( gov_opp_accommodations     =      case
                         key_cameo                  = paste(year, month, Country, sep = "_"))
 
 
+#Sum generated variables by Country-Month
 
-#Sum variables by Year-Month
-data_escalation <- data_icews_cm %>%
+data_sum <- data %>%
   group_by(key_cameo) %>%
   summarise(gov_opp_accommodations = sum(gov_opp_accommodations),
             gov_opp_low_level  = sum(gov_opp_low_level),
@@ -273,29 +278,41 @@ data_escalation <- data_icews_cm %>%
             gov_reb_nonviol_repression = sum(gov_reb_nonviol_repression),
             reb_gov_demands  = sum(reb_gov_demands),
             reb_gov_low_level = sum(reb_gov_low_level))
-  
-#Export dataset
-#write.csv(data_escalation,"~/ICEWS-Project/Data/data_escalation.csv", row.names = FALSE)
 
-#-------------------------------------------------------------------------------------------------------------------------------------------------
-#Merge with data_cm and data_pgm
-cm_data = fread("~/ICEWS-Project/Data/cm_data.csv")
-load("~/ICEWS-Project/Data/pgm_data.RData")
+#save as csv data
+#write.csv(data_sum, file="data_escalation.csv", row.names = F)
 
+#---------------------------------------------------------------------------------------------------------------------------
+##########################################################################
+####### Combine cm_data and ESCALATION variable by CM ####################
+#########################################################################
 
-#change country names
+#Load data sets:
+
+#Maria-Anna
+cm_data<-fread("C:/Users/NUTELLA/Documents/Consulting Bewaffnete Konflikte/forecasting_competition_replication/Data/cm_data.csv")
+pgm_data<-read.table("C:/Users/NUTELLA/Documents/Consulting Bewaffnete Konflikte/Data/pgm_somalia.csv", sep = ";")
+
+#Clara
+cm_data = fread("cm_data.csv")
+load("/Users/clarita/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Data Sets/pgm_data.RData")
+
+#for CIP pool
+cm_data = fread("C:/Users/ru23kek/Downloads/cm_data.csv")
+
+#Change country names to uniform country names
+
 cm_data<- cm_data %>% mutate(country_name = replace(country_name, country_name ==   "The Gambia"  ,"Gambia"),
-                             country_name = replace(country_name, country_name ==   "Congo"  ,"Democratic Republic of Congo"),
+                             country_name = replace(country_name, country_name ==   "Congo, DRC"  ,"Democratic Republic of Congo"),
                              year_month   = format(as.Date(cm_data$date, format="%Y-%m-%d"),"%Y-%m"),
                              key_cameo= paste(year, month, country_name, sep = "_"))
 
 
+
 pgm_data<- pgm_data %>% mutate(country_name = replace(country_name, country_name ==   "The Gambia"  ,"Gambia"),
-                               country_name = replace(country_name, country_name ==   "Congo"  ,"Democratic Republic of Congo"),
+                               country_name = replace(country_name, country_name ==   "Congo, DRC"  ,"Democratic Republic of Congo"),
                                year_month   = format(as.Date(pgm_data$date, format="%Y-%m-%d"),"%Y-%m"),
                                key_cameo= paste(year, month, country_name,  sep = "_"))
-
-
 
 
 #Drop all years in Fritz et al. (2021) data set that are not included in our data
@@ -309,8 +326,7 @@ cm_data<- cm_data %>% filter(year_month<= "2020-04")
 pgm_data<- pgm_data %>% filter(year_month<="2020-04")
 
 
-
-#keep relevant variables of cm_data
+#keep relevant variables of CM data (cm_data)
 cm_data<-cm_data %>% select(c("date",
                               "key_cameo",      
                               "year_month",
@@ -340,50 +356,55 @@ cm_data<-cm_data %>% select(c("date",
                               "mcw_receiver_acute",
                               "avr_lon", "avr_lat"))
 
+#keep relevant variables of PGM data (pgm_data)
 pgm_data<-pgm_data %>% select(c("key_cameo",
-                      "date",
-                      "year_month",
-                      "month",
-                      "year",
-                      "pg_id" ,
-                      "month_id",
-                      "key_pm",
-                      "key_py",
-                      "key_cm",
-                      "key_cy",
-                      "country_name",
-                      "country_id",
-                      "country_iso3",
-                      "name_fac",
-                      "ged_dummy_sb",
-                      "ged_best_sb",
-                      "ged_dummy_ns",
-                      "ged_best_ns",
-                      "ged_dummy_os",
-                      "ged_best_os",
-                      "pgd_nlights_calib_mean",
-                      "pgd_imr_mean",
-                      "pgd_capdist",
-                      "fvp_population200",
-                      "fvp_gdp200",
-                      "polity",
-                      "milit_exp",
-                      "mcw_receiver_rolling",
-                      "mcw_receiver_acute",
-                      "long",
-                      "lat" ,
-                      "time_since_ged_dummy_os.x",
-                      "time_since_ged_dummy_ns.x",
-                      "time_since_ged_dummy_sb.x"))
+                                "date",
+                                "year_month",
+                                "month",
+                                "year",
+                                "pg_id" ,
+                                "month_id",
+                                "key_pm",
+                                "key_py",
+                                "key_cm",
+                                "key_cy",
+                                "country_name",
+                                "country_id",
+                                "country_iso3",
+                                "name_fac",
+                                "ged_dummy_sb",
+                                "ged_best_sb",
+                                "ged_dummy_ns",
+                                "ged_best_ns",
+                                "ged_dummy_os",
+                                "ged_best_os",
+                                "pgd_nlights_calib_mean",
+                                "pgd_imr_mean",
+                                "pgd_capdist",
+                                "fvp_population200",
+                                "fvp_gdp200",
+                                "polity",
+                                "milit_exp",
+                                "mcw_receiver_rolling",
+                                "mcw_receiver_acute",
+                                "long",
+                                "lat" ,
+                                "time_since_ged_dummy_os.x",
+                                "time_since_ged_dummy_ns.x",
+                                "time_since_ged_dummy_sb.x"))
 
 
 #Merge two data sets: cm_data (28 columns) and data_sum (11 columns) by key_cameo
-
 cm_icews_data<- left_join(cm_data,data_sum, by="key_cameo")
+
+#Merge two data sets: pgm_data (28 columns) and data_sum (11 columns) by key_cameo
 pgm_icews_data<- left_join(pgm_data,data_sum, by="key_cameo")
 
-#Save data
-#write.csv(cm_icews_data, file="~/ICEWS-Project/Data/cm_icews_data.csv", row.names =  FALSE)
-#write.csv(pgm_icews_data, file="~/ICEWS-Project/Data/pgm_icews_data.csv", row.names =  FALSE)
+write.csv(cm_icews_data, file="cm_icews_data.csv", row.names = F)
+write.csv(pgm_icews_data, file="pgm_icews_data.csv", row.names = F)
+
+
+
+
 
 
