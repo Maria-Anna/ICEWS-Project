@@ -1,0 +1,7 @@
+This R-file aggregated the data_icews_cm data to data_escalation. The events are categorised and are sumed up into 10 new variables. This variables are then added to the cm_data and the pgm_data. 
+
+
+Generation of 3 new datasets
+data_escalation: aggregated data_icews_cm
+cm_icews_data: data_escalation + cm_data
+pgm_icews_data: data_escalation + pgm_data

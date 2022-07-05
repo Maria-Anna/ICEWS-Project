@@ -1,0 +1,2 @@
+We are using an updated version of the icews data set, so the data is not exactly matching with the one Blair and 
+Sambanis used, so we check, how close we get with our data_escalation to the aggregated of Data they provide in cm_data_BlairSambanis.
