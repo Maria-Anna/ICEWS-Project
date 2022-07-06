@@ -1,5 +1,4 @@
 ##############################################THE CAMEO EVENT TRAP#################################################
-
 #Load necessary packages
 library(ggplot2)
 library(dplyr)
