@@ -14,8 +14,7 @@ data_icews_cm<- fread("~/ICEWS-Project/Data/data_icews_cm.csv")
 #Modify Variables
 data_icews_cm$year <- as.numeric(data_icews_cm$year)
 
-data_icews_cm<- data_icews_cm %>% mutate(Country = replace(Country, Country == "Congo", "Democratic Republic of Congo"),
-                                   Country = replace(Country, Country ==  "Congo, DRC", "Democratic Republic of Congo"),
+data_icews_cm<- data_icews_cm %>% mutate(Country = replace(Country, Country ==  "Congo, DRC", "Democratic Republic of Congo"),
                                    Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"))
 
 
