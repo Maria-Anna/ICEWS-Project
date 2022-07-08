@@ -170,7 +170,7 @@ Country<- unique(data_icews_pgm$Country)
 #j<-1995
 
 #Loop
-for (i in states_africa_north_east){
+for (i in Country){
 for(j in Year) {
   
   tryCatch({  
