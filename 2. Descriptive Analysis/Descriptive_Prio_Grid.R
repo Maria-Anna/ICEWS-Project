@@ -170,13 +170,13 @@ Country<- unique(data_icews_pgm$Country)
 #j<-1995
 
 #Loop
-for (i in Country){
+for (i in states_africa_north_east){
 for(j in Year) {
   
   tryCatch({  
 
 print(i)  
-#print(j)
+print(j)
 
 #Count Events per git per country
   count_events<-data_icews_pgm %>%
@@ -215,7 +215,7 @@ count_events %>% filter(Country== i ) %>%
         axis.text = element_text(size=12,colour = "black"))
 
 #Save plot
-ggsave(filename=paste("Prio_Events in Africa",i,".png", sep="_"), width= 15, height = 9)
+ggsave(filename=paste("Prio_Events in Africa",i,j,".png", sep="_"), width= 15, height = 9)
 
   }
   , error=function(e){})
