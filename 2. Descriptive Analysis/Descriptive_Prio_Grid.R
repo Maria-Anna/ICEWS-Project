@@ -18,8 +18,11 @@ false_coded<-data_icews_pgm %>% filter( Longitude < -50 | Longitude > 64 | Latit
 data_icews_pgm<- filter(data_icews_pgm, !Event.ID %in% false_coded$Event.ID)
 
 #Read Polygons
-prio_grid_polygons<-readRDS("~/ICEWS-Project/Data/prio_grid_polygons")
+#Set working directory with PRIO Grid Shapefiles
+folder_cellshp<- "~/ICEWS-Project/Data/priogrid_cellshp"
+prio_grid_polygons <- st_read(dsn = folder_cellshp, layer = "priogrid_cell", stringsAsFactors = F, quiet=T) %>% mutate(gid = as.character(gid))
 
+rm(folder_cellshp)
 rm(false_coded)
 #--------------------------------------------------------------------------------------------------------
 #############################################
