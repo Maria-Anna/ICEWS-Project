@@ -90,7 +90,6 @@ events_africa<- subset(events_africa_total, events_africa_total$Country==events_
 #Export dataset
 write.csv(events_africa, file= "~/ICEWS-Project/Data/Preparation Data/events_africa.csv")
 
-
 #for 2020:
 #filter for above condition
 data_2020 <- data_2020 %>% filter(Country %in% states_africa & Source.Country %in% states_africa & Target.Country %in% states_africa)

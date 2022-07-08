@@ -1,6 +1,6 @@
 ################################################################# ESTIMATE MODELS WITHOUT MCW and ICEWS ####################################################################
 
-#Remark: Fritz et al. (2021) estimation model without MCW, with data from 1995-01-01 till 2020-04-01 and ICEWS escalation variables
+#Remark: Fritz et al. (2021) estimation model without MCW, with data from 1995-01-01 till 2020-08-01 and ICEWS escalation variables
 # + NAs are replaced by 0
 
 #Load necessary packages

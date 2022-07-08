@@ -1,6 +1,6 @@
 ################################################################# ESTIMATE MODELS WITH MCW ####################################################################
 
-#Remark: Fritz et al. (2021) estimation model with MCW, with data from 1995-01-01 till 2020-04-01
+#Remark: Fritz et al. (2021) estimation model with MCW, with data from 1995-01-01 till 2020-08-01
 
 #Load necessary packages
 library(mgcv)
@@ -33,9 +33,8 @@ load("pgm_data.RData")
 
 #Filter for years 1995-2020
 cm_data<- cm_data %>% filter(year>="1995")
-cm_data<- cm_data %>% filter(date<="2020-04-01")
 pgm_data<- pgm_data %>% filter(year>="1995")
-pgm_data<- pgm_data %>% filter(date<="2020-04-01")
+
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ############################################

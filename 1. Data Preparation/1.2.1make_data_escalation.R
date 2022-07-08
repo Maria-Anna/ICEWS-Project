@@ -321,10 +321,6 @@ pgm_data<- pgm_data %>% mutate(country_name = replace(country_name, country_name
 cm_data<- cm_data %>% filter(year_month>="1995-01")
 pgm_data<- pgm_data %>% filter(year_month>="1995-01")
 
-#all above 2020-04
-cm_data<- cm_data %>% filter(year_month<= "2020-04")
-pgm_data<- pgm_data %>% filter(year_month<="2020-04")
-
 
 #keep relevant variables of CM data (cm_data)
 cm_data<-cm_data %>% select(c("date",
@@ -400,8 +396,8 @@ cm_icews_data<- left_join(cm_data,data_sum, by="key_cameo")
 #Merge two data sets: pgm_data (28 columns) and data_sum (11 columns) by key_cameo
 pgm_icews_data<- left_join(pgm_data,data_sum, by="key_cameo")
 
-write.csv(cm_icews_data, file="cm_icews_data.csv", row.names = F)
-write.csv(pgm_icews_data, file="pgm_icews_data.csv", row.names = F)
+#write.csv(cm_icews_data, file="cm_icews_data.csv", row.names = F)
+#write.csv(pgm_icews_data, file="pgm_icews_data.csv", row.names = F)
 
 
 
