@@ -34,9 +34,20 @@ data<-data %>%
 #Convert CAMEO.Code to numeric
 data$CAMEO.Code<- as.integer(as.numeric(data$CAMEO.Code))
 
-
 #Replace old dataframe with new
 list_all_ICEWS[[21]]<-data
+
+#load parallel full 2020 data set and keep months 5,6,7 and 8
+directory<- "/Users/clarita/Desktop/Consulting\ Bewaffnete\ Konflikte/Datasets_Africa/TSV\ Data\ Sets/2017"
+setwd(directory)
+data_2020<- read.delim("events.2020.20220623.tab",na.strings=c("","NA"))
+#Cameo Code as integer
+data_2020$CAMEO.Code<- as.character(data_2020$CAMEO.Code)
+data_2020$CAMEO.Code<- as.integer(as.numeric(data_2020$CAMEO.Code))
+#filter for 2020 months
+data_2020$Event.Date<-as.Date(data_2020$Event.Date)
+data_2020 <- data_2020 %>% filter(Event.Date>="2020-05-01")
+data_2020 <- data_2020 %>% filter(Event.Date<"2020-09-01")
 
 
 #Filter Africa (in total: 54 african countries without variation in the name)
@@ -70,7 +81,6 @@ list_africa_total<-lapply(list_all_ICEWS, function(x) dplyr::filter(x, Country %
 #Dataset of events that fulfill condition
 events_africa_total<-reshape::merge_all(list_africa_total)
 
-
 #Keep only observations where source, target and country in the same country
 events_africa_total$Country<-as.character(events_africa_total$Country)
 events_africa_total$Source.Country<-as.character(events_africa_total$Source.Country)
@@ -79,6 +89,15 @@ events_africa<- subset(events_africa_total, events_africa_total$Country==events_
 
 #Export dataset
 write.csv(events_africa, file= "~/ICEWS-Project/Data/Preparation Data/events_africa.csv")
+
+
+#for 2020:
+#filter for above condition
+data_2020 <- data_2020 %>% filter(Country %in% states_africa & Source.Country %in% states_africa & Target.Country %in% states_africa)
+#save as csv
+#write.csv(data_2020, file="data_2020.csv", row.names = F)
+
+
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 ####################################################

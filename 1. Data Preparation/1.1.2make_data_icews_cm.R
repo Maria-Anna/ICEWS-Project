@@ -11,13 +11,18 @@ library(tidyverse)
 rm(list=ls())
 
 ###################################################
-############ Prepare Dataset ######################
+############ Prepare Data Set ######################
 ###################################################
 
-#Load ICEWS Africa dataset
+#Load ICEWS Africa data set
 events_africa<- read.delim("~/ICEWS-Project/Data/events_africa.tsv")
+events_africa<- read.delim("/Users/clarita/Desktop/Consulting\ Bewaffnete\ Konflikte/Datasets_Africa/TSV\ Data\ Sets/events_africa.tsv")
 events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
 
+#Append 2020 data set (month 5 to 8)
+data_2020<- read.csv("~/ICEWS-Project/Data/data_2020.csv")
+data_2020$Event.Date <- as.Date(data_2020$Event.Date, format="%Y-%m-%d")
+events_africa<-rbind(events_africa, data_2020)
 
 #Add variables
 events_africa$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
@@ -29,7 +34,7 @@ events_africa$Month<-as.numeric(format(as.Date(events_africa$Event.Date, format=
 events_africa$ID<- cumsum(!duplicated(events_africa))
 
 
-#Summary data set: 1320102 observations and 24 variables
+#Summary data set: 1335303 observations and 24 variables
 
 ######################################################
 #########Load and Prepare Country Code################
@@ -82,6 +87,8 @@ country_code<-subset(country_code,country_name!="Sudan" & country_name!="Tanzani
 
 #Change Country names to uniform country names
 events_africa$Country<-as.character(events_africa$Country) #Set country name as character value
+events_africa$Source.Country<-as.character(events_africa$Source.Country) 
+events_africa$Target.Country<-as.character(events_africa$Target.Country) 
 
 #for Country:
 events_africa["Country"][events_africa["Country"]=="Democratic Republic of Congo"] <- "Congo, DRC" #Change to Congo, DRC
@@ -177,6 +184,6 @@ data_icews_cm<-events_africa
 
 #Save
 #write.csv(data_icews_cm, file = "data_icews_cm.csv", row.names = FALSE)
-
+#save(data_icews_cm, file = "data_icews_cm.RData")
 
 

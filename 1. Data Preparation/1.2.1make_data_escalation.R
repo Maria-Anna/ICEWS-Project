@@ -10,13 +10,13 @@ library(dplyr)
 ######################################
 
 #For Clara
-load("/Users/clarita/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Data Sets/data_icews_cm.Rdata")
+load("/Users/clarita/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Data Sets/data_icews_cm.RData")
 
 #For Maria-Anna
 load("C:/Users/NUTELLA/Downloads/data_cm.Rdata")
 
 #Modify Variables
-data<-data_cm
+data<-data_icews_cm
 data$year <- as.numeric(data$year)
 data<- data %>% mutate(Country = replace(Country, Country ==  "Congo, DRC", "Democratic Republic of Congo"),
                        Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"))
