@@ -13,6 +13,8 @@ library(pryr)
 library(DEoptim)
 library(dplyr)
 library(xtable)
+library(stargazer)
+library(moments)
 
 #-------------------------------------------------------------------------------------------------------------------------------------#
 ##################
@@ -102,7 +104,7 @@ cm_data_sub<-cm_data[,30:39]
 a<-as.data.frame(skewness(cm_data_sub))
 b<-as.data.frame(skewness(log1p(cm_data_sub)))
 a<-cbind(a,b)
-print(xtable(a, type = "latex"), file = "filename2.tex")
+print(xtable(a, type = "latex"), file = "skewness_comp.tex")
 
 
 #generate distribution plots (necessary to see distribution)
