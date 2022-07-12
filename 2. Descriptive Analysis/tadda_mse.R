@@ -25,7 +25,7 @@ results_mse_sb = results[,.(mse_mcw = mean((log1p(observation) - log1p(predictio
                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
 
 #save as latex
-print(xtable(results_mse_sb, type="latex"),file="mse_sb.tex")
+print(xtable(results_mse_sb, type="latex", digits = 8),file="mse_sb.tex")
 
 
 
@@ -55,7 +55,7 @@ results_mse_icews = results[,.(mse_mcw = mean((log1p(observation) - log1p(predic
                             tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
 
 #save as latex
-print(xtable(results_mse_icews, type="latex"),file="mse_icews.tex")
+print(xtable(results_mse_icews, type="latex", digits = 8),file="mse_icews.tex")
 
 
 
