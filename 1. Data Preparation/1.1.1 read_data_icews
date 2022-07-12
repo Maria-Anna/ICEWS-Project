@@ -1,0 +1,10 @@
+The following is done in the "read_data_icews" File:
+
+1. Read the coded ICEWS event data from "dataverse.harvard.edu." for 1995-2020.
+2. Data is read from TSV Format.
+3. Coded event data for 2017 is downloaded in parallel, due to typos. 2017 typos were hardcoded, corrected and notified to "dataverse.harvard.edu".
+4. Different event data sets can be filtered from the ICEWS 1995-2020 event data set.
+5. Data set "events_africa" is used for the upcoming analysis: it contains all events where "Source.Country", "Target.Country" and "Country" refer to the same African country. Hence, only events that happen within an African country are considered.
+6. Possible to filter the ICEWS event data set in various ways.
+
+
