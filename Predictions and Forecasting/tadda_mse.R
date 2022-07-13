@@ -113,11 +113,11 @@ tadda = function(obs_delta, pred_delta, epsilon = 0.048){
 }
 
 
-results_mse_icews_try2 = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+results_mse_icews_low_level = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
                                     tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
 
 #save as latex
-print(xtable(results_mse_icews, type="latex", digits = 8),file="mse_icews_try2.tex")
+print(xtable(results_mse_icews, type="latex", digits = 8),file="mse_icews_low_level.tex")
 
 
 

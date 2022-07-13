@@ -364,7 +364,8 @@ pgm_icews_data_pg<- left_join(pgm_data,data_sum, by="key_cameo")
 
 #merge pgm data set with capital cities
 capita<-fread("capital.csv")
-pgm_icews_data_pg<-left_join(pgm_icews_data_pg,capita, by="pg_id")
-unique(pgm_icews_data_pg$capname)
-colSums(is.na(pgm_icews_data_pg))
+pgm_icews_data_pg_b<-left_join(pgm_icews_data_pg,capita, by="pg_id", keep.all=F)
+#write.csv(pgm_icews_data_pg, file="pgm_icews_data_pg.csv", row.names = F)
+
+
 
