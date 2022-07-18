@@ -301,6 +301,7 @@ load("/Users/clarita/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Dat
 #for CIP pool
 load("pgm_data.Rdata")
 cm_data = fread("C:/Users/ru23kek/Downloads/cm_data.csv")
+data_sum= fread("data_escalation_prio.csv")
 
 #Change country names to uniform country names
 
@@ -363,9 +364,29 @@ pgm_icews_data_pg<- left_join(pgm_data,data_sum, by="key_cameo")
 #write.csv(pgm_icews_data_pg, file="pgm_icews_data_pg.csv", row.names = F)
 
 #merge pgm data set with capital cities
-capita<-fread("capital.csv")
-pgm_icews_data_pg_b<-left_join(pgm_icews_data_pg,capita, by="pg_id", keep.all=F)
+capital<-fread("capital.csv")
+dupl<- capital[duplicated(capital$pg_id),]
+capital<-capital %>% filter(pg_id!="123511")
+
+#Remark:
+#duplicates regarding capital city
+#Prio ID: 123511 - Brazzaville - Congo
+#Prio ID: 123511 - Kinshasa (Léopoldville) - Democratic Republic of Congo
+
+#merge with pg data set
+pgm_icews_data_pg<-left_join(pgm_icews_data_pg,capital, by="pg_id")
+pgm_icews_data_pg[country_name=="Congo" & pg_id=="123511",]$capname<-"Brazzaville"
+pgm_icews_data_pg[country_name=="Democratic Republic of Congo" & pg_id=="123511",]$capname<-"Kinshasa (Léopoldville)"
+
+#make factor variable
+pgm_icews_data_pg$capital_factor<-ifelse(!is.na(pgm_icews_data_pg$capname),1,0)
+
+
 #write.csv(pgm_icews_data_pg, file="pgm_icews_data_pg.csv", row.names = F)
+
+
+
+
 
 
 
