@@ -5,20 +5,25 @@ library(haven)
 library(dplyr)
 library(ggplot2)
 library(gridExtra)
-
+library(data.table)
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #######################################
 #Load BS Data Set
 ######################################
 X1mo_data <-read_dta("/Users/clarita/Desktop/Consulting Projekt -Administratives/Blair_and_Sambanis_Replication_code/Corrected/replication/data/1mo_data.dta")
-
+data_sum<-fread("data_escalation.csv")
+data<-fread("data_icews_cm.csv")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ###############################################
 #Compare data set 2001 to 2015 with BS (2020)
 ###############################################
 
-#Keep relevant variables of BS (2020)
 
+#Set data to equal country names
+data<- data %>% mutate(Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"),
+                             Country = replace(Country, Country ==   "Congo, DRC"  ,"Democratic Republic of Congo"))
+
+#filter BS (2020) data set
 X1mo_data_check<-X1mo_data %>% select(year, month,country_name, gov_opp_accommodations, gov_opp_low_level, gov_opp_nonviol_repression, opp_gov_demands, opp_gov_low_level,gov_reb_accommodations, gov_reb_low_level, gov_reb_nonviol_repression, reb_gov_demands, reb_gov_low_level ) %>%
   filter(country_name %in%  levels(factor(data$Country))) %>%
   mutate(key_cameo= paste(year, month, country_name, sep = "_"))
