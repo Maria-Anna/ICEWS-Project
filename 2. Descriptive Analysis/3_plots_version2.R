@@ -84,7 +84,7 @@ tmp_result$country_id[tmp_result$pg_id %in% ids_south_sudan] = 246
 ##################
 
 #Search for the corresponding files: differentiate between result (2017-01 till 2019-12) and forecast (2020-06 and 2020-12)
-data_files = paste0("Prediction/",list.files("Prediction/"))
+data_files = paste0("Prediction_ICEWS/",list.files("Prediction_ICEWS/"))
 data_files_evaluation_forecasts_no_mcw = data_files[grep(pattern = "no_mcw_result_t", data_files)]
 data_files_real_forecasts_no_mcw = data_files[grep(pattern = "no_mcw_forecast", data_files)]
 data_files_real_forecasts = data_files[grep(pattern = "real_mcw_forecast_t_", data_files)]
@@ -121,6 +121,7 @@ results$id = paste(results$date, results$s, results$pg_id,sep = "_")
 #Continue with: Evaluation Forecasts (forecasts with NO MCW) - gen results_no_mcw
 results_no_mcw = rbindlist(lapply(data_files_evaluation_forecasts_no_mcw, fread))
 results_no_mcw$id = paste(results_no_mcw$date, results_no_mcw$s, results_no_mcw$pg_id,sep = "_")
+#for results save new variable
 results$prediction_no_mcw= results_no_mcw$prediction
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -146,7 +147,9 @@ results$predicted_log_change_no_mcw = log1p(results$prediction_no_mcw) - log1p(r
 results_mse = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
                          mse_no_mcw = mean((log1p(observation) - log1p(prediction_no_mcw))^2),
                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48), 
-                         tadda_no_mcw = tadda(observation_log_change,predicted_log_change_no_mcw, 0.48)), by = s]
+                         tadda_no_mcw = tadda(observation_log_change,predicted_log_change_no_mcw, 0.48)
+                         ),
+                         by = s]
 
 #generate LATEX table to save the results
 library(kableExtra)
