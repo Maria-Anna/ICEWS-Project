@@ -32,6 +32,7 @@ source('helper_functions.R')
 
 cm_data = fread("cm_icews_data.csv")
 pgm_data = fread("pgm_icews_data.csv")
+data_escalation = fread("data_escalation.csv")
 
 #Replace NA with 0 (missing events on country-month level are interpreted as 0 events)
 cm_data[is.na(cm_data),]<-0

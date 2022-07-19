@@ -63,17 +63,17 @@ counts_events_by_country<-data %>% group_by(Country,Jahr) %>% count(sort=TRUE)
 
 #count number of events by year
 
-counts_events_by_year<-data %>% group_by(Jahr) %>% count(sort=TRUE)
+counts_events_by_year<-data %>% group_by(year) %>% count(sort=TRUE)
 
 
 #Count average number of observationy per country over the years
 
-average_events_by_country<- data %>% group_by(Country,Jahr) %>% count() %>% ungroup (Jahr) %>% summarise(mean(n)) 
+average_events_by_country<- data %>% group_by(Country,year) %>% count() %>% ungroup (year) %>% summarise(mean(n)) 
 
 
 #create median
 
-median<- data %>% group_by(Country,Jahr) %>% count() %>% ungroup (Country) %>% summarise(median(n))  
+median<- data %>% group_by(Country,year) %>% count() %>% ungroup (Country) %>% summarise(median(n))  
 average_median<-mean(median$`median(n)`)
 
 #add column (in total 25 columns) whether country above median or below median event number in the specific year
@@ -95,16 +95,26 @@ data$Event.Quarter <- paste0(quarter(data$Event.Date))
 
 #Evolution of number of events across time 1995-2020
 
-
 counts_events_by_year%>%
-  ggplot(aes(Jahr,n,group=1))+ geom_point()+ geom_line()+
+  ggplot(aes(year,n,group=1))+ geom_point()+ geom_line()+
   xlab("Year")+ ylab("Number of Events")+
-  ggtitle("Evolution of Event Numbers Across Time")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
-        panel.grid.major.y = element_line( size=.05, color="black" ), 
-        axis.line = element_line(colour = "black"))
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.line = element_line(colour = "black"),
+        axis.text = element_text(size=12,colour = "black"))
 
+
+counts_events_by_year%>%
+  ggplot(aes(year,n,group=1))+ geom_point()+ geom_line()+
+  xlab("Year")+ ylab("Number of Events")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 ggsave("Evolution_Events.png")
 
@@ -211,10 +221,19 @@ average_events_by_country%>%arrange(mean)%>%mutate(Country=factor(Country,levels
 ggplot(aes(x=mean, y=Country)) +
   geom_point(size=1)+
   geom_vline(aes(xintercept =average_median,color="median"),linetype="dotted")+
-  ggtitle("Average Number of Events between 1995 and 2020")+
-  ylab(label="Country")+xlab(label="Average Number of Events between the Years")+
-  scale_color_manual(name = "Average Median Number of Events", values = c(median= "red"))+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5))
+  ylab(label="Country")+xlab(label="Average Event Number between 1995-2020")+
+  scale_color_manual(values = c(median= "red"), labels="Median")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.line = element_line(colour = "black"),
+        axis.text = element_text(size=12,colour = "black"),
+        legend.position = c(0.9,0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(1.5, 'cm'),
+        legend.background = element_blank(),
+        legend.text=element_text(size=12))
 
 ggsave("Average_Number_Events_label.png") 
 
@@ -225,7 +244,12 @@ average_events_by_country%>%arrange(mean)%>%mutate(Country=factor(Country,levels
   geom_vline(xintercept =average_median,linetype="dotted", colour="red")+
   ggtitle("Average Number of Events between 1995 and 2020")+
   ylab(label="Country")+xlab(label="Average Number of Events between the Years")+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.line = element_line(colour = "black"),
+        axis.text = element_text(size=12,colour = "black"))
 
 ggsave("Average_Number_Events.png") 
 
@@ -665,6 +689,50 @@ north_eastern_africa %>% group_by(Jahr) %>%
 #in which country the highest number of duplicates
 north_eastern_africa %>% group_by(Country) %>%
   filter(duplicated(Story.ID)) 
+
+
+#Pie Chart for CAMEO ROOT Frequency
+data("cameo_codes")
+cameo_codes<-cameo_codes[,c("cameo_code","name","lvl0","lvl1")]
+cameo_codes<- cameo_codes %>% filter(cameo_code=="01" |cameo_code=="02"| cameo_code=="03"| cameo_code=="04"| cameo_code=="05"| cameo_code=="06"| cameo_code=="07"| cameo_code=="08"| cameo_code=="09"| cameo_code=="10" |
+                                    cameo_code=="11"| cameo_code=="12"| cameo_code=="13"| cameo_code=="14"| cameo_code=="15"| cameo_code=="16"| cameo_code=="17" | cameo_code=="18" | cameo_code=="19" | cameo_code=="20")
+data<-merge(data,cameo_codes, by.x="CAMEO_root", by.y="lvl0")
+
+
+cameo_freq<-data %>% group_by(CAMEO_root,name) %>% count(sort=TRUE)
+#plot
+library(RColorBrewer)
+colourCount <- length(unique(data$name)) # number of levels
+getPalette <- colorRampPalette(brewer.pal(9, "Set2"))
+cameo_freq %>%
+    ggplot(aes(x="", y=n, fill=name))+
+    geom_bar(stat="identity", width=1) +
+    coord_polar("y", start=0)+
+    theme_void()+
+    labs(fill="CAMEO Root Code")+
+    scale_fill_manual(values = getPalette(colourCount)) +
+    theme(plot.title = element_text(hjust = 0.5))
+#table
+print(xtable(cameo_freq, type = "latex"), file = "cameo_freq.tex")
+
+
+#Pie Chart for Intensity Frequency
+int_freq<-data %>% group_by(Intensity) %>% count(sort=TRUE)
+int_freq %>%
+  ggplot(aes(x="", y=n, fill=Intensity))+
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0)+
+  theme_void()+
+  labs(fill="CAMEO Root Code")+
+  scale_fill_manual(values = getPalette(colourCount)) +
+  theme(plot.title = element_text(hjust = 0.5))
+#table with intensity range
+bins<-c(-10,-0.1,0,0.1,10)
+str(int_freq$Intensity)
+int_freq$Intensity<- cut(int_freq$Intensity, breaks = bins,include.lowest = T)
+int_freq_sum <- int_freq %>% group_by(Intensity) %>% summarise(Frequency = sum(n))
+print(xtable(int_freq_sum, type = "latex"), file = "int_freq.tex")
+
 
 
 

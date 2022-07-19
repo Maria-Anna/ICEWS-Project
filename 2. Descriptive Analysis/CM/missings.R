@@ -20,7 +20,9 @@ colSums(is.na(events_africa))
 #District:  1137346--> now: 1151169 
 #Province: 271525--> now:    275904 
 
-
+#generate table with missings for latex
+events_africa_na <-as.data.frame(colSums(is.na(events_africa)))
+print(xtable(events_africa_na, type = "latex"), file = "missings_events_africa.tex")
 
 
 

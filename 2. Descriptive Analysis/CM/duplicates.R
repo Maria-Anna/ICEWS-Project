@@ -25,7 +25,7 @@ sum(duplicated(events_africa$Event.ID))
 
 
 #for Story.ID
-#483193 duplicates
+#489032 duplicates
 table(duplicated(events_africa$Story.ID))
 #Remark:
 #From the same event different information of a story can be extracted
