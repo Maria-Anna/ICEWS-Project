@@ -38,20 +38,38 @@ cm_data[is.na(cm_data),]<-0
 pgm_data[is.na(pgm_data),]<-0
 
 #Aggregate 8 variables with a 3-months window
-cm_data_egy<-cm_data %>% filter(year=="2011" & country_name=="Egypt")
-cm_data_egy$gov_opp_low_level_aggr<-rollsumr(cm_data_egy$gov_opp_low_level, k = 3, fill = NA)
+#CM data set
+cm_data<- cm_data %>% group_by(country_id) %>% arrange("month_id") 
+cm_data<- cm_data %>% group_by(country_id) %>%
+                      dplyr::mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA),
+                                    opp_gov_low_level_aggr = rollsumr(opp_gov_low_level, k = 3, fill = NA),
+                                    reb_gov_low_level_aggr = rollsumr(reb_gov_low_level, k = 3, fill = NA),
+                                    gov_reb_low_level_aggr = rollsumr(gov_reb_low_level, k = 3, fill = NA),
+                                    gov_opp_nonviol_repression_aggr = rollsumr(gov_opp_nonviol_repression, k = 3, fill = NA),
+                                    gov_reb_nonviol_repression_aggr = rollsumr(gov_reb_nonviol_repression, k = 3, fill = NA),
+                                    gov_opp_accommodations_aggr = rollsumr(gov_opp_accommodations, k = 3, fill = NA),
+                                    gov_reb_accommodations_aggr = rollsumr(gov_reb_accommodations, k = 3, fill = NA)
+                                    )
 
-cm_data_test<-cm_data %>% filter(country_name=="Egypt" | country_name=="Somalia")
-cm_data_test<- cm_data_test %>% group_by(country_name) %>% arrange("date") 
-cm_data_test<- cm_data_test %>% group_by(country_name) %>%
-              dplyr::mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA))
+#Remove NA Rows: new data frame contains observations from 1995-03 onwards
+cm_data<- cm_data %>% filter(date>="1995-03-01")
 
-df %>% 
-  group_by(person) %>% 
-  dplyr::mutate(s1_rolling = rollsumr(score1, k = 3, fill = NA),
-                s2_rolling = rollsumr(score2, k = 3, fill = NA))
 
-cm_data_egy$gov_opp_low_level_aggr<-rollsumr(cm_data_egy$gov_opp_low_level, k = 3, fill = NA)
+#PGM data set
+pgm_data = pgm_data[order(month_id, pg_id)]
+pgm_data<- pgm_data %>% group_by(pg_id) %>%
+  dplyr::mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA),
+                opp_gov_low_level_aggr = rollsumr(opp_gov_low_level, k = 3, fill = NA),
+                reb_gov_low_level_aggr = rollsumr(reb_gov_low_level, k = 3, fill = NA),
+                gov_reb_low_level_aggr = rollsumr(gov_reb_low_level, k = 3, fill = NA),
+                gov_opp_nonviol_repression_aggr = rollsumr(gov_opp_nonviol_repression, k = 3, fill = NA),
+                gov_reb_nonviol_repression_aggr = rollsumr(gov_reb_nonviol_repression, k = 3, fill = NA),
+                gov_opp_accommodations_aggr = rollsumr(gov_opp_accommodations, k = 3, fill = NA),
+                gov_reb_accommodations_aggr = rollsumr(gov_reb_accommodations, k = 3, fill = NA)
+  )
+
+#Remove NA Rows: new data frame contains observations from 1995-03 onwards
+cm_data<- cm_data %>% filter(date>="1995-03-01")
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
