@@ -13,6 +13,8 @@ library(lubridate)
 library(pryr)
 library(DEoptim)
 library(dplyr)
+library(zoo)
+library(plyr)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ##################
@@ -39,9 +41,9 @@ pgm_data[is.na(pgm_data),]<-0
 
 #Aggregate 8 variables with a 3-months window
 #CM data set
-cm_data<- cm_data %>% group_by(country_id) %>% arrange("month_id") 
+cm_data = cm_data[order(month_id,country_id)]
 cm_data<- cm_data %>% group_by(country_id) %>%
-                      dplyr::mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA),
+                      mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA),
                                     opp_gov_low_level_aggr = rollsumr(opp_gov_low_level, k = 3, fill = NA),
                                     reb_gov_low_level_aggr = rollsumr(reb_gov_low_level, k = 3, fill = NA),
                                     gov_reb_low_level_aggr = rollsumr(gov_reb_low_level, k = 3, fill = NA),
@@ -55,10 +57,11 @@ cm_data<- cm_data %>% group_by(country_id) %>%
 cm_data<- cm_data %>% filter(date>="1995-03-01")
 
 
+
 #PGM data set
 pgm_data = pgm_data[order(month_id, pg_id)]
 pgm_data<- pgm_data %>% group_by(pg_id) %>%
-  dplyr::mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA),
+  mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA),
                 opp_gov_low_level_aggr = rollsumr(opp_gov_low_level, k = 3, fill = NA),
                 reb_gov_low_level_aggr = rollsumr(reb_gov_low_level, k = 3, fill = NA),
                 gov_reb_low_level_aggr = rollsumr(gov_reb_low_level, k = 3, fill = NA),
@@ -71,6 +74,13 @@ pgm_data<- pgm_data %>% group_by(pg_id) %>%
 #Remove NA Rows: new data frame contains observations from 1995-03 onwards
 pgm_data<- pgm_data %>% filter(date>="1995-03-01")
 
+#save data sets
+write.csv(cm_data, file="cm_aggregate.csv", row.names = F)
+write.csv(pgm_data, file="pgm_aggregate.csv", row.names = F)
+
+#load data sets
+cm_data<-fread("cm_aggregate.csv")
+pgm_data<-fread("pgm_aggregate.csv")
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ############################################
