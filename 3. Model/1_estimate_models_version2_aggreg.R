@@ -39,17 +39,20 @@ pgm_data[is.na(pgm_data),]<-0
 
 #Aggregate 8 variables with a 3-months window
 cm_data_egy<-cm_data %>% filter(year=="2011" & country_name=="Egypt")
+cm_data_egy$gov_opp_low_level_aggr<-rollsumr(cm_data_egy$gov_opp_low_level, k = 3, fill = NA)
 
-cm_data_egy<-cm_data_egy[ , lag3 :=  shift(cm_data_egy$gov_opp_low_level, 3, type = "lag")]
-cm_data_egy$gov_opp_low_level<-as.numeric(cm_data_egy$gov_opp_low_level)
-cm_data_egy$month_id<-as.numeric(cm_data_egy$month_id)
+cm_data_test<-cm_data %>% filter(country_name=="Egypt" | country_name=="Somalia")
+cm_data_test<- cm_data_test %>% group_by(country_name) %>% arrange("date") 
+cm_data_test<- cm_data_test %>% group_by(country_name) %>%
+              dplyr::mutate(gov_opp_low_level_aggr = rollsumr(gov_opp_low_level, k = 3, fill = NA))
 
-cm_data_egy<-cm_data_egy %>%
-  group_by(country_name) %>%
-  summarise_by_time(
-    .by        = "key_cm",
-    value      = sum(gov_opp_low_level)
-  )
+df %>% 
+  group_by(person) %>% 
+  dplyr::mutate(s1_rolling = rollsumr(score1, k = 3, fill = NA),
+                s2_rolling = rollsumr(score2, k = 3, fill = NA))
+
+cm_data_egy$gov_opp_low_level_aggr<-rollsumr(cm_data_egy$gov_opp_low_level, k = 3, fill = NA)
+
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ############################################
