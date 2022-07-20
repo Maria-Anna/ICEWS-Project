@@ -37,6 +37,10 @@ pgm_data = fread("pgm_icews_data_pg.csv")
 cm_data[is.na(cm_data),]<-0
 pgm_data[is.na(pgm_data),]<-0
 
+#Change column name
+names(pgm_data)[47]<-paste("cap_fac")
+pgm_data$cap_fac<-as.factor(pgm_data$cap_fac)
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ############################################
 #Variable Modification and Data Preparation
@@ -158,7 +162,7 @@ for(i in 1:length(dates)){
                        log(milit_exp) +
                        pgd_capdist*log1p(mcw_receiver_rolling)+ #new included interaction
                        pgd_capdist*log1p(mcw_receiver_acute) + #new included interaction
-                       te(long, lat), #+
+                       te(long, lat) +
                      #log1p(reb_gov_demands) +
                      #log1p(opp_gov_demands) +
                        log1p(gov_opp_accommodations)*cap_fac +
@@ -191,7 +195,7 @@ for(i in 1:length(dates)){
                         log(milit_exp) +
                         pgd_capdist*log1p(mcw_receiver_rolling)+
                         pgd_capdist* log1p(mcw_receiver_acute) +
-                        te(long, lat), #+
+                        te(long, lat) +
                       #log1p(reb_gov_demands) +
                       #log1p(opp_gov_demands) +
                       log1p(gov_opp_accommodations)*cap_fac +
@@ -311,7 +315,7 @@ for(i in 1:length(dates)){
                        log(milit_exp) +
                        pgd_capdist*log1p(mcw_receiver_rolling)+
                        pgd_capdist*log1p(mcw_receiver_acute) +
-                       te(long, lat), #+
+                       te(long, lat) +
                      #log1p(reb_gov_demands) +
                      #log1p(opp_gov_demands) +
                      log1p(gov_opp_accommodations)*cap_fac +
@@ -340,7 +344,7 @@ for(i in 1:length(dates)){
                         log(milit_exp) +
                         pgd_capdist*log1p(mcw_receiver_rolling)+
                         pgd_capdist* log1p(mcw_receiver_acute) +
-                        te(long, lat), #+
+                        te(long, lat) +
                       #log1p(reb_gov_demands) +
                       #log1p(opp_gov_demands) +
                       log1p(gov_opp_accommodations)*cap_fac +
