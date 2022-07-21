@@ -151,4 +151,60 @@ print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="resul
 
 
 
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#For Fritz. et al. (2021) and ICEWS, CM and PGM Level
+
+
+
+data_files = paste0("Prediction_ICEWS_Esc/",list.files("Prediction_ICEWS_Esc/"))
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
+
+
+#MSE and TADDA
+obs_delta = results$observation_log_change
+pred_delta = results$predicted_log_change
+
+tadda = function(obs_delta, pred_delta, epsilon = 0.048){
+  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
+          ((abs(obs_delta-pred_delta)> epsilon))))
+}
+
+
+results_mse_icews_escalation = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+                                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
+
+#save as latex
+print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="results_mse_icews_escalation.tex")
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#For Fritz. et al. (2021) and ICEWS, CM and PGM with aggregated events over 3 months
+
+
+
+data_files = paste0("Prediction_ICEWS_Esc/",list.files("Prediction_ICEWS_Esc/"))
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
+
+
+#MSE and TADDA
+obs_delta = results$observation_log_change
+pred_delta = results$predicted_log_change
+
+tadda = function(obs_delta, pred_delta, epsilon = 0.048){
+  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
+          ((abs(obs_delta-pred_delta)> epsilon))))
+}
+
+
+results_mse_icews_escalation = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+                                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
+
+#save as latex
+print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="results_mse_icews_escalation.tex")
 
