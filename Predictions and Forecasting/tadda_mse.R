@@ -156,7 +156,7 @@ print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="resul
 
 
 
-data_files = paste0("Prediction_ICEWS_Esc/",list.files("Prediction_ICEWS_Esc/"))
+data_files = paste0("Prediction_ICEWS_CM_PGM/",list.files("Prediction_ICEWS_CM_PGM/"))
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
 
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
@@ -173,11 +173,11 @@ tadda = function(obs_delta, pred_delta, epsilon = 0.048){
 }
 
 
-results_mse_icews_escalation = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+results_mse_icews_cm_pgm = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
                                           tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
 
 #save as latex
-print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="results_mse_icews_escalation.tex")
+print(xtable(results_mse_icews_cm_pgm, type="latex", digits = 8),file="results_mse_icews_cm_pgm.tex")
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -185,7 +185,7 @@ print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="resul
 
 
 
-data_files = paste0("Prediction_ICEWS_Esc/",list.files("Prediction_ICEWS_Esc/"))
+data_files = paste0("Prediction_ICEWS_Aggr/",list.files("Prediction_ICEWS_Aggr/"))
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
 
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
@@ -202,9 +202,9 @@ tadda = function(obs_delta, pred_delta, epsilon = 0.048){
 }
 
 
-results_mse_icews_escalation = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+results_mse_icews_aggregate = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
                                           tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
 
 #save as latex
-print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="results_mse_icews_escalation.tex")
+print(xtable(results_mse_icews_aggregate, type="latex", digits = 8),file="results_mse_icews_aggregate.tex")
 
