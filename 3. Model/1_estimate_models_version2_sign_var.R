@@ -72,7 +72,7 @@ pgm_data$country_id = tmp_data$country_id[match(pgm_data$country_name,tmp_data$c
 #PART I: PREDICTION
 
 #Create directory for the predictions 
-dir.create(path = "Prediction_ICEWS_Low")
+dir.create(path = "Prediction_ICEWS_Esc")
 
 #set time
 time_beginning = Sys.time()
@@ -252,7 +252,7 @@ for(i in 1:length(dates)){
     }
     
     
-    date_change = paste0("Prediction_ICEWS_Low/final_treshold", gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+    date_change = paste0("Prediction_ICEWS_Esc/final_treshold", gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
     
     writeLines(paste0("Found Tresholds are ", paste(round(alt_optimal_thresholds, digits = 3),collapse = " "), 
                       " and ",paste(round(optimal_thresholds, digits = 3),collapse = " "),"\n"))
@@ -413,7 +413,7 @@ for(i in 1:length(dates)){
       all_data$pgm_data_comp$pred_stage_3[is.na(all_data$pgm_data_comp$pred_final_untuned)] 
     
     
-    date_change = paste0("Prediction_ICEWS_Low/with_mcw_result_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+    date_change = paste0("Prediction_ICEWS_Esc/with_mcw_result_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
     
     #STEP 5.4: save results
     
@@ -533,8 +533,8 @@ for(s in s_values) {
                       log1p(mcw_receiver_acute) +
                       te(avr_lon, avr_lat) +
                       s(name_fac, bs="re") +
-                      log1p(reb_gov_demands) +
-                      log1p(opp_gov_demands) +
+                      #log1p(reb_gov_demands) +
+                      #log1p(opp_gov_demands) +
                       log1p(gov_opp_accommodations) +
                       log1p(gov_reb_accommodations) +
                       log1p(gov_opp_nonviol_repression) +
@@ -565,8 +565,8 @@ for(s in s_values) {
                      pgd_capdist*log1p(mcw_receiver_rolling)+
                      pgd_capdist*log1p(mcw_receiver_acute) +
                      te(long, lat) +
-                     log1p(reb_gov_demands) +
-                     log1p(opp_gov_demands) +
+                     #log1p(reb_gov_demands) +
+                     #log1p(opp_gov_demands) +
                      log1p(gov_opp_accommodations) +
                      log1p(gov_reb_accommodations) +
                      log1p(gov_opp_nonviol_repression) +
@@ -594,8 +594,8 @@ for(s in s_values) {
                       pgd_capdist*log1p(mcw_receiver_rolling)+
                       pgd_capdist* log1p(mcw_receiver_acute) +
                       te(long, lat) +
-                      log1p(reb_gov_demands) +
-                      log1p(opp_gov_demands) +
+                      #log1p(reb_gov_demands) +
+                      #log1p(opp_gov_demands) +
                       log1p(gov_opp_accommodations) +
                       log1p(gov_reb_accommodations) +
                       log1p(gov_opp_nonviol_repression) +
@@ -675,8 +675,8 @@ for(s in s_values) {
                       log1p(mcw_receiver_acute) +
                       te(avr_lon, avr_lat) +
                       s(name_fac, bs="re") +
-                      log1p(reb_gov_demands) +
-                      log1p(opp_gov_demands) +
+                      #log1p(reb_gov_demands) +
+                      #log1p(opp_gov_demands) +
                       log1p(gov_opp_accommodations) +
                       log1p(gov_reb_accommodations) +
                       log1p(gov_opp_nonviol_repression) +
@@ -705,8 +705,8 @@ for(s in s_values) {
                      pgd_capdist*log1p(mcw_receiver_rolling)+
                      pgd_capdist*log1p(mcw_receiver_acute) +
                      te(long, lat) +
-                     log1p(reb_gov_demands) +
-                     log1p(opp_gov_demands) +
+                     #log1p(reb_gov_demands) +
+                     #log1p(opp_gov_demands) +
                      log1p(gov_opp_accommodations) +
                      log1p(gov_reb_accommodations) +
                      log1p(gov_opp_nonviol_repression) +
@@ -734,8 +734,8 @@ for(s in s_values) {
                       pgd_capdist*log1p(mcw_receiver_rolling)+
                       pgd_capdist* log1p(mcw_receiver_acute) +
                       te(long, lat) +
-                      log1p(reb_gov_demands) +
-                      log1p(opp_gov_demands) +
+                      #log1p(reb_gov_demands) +
+                      #log1p(opp_gov_demands) +
                       log1p(gov_opp_accommodations) +
                       log1p(gov_reb_accommodations) +
                       log1p(gov_opp_nonviol_repression) +
@@ -802,7 +802,7 @@ for(s in s_values) {
     all_data$pgm_data_comp$pred_stage_3[is.na(all_data$pgm_data_comp$pred_final_untuned)] 
   
   
-  date_change = paste0("Prediction_ICEWS_Low/real_mcw_forecast_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+  date_change = paste0("Prediction_ICEWS_Esc/real_mcw_forecast_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
   
   #save predictions
   result = data.table(date = tmp_date, 
@@ -831,13 +831,22 @@ for(s in s_values) {
   gc(full = T)
   # save the models for s = 2 
   if(s == 2){
-    save(try_model_1,file =  "Prediction_ICEWS_Low/models/try_model_1.RData")
-    save(try_model_2,file =  "Prediction_ICEWS_Low/models/try_model_2.RData")
-    save(try_model_3,file =  "Prediction_ICEWS_Low/models/try_model_3.RData")
+    save(try_model_1,file =  "Prediction_ICEWS_Esc/models/try_model_1_s2.RData")
+    save(try_model_2,file =  "Prediction_ICEWS_Esc/models/try_model_2_s2.RData")
+    save(try_model_3,file =  "Prediction_ICEWS_Esc/models/try_model_3_s2.RData")
     data_pg = all_data$pgm_data_comp
-    save(data_pg, file = "Prediction_ICEWS_Low/models/data_pg.RData")
+    save(data_pg, file = "Prediction_ICEWS_Esc/models/data_pg_s2.RData")
     data_c = all_data$cm_data_comp
-    save(data_c, file = "Prediction_ICEWS_Low/models/data_c.RData")
+    save(data_c, file = "Prediction_ICEWS_Esc/models/data_c_s2.RData")
+  }
+  if(s == 7){
+    save(try_model_1,file =  "Prediction_ICEWS_Esc/models/try_model_1_s7.RData")
+    save(try_model_2,file =  "Prediction_ICEWS_Esc/models/try_model_2_s7.RData")
+    save(try_model_3,file =  "Prediction_ICEWS_Esc/models/try_model_3_s7.RData")
+    data_pg = all_data$pgm_data_comp
+    save(data_pg, file = "Prediction_ICEWS_Esc/models/data_pg_s7.RData")
+    data_c = all_data$cm_data_comp
+    save(data_c, file = "Prediction_ICEWS_Esc/models/data_c_s7.RData")
   }
   
   rm(try_model_1, try_model_2, try_model_3,result,all_data)
