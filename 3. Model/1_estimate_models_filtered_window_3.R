@@ -32,8 +32,8 @@ cm_data = fread("cm_data.csv")
 load("pgm_data.RData")
 
 #Filter for years 1995-2020
-cm_data<- cm_data %>% filter(date>="01-03-1995")
-pgm_data<- pgm_data %>% filter(date>="01-03-1995")
+cm_data<- cm_data %>% filter(date>="1995-03-01")
+pgm_data<- pgm_data %>% filter(date>="1995-03-01")
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
