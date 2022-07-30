@@ -205,7 +205,87 @@ results_mse_icews_cm_cap = results[,.(mse_mcw = mean((log1p(observation) - log1p
 print(xtable(results_mse_icews_cm_cap, type="latex", digits = 8),file="results_mse_icews_cm_cap.tex")
 
 
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#For Fritz. et al. (2021) Filtered for three months window
 
+
+data_files = paste0("Prediction_filtered_window/",list.files("Prediction_filtered_window/"))
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
+
+
+#MSE and TADDA
+obs_delta = results$observation_log_change
+pred_delta = results$predicted_log_change
+
+tadda = function(obs_delta, pred_delta, epsilon = 0.048){
+  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
+          ((abs(obs_delta-pred_delta)> epsilon))))
+}
+
+
+results_mse_filtered_three = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+                                      tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
+
+#save as latex
+print(xtable(results_mse_filtered_three, type="latex", digits = 8),file="results_mse_filtered_three.tex")
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#For Fritz. et al. (2021) and ICEWS, with CM and PGM with no intercation
+
+
+data_files = paste0("Prediction_ICEWS_CM_PGM_NO_INT/",list.files("Prediction_ICEWS_CM_PGM_NO_INT/"))
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
+
+
+#MSE and TADDA
+obs_delta = results$observation_log_change
+pred_delta = results$predicted_log_change
+
+tadda = function(obs_delta, pred_delta, epsilon = 0.048){
+  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
+          ((abs(obs_delta-pred_delta)> epsilon))))
+}
+
+
+results_mse_cm_pgm_no_int = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+                                        tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
+
+#save as latex
+print(xtable(results_mse_cm_pgm_no_int, type="latex", digits = 8),file="results_mse_cm_pgm_no_int.tex")
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#For Fritz. et al. (2021) and ICEWS, with CM and PGM and Cap Dist Interaction
+
+
+data_files = paste0("Prediction_ICEWS_CM_PGM_CAP_DIST/",list.files("Prediction_ICEWS_CM_PGM_CAP_DIST/"))
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
+
+
+#MSE and TADDA
+obs_delta = results$observation_log_change
+pred_delta = results$predicted_log_change
+
+tadda = function(obs_delta, pred_delta, epsilon = 0.048){
+  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
+          ((abs(obs_delta-pred_delta)> epsilon))))
+}
+
+
+results_mse_cm_pgm_cap_dist = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+                                       tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
+
+#save as latex
+print(xtable(results_mse_cm_pgm_cap_dist, type="latex", digits = 8),file="results_mse_cm_pgm_cap_dist.tex")
 
 
 

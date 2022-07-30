@@ -213,6 +213,50 @@ xtable(summary_1, digits = 4)
 xtable(summary_2, digits = 4)
 xtable(summary_3, digits = 4)
 
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#For CM and PGM without Cap Factor
+#s=2
+load("Prediction_ICEWS_CM_PGM_NO_INT/models/try_model_1_s2.RData")
+load("Prediction_ICEWS_CM_PGM_NO_INT/models/try_model_2_s2.RData")
+load("Prediction_ICEWS_CM_PGM_NO_INT/models/try_model_3_s2.RData")
+
+summary_1 = summary(try_model_1)
+summary_2 = summary(try_model_2)
+summary_3 = summary(try_model_3)
+
+summary_1<-as.data.frame(summary_1$p.table)
+summary_1$Significance<-stars.pval(summary_1[,4])
+summary_2<-as.data.frame(summary_2$p.table)
+summary_2$Significance<-stars.pval(summary_2[,4])
+summary_3<-as.data.frame(summary_3$p.table)
+summary_3$Significance<-stars.pval(summary_3[,4])
+
+xtable(summary_1, digits = 4)
+xtable(summary_2, digits = 4)
+xtable(summary_3, digits = 4)
+
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#For 3 Months Aggregation
+#s=2
+load("Prediction_ICEWS_Aggr/models/try_model_1_s2.RData")
+load("Prediction_ICEWS_Aggr/models/try_model_2_s2.RData")
+load("Prediction_ICEWS_Aggr/models/try_model_3_s2.RData")
+
+summary_1 = summary(try_model_1)
+summary_2 = summary(try_model_2)
+summary_3 = summary(try_model_3)
+
+summary_1<-as.data.frame(summary_1$p.table)
+summary_1$Significance<-stars.pval(summary_1[,4])
+summary_2<-as.data.frame(summary_2$p.table)
+summary_2$Significance<-stars.pval(summary_2[,4])
+summary_3<-as.data.frame(summary_3$p.table)
+summary_3$Significance<-stars.pval(summary_3[,4])
+
+xtable(summary_1, digits = 4)
+xtable(summary_2, digits = 4)
+xtable(summary_3, digits = 4)
 
 
 
