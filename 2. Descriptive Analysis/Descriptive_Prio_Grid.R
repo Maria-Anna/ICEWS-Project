@@ -10,6 +10,7 @@ library(readr)
 library(ggpubr)
 library(viridis)
 
+
 #Read ICEWS
 data_icews_pgm<-readRDS("~/ICEWS-Project/Data/data_icews_pgm")
 
