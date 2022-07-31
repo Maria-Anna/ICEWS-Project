@@ -16,34 +16,27 @@ library(gridBase)
 library(gridGraphics)
 library(data.table)
 
-#Set working directory
 
-#for Clara
-setwd("~/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa")
-#for Maria-Anna
-setwd("~/Consulting Bewaffnete Konflikte/Data")
+path_events_africa<-"~/ICEWS Project/Data/data_icews_cm.csv"
+path_plots<- "~/ICEWS-Project/2. Descriptive Analysis/Plots"
+
 
 #Load data sets: load and format correctly
-
-events_africa_total <- read.delim("events_africa_total.tsv",header = TRUE,sep= "\t")
-events_africa<- read.delim("events_africa.tsv",header = TRUE,sep= "\t")
-events_target_and_source_is_africa<-read.delim("events_target_and_source_is_africa.tsv",header = TRUE,sep= "\t")
-events_target_or_source_is_africa<-read.delim("events_target_or_source_is_africa.tsv",header = TRUE,sep= "\t")
-
-events_africa_total$Event.Date <- as.Date(events_africa_total$Event.Date, format="%Y-%m-%d")
+events_africa<- read.csv(path_events_africa)
 events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
-events_target_and_source_is_africa$Event.Date <- as.Date(events_target_and_source_is_africa$Event.Date, format="%Y-%m-%d")
-events_target_or_source_is_africa$Event.Date <- as.Date(events_target_or_source_is_africa$Event.Date, format="%Y-%m-%d")
 
 #Save as data
-
-data<-events_africa_total
 data<-events_africa
 
-#Prepare for loop
 
+#Drop not correctly geocoded observations
+false_coded<-data %>% filter( Longitude < -50 | Longitude > 64 | Latitude> 40)
+data<- filter(data, !Event.ID %in% false_coded$Event.ID)
+
+
+#Prepare for loop
 data$Jahr<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
-Jahre<-seq(1995, 2020, by= 1)
+Jahre<-seq(1995, 2021, by= 1)
 states_africa<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde","Cape Verde", "Cameroon","Central African Republic",
                  "Chad", "Comoros","Congo","Congo, DRC", "Democratic Republic of Congo", "Congo, Democratic Republic of the","Cote d'Ivoire","Republic of Cote d'Ivoire", "DRC Cote d'Ivoire",
                  "Congo, Republic of the Cote d'Ivoire","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Kenya",
@@ -53,9 +46,16 @@ states_africa<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Buru
 
 
 #create african map
+states<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso (Upper Volta)", "Burundi","Cape Verde", "Cameroon","Central African Republic",
+                 "Chad", "Comoros","Congo", "Congo, Democratic Republic of (Zaire)","Cote D'Ivoire","Djibouti","Egypt","Equatorial Guinea","Eritrea","Ethiopia","Gabon","Gambia",
+                 "Ghana","Guinea","Guinea-Bissau","Kenya","Lesotho","Liberia","Libya","Madagascar (Malagasy)","Malawi","Mali","Mauritania","Mauritius","Morocco","Mozambique","Namibia","Niger",
+                 "Nigeria", "Rwanda", "Swaziland (Eswatini)","Senegal","Seychelles","Sierra Leone","Somalia", "South Africa", "South Sudan",
+                 "Sudan","Tanzania (Tanganyika)","Togo","Tunisia", "Uganda", "Zambia", "Zimbabwe (Rhodesia)" )
 
-world_map <- ne_countries(scale = "small", returnclass = "sf")
-africa <- world_map %>% filter(continent %in% "Africa")
+africa <- cshp(date=as.Date("2012-1-01"), useGW=TRUE)
+africa <- st_as_sf(africa, sf_use_s2(FALSE))
+africa <- africa[africa$country_name %in% states,]
+
 
 #Count number of observations per country and year
 
@@ -93,8 +93,7 @@ data$Event.Quarter <- paste0(quarter(data$Event.Date))
 
 ###############################Geographical Plots#########################
 
-#Evolution of number of events across time 1995-2020
-
+#Evolution of number of events across time 1995-2021
 
 counts_events_by_year%>%
   ggplot(aes(Jahr,n,group=1))+ geom_point()+ geom_line()+
@@ -102,45 +101,53 @@ counts_events_by_year%>%
   ggtitle("Evolution of Event Numbers Across Time")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
-        panel.grid.major.y = element_line( size=.05, color="black" ), 
-        axis.line = element_line(colour = "black"))
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
+ggsave("Evolution_Events.png", path=path_plots)
 
-ggsave("Evolution_Events.png")
+#Beispielplot
+#i<-2019
 
+#Events on the African Continent 1995-2021
 
-#Events on the African Continent 1995-2020
-
-for(i in 2019){
+for(i in Jahre){
+   print(i)
   
    ggplot(data=africa) + 
    geom_sf(col = "black", alpha = 0.00001) + 
-   geom_point(data= dplyr::filter(data, Jahr== i), aes(x = Longitude, y = Latitude), col = "red", size=0.5, fill=20) + 
+   geom_point(data= dplyr::filter(data, Jahr== i), aes(x = Longitude, y = Latitude), col = "black", size=0.5, fill=20) + 
    xlab("Latitude") + ylab("Longitude") + 
    ggtitle(paste("Number of events on the African continent in",i))+
-   theme(plot.title = element_text(color = "black", size=20, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5)) 
+    theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+          panel.background = element_blank(),
+          axis.line = element_line(colour = "black"),
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))
   
-  ggsave(filename=paste("Events in Africa_",i,".png", sep="")) 
+  ggsave(filename=paste("Events in Africa_",i,".png", sep=""), path=path_plots) 
   
 }
 
 ggplot(data=africa) + 
   geom_sf(col = "black", alpha = 0.00001) + 
-  geom_point(data=data, aes(x = Longitude, y = Latitude), col = "red", size=0.000000000000001, fill=20) + 
+  geom_point(data=data, aes(x = Longitude, y = Latitude), col = "black", size=0.000000000000001, fill=20) + 
   xlab("Latitude") + ylab("Longitude") + 
   ggtitle("Number of events on the African continent in")+
-  theme(plot.title = element_text(color = "black", size=20, hjust=0.5),
-        axis.title.x = element_text(hjust=0.5),
-        axis.title.y= element_text(hjust=0.5)) 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
-events_in_africa<-st_join(data,africa, left=F)
+#events_in_africa<-st_join(data,africa, left=F)
+#counts_events_by_country %>% filter(Jahr==2019) %>%arrange(sort(n,decreasing=FALSE))
 
-
-counts_events_by_country %>% filter(Jahr==2019) %>%arrange(sort(n,decreasing=FALSE))
-
-#Events on the African Continent 1995-2020: Comparison between Countries with many Events to few Events
+#Events on the African Continent 1995-2021: Comparison between Countries with many Events to few Events
 
 for(i in Jahre){
 
@@ -149,25 +156,31 @@ p<-ggplot(data=africa) +
   geom_point(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]==1),aes(x = Longitude, y = Latitude), col = "red", size=0.5, fill=20) + 
   xlab("Latitude") + ylab("Longitude") + 
   ggtitle(paste("Events>Median in",i))+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5)) 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 q<-ggplot(data=africa) + 
   geom_sf(col = "black", alpha = 0.00001) + 
   geom_point(data= dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]==0) ,aes(x = Longitude, y = Latitude), col = "red", size=0.5, fill=20) + 
   xlab("Latitude") + ylab("Longitude") +
   ggtitle(paste("Events<Median in",i))+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5)) 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
-ggsave(plot=plot_grid(p,q,ncol = 2, align="hv"),filename=paste("Events_Comparison_",i,".png", sep="")) 
+ggsave(plot=plot_grid(p,q,ncol = 2, align="hv"),filename=paste("Events_Comparison_",i,".png", sep=""), path= path_plots, width = 15, height = 9) 
 
 }
 
 
-#Frequency of Latitude and Longitude 1995-2020
+#Frequency of Latitude and Longitude 1995-2021
 
 for(i in Jahre){
   
@@ -175,14 +188,20 @@ ggplot(data= dplyr::filter(data, Jahr== i)) + geom_density(aes(Latitude, fill="L
   geom_density(aes(Longitude, fill="Longitude"), alpha=0.2) + 
   scale_fill_manual(name = "Geographic Coordinate", values = c(Latitude = "red", Longitude = "green"))+
   xlab(label = "Geographic Coordinate")+
-  ylab(label="Density")
+  ylab(label="Density")+
+    theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+          panel.background = element_blank(),
+          axis.line = element_line(colour = "black"),
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))
 
-ggsave(filename=paste("Density_Latitude_Longitude_",i,".png", sep="")) 
+ggsave(filename=paste("Density_Latitude_Longitude_",i,".png", sep=""), path= path_plots, width = 15, height = 9) 
 
 }
 
 
-#Frequency of observations in each country 1995-2020
+#Frequency of observations in each country 1995-2021
 
 colnames(counts_events_by_country)[which(names(counts_events_by_country) == "n")] <- "count"
 counts_events_by_country$count<-as.numeric(counts_events_by_country$count)
@@ -195,9 +214,15 @@ ggplot(aes(y=Country, x=count)) +
     geom_vline(xintercept =771.5,linetype="dotted", color="red")+
     ggtitle(paste("Absolute Number of Events in",i))+
   ylab(label="Country")+xlab(label="Absolute Number of Events")+
-    theme( plot.title = element_text(color = "black", size=14, hjust=0.5))
+    theme( plot.title = element_text(color = "black", size=14, hjust=0.5))+
+    theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+          panel.background = element_blank(),
+          axis.line = element_line(colour = "black"),
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))
 
-ggsave(filename=paste("Number_Events_Countries_",i,".png", sep="")) 
+ggsave(filename=paste("Number_Events_Countries_",i,".png", sep=""), path= path_plots, width = 15, height = 9) 
 
 }
 
@@ -214,9 +239,14 @@ ggplot(aes(x=mean, y=Country)) +
   ggtitle("Average Number of Events between 1995 and 2020")+
   ylab(label="Country")+xlab(label="Average Number of Events between the Years")+
   scale_color_manual(name = "Average Median Number of Events", values = c(median= "red"))+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
-ggsave("Average_Number_Events_label.png") 
+ggsave("Average_Number_Events_label.png", path= path_plots, width = 15, height = 9) 
 
 #without label
 average_events_by_country%>%arrange(mean)%>%mutate(Country=factor(Country,levels = Country))%>%
@@ -225,13 +255,18 @@ average_events_by_country%>%arrange(mean)%>%mutate(Country=factor(Country,levels
   geom_vline(xintercept =average_median,linetype="dotted", colour="red")+
   ggtitle("Average Number of Events between 1995 and 2020")+
   ylab(label="Country")+xlab(label="Average Number of Events between the Years")+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
-ggsave("Average_Number_Events.png") 
+ggsave("Average_Number_Events.png", path= path_plots, width = 15, height = 9) 
 
 
 
-#Density of events in Africa 1995-2020
+#Density of events in Africa 1995-2021
 
 for(i in 2019){
   
@@ -240,35 +275,45 @@ ggplot(data=africa) +
   geom_bin2d(data= dplyr::filter(data, Jahr== i), aes(x = Longitude, y = Latitude), bins=150) + 
   xlab("Latitude") + ylab("Longitude") + 
   ggtitle(paste("Events in Africa: Density of Events in",i))+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5)) +
+    theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+          panel.background = element_blank(),
+          axis.line = element_line(colour = "black"),
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))+
   scale_fill_gradient2(low="deepskyblue", mid="dodgerblue3", high = "firebrick1")
 
-ggsave(filename=paste("Event_Density_Africa_",i,".png", sep="")) 
+ggsave(filename=paste("Event_Density_Africa_",i,".png", sep=""),path= path_plots, width = 15, height = 9) 
   
 }
-
-#What are 
-
-
-
 
 
 ##Distribution in count data/density of the intensity numbers for countries with many and few event
 
 for (i in Jahre) {
-p<- ggplot(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]), aes(x = Intensity, colour==data[[paste0("danger_median_",i)]])) + 
-  geom_histogram(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]),position="dodge", bins=50, fill="transparent") + 
+p<- ggplot(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]==1), aes(x = Intensity, colour=data[[paste0("danger_median_",i)]]==0)) + 
+  geom_histogram(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]==1),position="dodge", bins=50, fill="transparent") + 
   scale_color_manual(name="Number Events", labels = c("Low", "High"), values=c("red", "darkgreen"))+
-  xlab("Intensity") + ylab("Absolute Frequency")
+  xlab("Intensity") + ylab("Absolute Frequency")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
-q<-ggplot(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]),aes(x = Intensity, colour=data[[paste0("danger_median_",i)]])) +
-  geom_density(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]),aes(colour=data[[paste0("danger_median_",i)]])) +
+q<-ggplot(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]==0),aes(x = Intensity, colour=data[[paste0("danger_median_",i)]]==0)) +
+  geom_density(data=dplyr::filter(data, Jahr==i & data[[paste0("danger_median_",i)]]==0),aes(colour=data[[paste0("danger_median_",i)]])) +
   scale_color_manual(name="Number Events", labels = c("Low", "High"), values=c("red", "darkgreen"))+
-  xlab("Intensity") + ylab("Density")
+  xlab("Intensity") + ylab("Density")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
-ggsave(plot=plot_grid(p,q,ncol = 2, align="hv"),filename=paste("Intensity_Country_Median",i,".png", sep="")) 
+ggsave(plot=plot_grid(p,q,ncol = 2, align="hv"),filename=paste("Intensity_Country_Median",i,".png", sep="",path= path_plots, width = 15, height = 9)) 
 
 }
 
@@ -282,9 +327,12 @@ p<-ggplot(data=africa) +
   scale_color_manual(name="Event Quarter", labels = c("First Quarter"), values=c("red"))+
   xlab("Latitude") + ylab("Longitude") + 
   ggtitle(paste("Events in Africa: First Quarter",i))+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5)) 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 q<-ggplot(data=africa) + 
   geom_sf(col = "black", alpha = 0.00001) + 
@@ -292,11 +340,14 @@ q<-ggplot(data=africa) +
   scale_color_manual(name="Event Quarter", labels = c("Last Quarter"), values=c("red"))+
   xlab("Latitude") + ylab("Longitude") + 
   ggtitle(paste("Events in Africa: Last Quarter",i))+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5)) 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
-ggsave(plot=plot_grid(p,q,ncol = 2, align="hv"),filename=paste("Events_Quarter_Comparison_",i,".png", sep="")) 
+ggsave(plot=plot_grid(p,q,ncol = 1, align="hv"),filename=paste("Events_Quarter_Comparison_",i,".png", sep=""),path= path_plots, width = 9, height = 9) 
 
 }
 
@@ -309,22 +360,6 @@ sum(is.na(data$Country)) #0
 
 #create variable equal=True if the same source, target and country
 data$Equal<-ifelse(data$Source.Country == data$Target.Country &  data$Target.Country == data$Country,TRUE,FALSE)
-
-##extract root codes from specific CAMEO event codes
-
-#Install package from github
-library("remotes")
-remotes::install_github("andybega/icews")
-library(icews)
-library(DBI)
-
-#load CAMEO dataset and keep relevant variables
-data("cameo_codes")
-cameo_codes<-cameo_codes[,c("cameo_code","name","lvl0","lvl1")]
-
-
-#merge with data by Event Text
-data<-merge(data,cameo_codes, by.x="Event.Text", by.y="name")
 
 
 ############################################Focus on North-Eastern African Countries#########################################
@@ -339,6 +374,9 @@ states_africa_north_east<-c("Eritrea", "Ethiopia","Uganda","Somalia","Kenya","So
 
 #compare absolute frequency of Root Cameo Code between 2016 and 2018 in each country (Brandt et al. 2022)
 
+#Example for Loop
+i<-"Somalia"
+
 for(i in states_africa_north_east){
 
 p<-data%>%filter(Country==i & Jahr=="2016") %>% ggplot(aes(x=as.character(lvl0)))+
@@ -348,12 +386,12 @@ p<-data%>%filter(Country==i & Jahr=="2016") %>% ggplot(aes(x=as.character(lvl0))
   scale_y_continuous(expand = c(0, 0), limits = c(0,NA))+
   scale_x_discrete(breaks=1:20,limits=factor(1:20))+
   ggtitle(paste(i,"(2016)"))+
-  theme(plot.title = element_text(hjust=0.5),
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        panel.border = element_rect(colour = "black", fill=NA, size=0.5))
-
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 q<-data%>%filter(Country==i & Jahr=="2017") %>%ggplot(aes(x=as.character(lvl0)))+
   geom_bar(stat="count",fill="darkblue")+
@@ -362,11 +400,12 @@ q<-data%>%filter(Country==i & Jahr=="2017") %>%ggplot(aes(x=as.character(lvl0)))
   scale_y_continuous(expand = c(0, 0), limits = c(0, NA))+
   scale_x_discrete(breaks=1:20,limits=factor(1:20))+
   ggtitle(paste(i,"(2017)"))+
-  theme(plot.title = element_text(hjust=0.5),
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 d<-data%>%filter(Country==i & Jahr=="2018") %>%ggplot(aes(x=as.character(lvl0)))+
   geom_bar(stat="count",fill="darkblue")+
@@ -375,11 +414,12 @@ d<-data%>%filter(Country==i & Jahr=="2018") %>%ggplot(aes(x=as.character(lvl0)))
   scale_y_continuous(expand = c(0, 0), limits = c(0, NA))+
   scale_x_discrete(breaks=1:20,limits=factor(1:20))+
   ggtitle(paste(i,"(2018)"))+
-  theme(plot.title = element_text( hjust=0.5),
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 ggsave(plot=plot_grid(p,q,d,ncol = 3, align="hv"),filename=paste("Root_Cameo_Code_Evolution_Absolute_",i,".png", sep="")) 
 
@@ -393,12 +433,12 @@ data%>%filter(Country=="Somalia" & Jahr=="2007") %>% ggplot(aes(x=as.character(l
   scale_y_continuous(expand = c(0, 0), limits = c(0, NA))+
   scale_x_discrete(breaks=1:20,limits=factor(1:20))+
   ggtitle(paste(i,"(2018)"))+
-  theme(plot.title = element_text( hjust=0.5),
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        panel.border = element_rect(colour = "black", fill=NA, size=0.5))
-
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 
 
@@ -417,9 +457,9 @@ for(i in "Somalia"){
     theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
           panel.background = element_blank(),
           axis.line = element_line(colour = "black"),
-          axis.text.x = element_text(angle = 90, vjust = 0.5),
-          panel.border = element_rect(colour = "black", fill=NA, size=0.5))
-  
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))
   
   q<-data%>%filter(Country==i & Jahr=="2017") %>%ggplot(aes(x=as.character(lvl0)))+
     geom_bar(aes(y=stat(count)/sum(count)),fill="darkblue")+
@@ -431,8 +471,9 @@ for(i in "Somalia"){
     theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
           panel.background = element_blank(),
           axis.line = element_line(colour = "black"),
-          axis.text.x = element_text(angle = 90, vjust = 0.5),
-          panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))
   
   d<-data%>%filter(Country==i & Jahr=="2018") %>%ggplot(aes(x=as.character(lvl0)))+
     geom_bar(aes(y=stat(count)/sum(count)),fill="darkblue")+
@@ -444,8 +485,9 @@ for(i in "Somalia"){
     theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
           panel.background = element_blank(),
           axis.line = element_line(colour = "black"),
-          axis.text.x = element_text(angle = 90, vjust = 0.5, size=5),
-          panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))
   
   ggsave(plot=plot_grid(p,q,d,ncol = 3, align="hv"),filename=paste("Root_Cameo_Code_Evolution_Relative_",i,".png", sep="")) 
   
@@ -465,8 +507,9 @@ p<-data%>%filter(Country=="Ethiopia" & Month=="18-07") %>%ggplot(aes(x=as.charac
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, size=5),
-        panel.border = element_rect(colour = "black", fill=NA, size=0.5))
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 q<-data%>%filter(Country=="Ethiopia" & Month=="18-08") %>%ggplot(aes(x=as.character(lvl0)))+
   geom_bar(aes(y=stat(count)/sum(count)),fill="darkblue")+
@@ -478,9 +521,9 @@ q<-data%>%filter(Country=="Ethiopia" & Month=="18-08") %>%ggplot(aes(x=as.charac
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, size=5),
-        panel.border = element_rect(colour = "black", fill=NA, size=0.5))
-  
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
   
 d<-data%>%filter(Country=="Ethiopia" & Month=="18-09") %>%ggplot(aes(x=as.character(lvl0)))+
   geom_bar(aes(y=stat(count)/sum(count)),fill="darkblue")+
@@ -492,9 +535,10 @@ d<-data%>%filter(Country=="Ethiopia" & Month=="18-09") %>%ggplot(aes(x=as.charac
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, size=5),
-        panel.border = element_rect(colour = "black", fill=NA, size=0.5))
-  
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
 ggsave(plot=plot_grid(p,q,d,ncol = 3, align="hv"),filename=paste("Uganda_Evolution_Relative_",i,".png", sep="")) 
 
 
@@ -509,9 +553,12 @@ counts_events_by_country %>% filter(Country=="Somalia") %>%
   stat_peaks(colour = "black",shape="circle open") +
   xlab("Year")+ ylab("Number of Events")+
   ggtitle("Somalia")+
-  theme(panel.background = element_blank(),
-        panel.grid.major.y = element_line( size=.05, color="black" ), 
-        axis.line = element_line(colour = "black"))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 #all countries in one plot
 #time span on yearly level: 1995-2020
@@ -520,9 +567,12 @@ counts_events_by_country %>% filter(Country %in% states_africa_north_east) %>%
   ggplot(aes(x=Jahr,y=stat(n)/sum(n),group=Country,color=Country))+ geom_point()+ geom_line()+
   xlab("Year")+ ylab("Number of Events")+
   ggtitle("North-Eastern African Countries")+
-  theme(panel.background = element_blank(),
-        panel.grid.major.y = element_line( size=.05, color="black" ), 
-        axis.line = element_line(colour = "black"))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 ggsave(filename="Evolution_Events_1995_2020.png") 
 
@@ -539,10 +589,12 @@ counts_events_by_country_month %>% filter(Month>="17-06"& Month<="19-01" & Count
   stat_peaks(colour = "black",shape="circle open",size=2,aes(colour=Country)) +
   xlab("Year-Month")+ ylab("Number of Events")+
   ggtitle("North-Eastern African Countries till January 2019")+
-  theme(panel.background = element_blank(),
-        panel.grid.major.y = element_line( size=.05, color="black" ), 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
-        plot.title = element_text(hjust = 0.5))
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 ggsave(filename="Evolution_Events_2017_2019.png") 
 
@@ -561,7 +613,12 @@ cameo_freq %>% filter(Country==i & Jahr==2017 & lvl0==18) %>%
   theme_void()+
   labs(fill="Cameo Code 18")+
   ggtitle(paste("Frequencies of Cameo Code 18 in",i,"2017"))+
-  theme(plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+          panel.background = element_blank(),
+          axis.line = element_line(colour = "black"),
+          axis.title.x = element_text(hjust=0.5, size=16),
+          axis.title.y= element_text(hjust=0.5,size=16),
+          axis.text = element_text(size=12,colour = "black"))
 
   ggsave(filename=paste("Cameo_Code_18_2017_",i,".png", sep="")) 
   
@@ -577,7 +634,14 @@ p<-cameo_freq %>% filter(Country=="Somalia" & Jahr==2017 & lvl0==18) %>%
   theme_void()+
   labs(fill="Cameo Code 18")+
   ggtitle(paste("Cameo Code 18 Somalia 2017"))+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+
 q<-cameo_freq_month %>% filter(Country=="Somalia" & Month>="18-01" & Month<="18-06" & lvl0==18) %>% 
   ggplot(aes(x="", y=n ,fill=Event.Text))+
   geom_bar(stat="identity", width=1) +
@@ -585,7 +649,12 @@ q<-cameo_freq_month %>% filter(Country=="Somalia" & Month>="18-01" & Month<="18-
   theme_void()+
   labs(fill="Cameo Code 18")+
   ggtitle(paste("Cameo Code 18 Somalia 18-01 till 18-06"))+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 ggsave(plot=plot_grid(p,q,ncol = 2),filename=paste("Cameo_Code_18_Pie_Somalia",i,".png", sep="")) 
 
@@ -597,7 +666,13 @@ p<-cameo_freq %>% filter(Country=="Uganda" & Jahr==2017 & lvl0==18) %>%
   theme_void()+
   labs(fill="Cameo Code 18")+
   ggtitle(paste("Cameo Code 18 Uganda 2017"))+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
 q<-cameo_freq_month %>% filter(Country=="Uganda" & Month>="18-01" & Month<="18-06" & lvl0==18) %>% 
   ggplot(aes(x="", y=n ,fill=Event.Text))+
   geom_bar(stat="identity", width=1) +
@@ -605,7 +680,12 @@ q<-cameo_freq_month %>% filter(Country=="Uganda" & Month>="18-01" & Month<="18-0
   theme_void()+
   labs(fill="Cameo Code 18")+
   ggtitle(paste("Cameo Code 18 Uganda 18-01 till 18-06"))+
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 ggsave(plot=plot_grid(p,q,ncol = 2, align = "hv"),filename=paste("Cameo_Code_18_Pie_Uganda",i,".png", sep="")) 
 
@@ -627,31 +707,69 @@ states_africa_north_east_no_danger<-c("Eritrea", "Uganda")
 #in 2016
 p<-north_eastern_africa %>% filter(Jahr==2016 & Country %in% states_africa_north_east_no_danger) %>% ggplot() + 
   geom_density(aes(Intensity, colour= Country))+ 
-  ggtitle("Intensity Comparison in 2016")
+  ggtitle("Intensity Comparison in 2016")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 p1<-north_eastern_africa %>% filter(Jahr==2016 & Country %in% states_africa_north_east_danger) %>% ggplot() + 
   geom_density(aes(Intensity, colour= Country))+ 
-  ggtitle("Intensity Comparison in 2016")
+  ggtitle("Intensity Comparison in 2016")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 
 #in 2017
 
 q<-north_eastern_africa %>% filter(Jahr==2017 & Country %in% states_africa_north_east_no_danger) %>% ggplot() + 
   geom_density(aes(Intensity, colour= Country))+ 
-  ggtitle("Intensity Comparison in 2017")
+  ggtitle("Intensity Comparison in 2017")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
 q1<-north_eastern_africa %>% filter(Jahr==2017  & Country %in% states_africa_north_east_danger) %>% ggplot() + 
   geom_density(aes(Intensity, colour= Country))+ 
-  ggtitle("Intensity Comparison in 2017")
+  ggtitle("Intensity Comparison in 2017")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 
 #in 2018
 
 d<-north_eastern_africa %>% filter(Jahr==2018 & Country %in% states_africa_north_east_no_danger) %>% ggplot() + 
   geom_density(aes(Intensity, colour= Country))+ 
-  ggtitle("Intensity Comparison in 2018")
+  ggtitle("Intensity Comparison in 2018")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
 d1<-north_eastern_africa %>% filter(Jahr==2018  & Country %in% states_africa_north_east_danger) %>% ggplot() + 
   geom_density(aes(Intensity, colour= Country))+ 
-  ggtitle("Intensity Comparison in 2018")
+  ggtitle("Intensity Comparison in 2018")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
 
 grid.arrange(p,q,d,p1,q1,d1, ncol=3,nrow=2)
 
