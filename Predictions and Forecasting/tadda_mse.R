@@ -1,5 +1,8 @@
 ####################################################### MSE vs. TADDA #######################################################
 
+#Load necessary packages:
+library(xtable)
+library(data.table)
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 #For Fritz. et al. (2021) filtered
@@ -292,7 +295,7 @@ print(xtable(results_mse_cm_pgm_cap_dist, type="latex", digits = 8),file="result
 #For Fritz. et al. (2021) and ICEWS, Aggregation over 2 Months Window
 
 
-data_files = paste0("Prediction_ICEWS_CM_PGM_CAP_DIST/",list.files("Prediction_ICEWS_CM_PGM_CAP_DIST/"))
+data_files = paste0("Prediction_ICEWS_Aggr_2_months/",list.files("Prediction_ICEWS_Aggr_2_months/"))
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
 
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
@@ -309,17 +312,17 @@ tadda = function(obs_delta, pred_delta, epsilon = 0.048){
 }
 
 
-results_mse_cm_pgm_cap_dist = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+results_mse_aggreg_2_months = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
                                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
 
 #save as latex
-print(xtable(results_mse_cm_pgm_cap_dist, type="latex", digits = 8),file="results_mse_cm_pgm_cap_dist.tex")
+print(xtable(results_mse_aggreg_2_months , type="latex", digits = 8),file="results_mse_aggreg_2_months .tex")
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) Filtered for three months window
+#For Fritz. et al. (2021) Filtered for two months window
 
 
-data_files = paste0("Prediction_ICEWS_CM_PGM_CAP_DIST/",list.files("Prediction_ICEWS_CM_PGM_CAP_DIST/"))
+data_files = paste0("Prediction_filtered_window_2/",list.files("Prediction_filtered_window_2/"))
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
 
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
@@ -336,11 +339,11 @@ tadda = function(obs_delta, pred_delta, epsilon = 0.048){
 }
 
 
-results_mse_cm_pgm_cap_dist = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+results_filtered_window_2 = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
                                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
 
 #save as latex
-print(xtable(results_mse_cm_pgm_cap_dist, type="latex", digits = 8),file="results_mse_cm_pgm_cap_dist.tex")
+print(xtable(results_filtered_window_2, type="latex", digits = 8),file="results_filtered_window_2.tex")
 
 
 
