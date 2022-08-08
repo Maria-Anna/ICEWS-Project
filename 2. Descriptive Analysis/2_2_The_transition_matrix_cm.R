@@ -1,4 +1,5 @@
 ##############################################THE CAMEO EVENT TRAP#################################################
+
 #Load necessary packages
 library(ggplot2)
 library(dplyr)
@@ -17,46 +18,23 @@ library(data.table)
 library(tidyr)
 library(tidyselect)
 library(tidyverse)
+library(data.table)
 
-#Set working directory
-
-#for Clara
-setwd("~/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa")
-#for Maria-Anna
-setwd("~/Consulting Bewaffnete Konflikte/Data")
 
 
 ###################################################
 ############ Prepare Dataset ######################
 ###################################################
 
-events_africa<- read.delim("events_africa.tsv",header = TRUE,sep= "\t")
-events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
-data<-events_africa
+data_icews_cm<- fread("~/ICEWS-Project/Data/data_icews_cm.csv")
+
+data<-data_icews_cm
 
 #add variables
-data$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
+data$Year<-format(as.Date(data$Event.Date, format="%Y-%m-%d"),"%Y") 
 data$Year_month<-format(as.Date(data$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
 data$Month<-as.numeric(format(as.Date(data$Event.Date, format="%Y-%m-%d"), "%m"))
 
-
-###################################################
-############ Load CAMEO CODE ######################
-###################################################
-
-
-#Install package from github
-library("remotes")
-#remotes::install_github("andybega/icews")
-library(icews)
-library(DBI)
-
-#load CAMEO dataset and keep relevant variables
-data("cameo_codes")
-cameo_codes<-cameo_codes[,c("cameo_code","name","lvl0","lvl1")]
-
-#merge with data by event text
-data_cameo<-merge(data,cameo_codes, by.x="Event.Text", by.y="name")
 
 
 #################################################################
@@ -74,16 +52,16 @@ cameo_conflict<-c("18","19","20")
 #####Create datasets for:
 
 #hostile event
-data_cameo_hostile<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0 %in% cameo_hostile)%>%as.data.frame()
+data_cameo_hostile<-data%>%group_by(Year_month,Country,Year)%>%count(CAMEO_root %in% cameo_hostile)%>%as.data.frame()
 
 #peaceful events
-data_cameo_peace<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0 %in% cameo_peace)%>%as.data.frame()
+data_cameo_peace<-data%>%group_by(Year_month,Country,Year)%>%count(CAMEO_root %in% cameo_peace)%>%as.data.frame()
 
 #hostile intensity events
-data_cameo_intensity<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(Intensity %in% cameo_intensity_hostile)%>%as.data.frame()
+data_cameo_intensity<-data%>%group_by(Year_month,Country,Year)%>%count(Intensity %in% cameo_intensity_hostile)%>%as.data.frame()
 
 #events with conflict
-data_cameo_conflict<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0 %in% cameo_conflict)%>%as.data.frame()
+data_cameo_conflict<-data%>%group_by(Year_month,Country,Year)%>%count(CAMEO_root %in% cameo_conflict)%>%as.data.frame()
 
 
 
@@ -93,7 +71,7 @@ data_cameo_conflict<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0
 ##hostile events:
 ###############
 
-data_cameo_hostile<-data_cameo_hostile %>% pivot_wider(names_from="lvl0 %in% cameo_hostile", values_from="n")
+data_cameo_hostile<-data_cameo_hostile %>% pivot_wider(names_from="CAMEO_root %in% cameo_hostile", values_from="n")
 
 #change NA to 0:
 data_cameo_hostile<-data_cameo_hostile %>%
@@ -118,7 +96,7 @@ data_cameo_hostile<-data_cameo_hostile %>%
 ###############
 
 
-data_cameo_peace<-data_cameo_peace %>% pivot_wider(names_from="lvl0 %in% cameo_peace", values_from="n")
+data_cameo_peace<-data_cameo_peace %>% pivot_wider(names_from="CAMEO_root %in% cameo_peace", values_from="n")
 
 #change NA to 0:
 data_cameo_peace<-data_cameo_peace %>%
@@ -169,7 +147,7 @@ data_cameo_intensity<-data_cameo_intensity %>%
 #################
 
 
-data_cameo_conflict<-data_cameo_conflict %>% pivot_wider(names_from="lvl0 %in% cameo_conflict", values_from="n")
+data_cameo_conflict<-data_cameo_conflict %>% pivot_wider(names_from="CAMEO_root %in% cameo_conflict", values_from="n")
 
 #change NA to 0:
 data_cameo_conflict<-data_cameo_conflict %>%
@@ -376,40 +354,39 @@ prob_table_hostile
 ############ Plot Transition Matrix #####################
 ########################################################
 
+#Assign saving path for Map plots
+path_plot<-"~/ICEWS-Project/2. Descriptive Analysis/Plots"
+
 #Plot 1: CAMEO EVENT TRAP for hostile events
 ggplot(prob_table_hostile, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
   stat_summary_2d(bins = 20, color = "white", fun = mean) +  
   scale_fill_gradient(low="#56B1F7", high="#132B43")+
-  ggtitle("The Cameo Event Trap: Hostile Events")+
   xlab("Relative Number of Hostile Events Quintile in T+1")+ylab("Relative Number of Hostile Events Quintile in T")+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5),
-         axis.ticks = element_blank(),
-         panel.grid.major = element_blank(),
-         panel.grid.minor = element_blank(),
-         panel.background = element_blank(),
-         title=element_blank(),
-         legend.key.height= unit(2.9, 'cm'))
-ggsave("Cameo_Event_Hostile.png")
+  labs(fill='Probability')+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+ggsave(filename="Cameo_Event_Hostile.png", path=path_plot, width =10, height = 7 )
 
 
 #Plot 2: CAMEO EVENT TRAP for peaceful events
 ggplot(prob_table_peace, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
   stat_summary_2d(bins = 20, color = "white", fun = mean) +  
   scale_fill_gradient(low="#56B1F7", high="#132B43")+
-  ggtitle("The Cameo Event Trap: Peaceful Events")+
   xlab("Relative Number of Peaceful Events Quintile in T+1")+ylab("Relative Number of peaceful Events Quintile in T")+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5),
-         axis.ticks = element_blank(),
-         panel.grid.major = element_blank(),
-         panel.grid.minor = element_blank(),
-         panel.background = element_blank(),
-         title=element_blank(),
-         legend.key.height= unit(2.9, 'cm'))
-ggsave("Cameo_Event_Peace.png")
+  labs(fill='Probability')+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+ggsave(filename = "Cameo_Event_Peace.png", path= path_plot,width =10, height = 7 )
 
 #Plot 3: CAMEO EVENT TRAP for hostile intensity events
 ggplot(prob_table_intensity, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
@@ -417,34 +394,31 @@ ggplot(prob_table_intensity, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
   scale_fill_gradient(low="#56B1F7", high="#132B43")+
   ggtitle("The Cameo Event Trap: Hostile Events by Intensity")+
   xlab("Relative Number of Hostile Events Quintile in T+1")+ylab("Relative Number of Hostile Events Quintile in T")+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5),
-         axis.ticks = element_blank(),
-         panel.grid.major = element_blank(),
-         panel.grid.minor = element_blank(),
-         panel.background = element_blank(),
-         title=element_blank(),
-         legend.key.height= unit(2.9, 'cm'))
-ggsave("Cameo_Event_Intensity.png")
+  labs(fill='Probability')+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+ggsave(filename="Cameo_Event_Intensity.png", path = path_plot,width =10, height = 7)
 
 
 #Plot 4: CAMEO EVENT TRAP for conflict events
 ggplot(prob_table_conflict, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
   stat_summary_2d(bins = 20, color = "white", fun = mean) +  
   scale_fill_gradient(low="#56B1F7", high="#132B43")+
-  ggtitle("The Cameo Event Trap: Conflict Events")+
   xlab("Relative Number of Conflict Events Quintile in T+1")+ylab("Relative Number of Conflict Events Quintile in T")+
-  theme( plot.title = element_text(color = "black", size=14, hjust=0.5),
-         axis.title.x = element_text(hjust=0.5),
-         axis.title.y= element_text(hjust=0.5),
-         axis.ticks = element_blank(),
-         panel.grid.major = element_blank(),
-         panel.grid.minor = element_blank(),
-         panel.background = element_blank(),
-         title=element_blank(),
-         legend.key.height= unit(2.9, 'cm'))
-ggsave("Cameo_Event_Conflict.png")
+  labs(fill='Probability')+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+ggsave(filename = "Cameo_Event_Conflict.png", path = path_plot,width =10, height = 7)
 
 
 
