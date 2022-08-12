@@ -110,7 +110,7 @@ print(xtable(a, type = "latex"), file = "skewness_comp.tex")
 #generate distribution plots (necessary to see distribution)
 a<-cm_data%>% filter(reb_gov_low_level>"0") %>% ggplot(aes(reb_gov_low_level)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
   scale_x_continuous(limits = c(0, max(cm_data$reb_gov_low_level)+1), breaks =seq(0,max(cm_data$reb_gov_low_level)+1,10))+
-  ylab("Absolute Frequency") + xlab("Reb-Gov Low Level Violence Events") + 
+  ylab("Freq") + xlab("Reb-Gov Low Level Violence Events") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -120,7 +120,7 @@ a<-cm_data%>% filter(reb_gov_low_level>"0") %>% ggplot(aes(reb_gov_low_level)) +
 
 b<-cm_data%>% filter(opp_gov_low_level>"0") %>% ggplot(aes(opp_gov_low_level)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
   scale_x_continuous(limits = c(0, max(cm_data$opp_gov_low_level)+1), breaks =seq(0,max(cm_data$opp_gov_low_level)+1,10))+
-  ylab("Absolute Frequency") + xlab("Opp-Gov Low Level Violence Events") + 
+  ylab("Freq") + xlab("Opp-Gov Low Level Violence Events") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -130,7 +130,7 @@ b<-cm_data%>% filter(opp_gov_low_level>"0") %>% ggplot(aes(opp_gov_low_level)) +
 
 c<-cm_data%>% filter(gov_reb_low_level>"0") %>% ggplot(aes(gov_reb_low_level)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
   scale_x_continuous(limits = c(0, 10), breaks =seq(0,10))+
-  ylab("Absolute Frequency") + xlab("Opp-Reb Low Level Violence Events") + 
+  ylab("Freq") + xlab("Opp-Reb Low Level Violence Events") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -140,13 +140,61 @@ c<-cm_data%>% filter(gov_reb_low_level>"0") %>% ggplot(aes(gov_reb_low_level)) +
 
 d<-cm_data%>% filter(gov_opp_low_level>"0") %>% ggplot(aes(gov_opp_low_level)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
   scale_x_continuous(limits = c(0, max(cm_data$gov_opp_low_level)+1), breaks =seq(0,max(cm_data$gov_opp_low_level)+1,10))+
-  ylab("Absolute Frequency") + xlab("Gov-Opp Low Level Violence Events") + 
+  ylab("Freq") + xlab("Gov-Opp Low Level Violence Events") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
         axis.text = element_text(size=12,colour = "black"))
+
+e<-cm_data%>% filter(gov_opp_accommodations>"0") %>% ggplot(aes(gov_opp_accommodations)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
+  scale_x_continuous(limits = c(0, max(cm_data$gov_opp_accommodations)+1), breaks =seq(0,max(cm_data$gov_opp_accommodations)+1,1))+
+  ylab("Freq") + xlab("Gov-Opp Accommodation Events") + 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+f<-cm_data%>% filter(gov_reb_accommodations>"0") %>% ggplot(aes(gov_reb_accommodations)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
+  scale_x_continuous(limits = c(0, max(cm_data$gov_reb_accommodations)+1), breaks =seq(0,max(cm_data$gov_reb_accommodations)+1,1))+
+  ylab("Freq") + xlab("Gov-Reb Accommodation Events") + 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+g<-cm_data%>% filter(gov_opp_nonviol_repression>"0") %>% ggplot(aes(gov_opp_nonviol_repression)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
+  scale_x_continuous(limits = c(0, max(cm_data$gov_opp_nonviol_repression)+1), breaks =seq(0,max(cm_data$gov_opp_nonviol_repression)+1,1))+
+  ylab("Freq") + xlab("Gov-Opp Non-Violent Repression Events") + 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+h<-cm_data%>% filter(gov_reb_nonviol_repression>"0") %>% ggplot(aes(gov_reb_nonviol_repression)) + geom_histogram(binwidth = 0.5, color="black", fill="white")+
+  scale_x_continuous(limits = c(0, max(cm_data$gov_reb_nonviol_repression)+1), breaks =seq(0,max(cm_data$gov_reb_nonviol_repression)+1,1))+
+  ylab("Freq") + xlab("Gov-Reb Non-Violent Repression Events") + 
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black"))
+
+
+
+
+
+p<-grid.arrange(a,b,c,d,e,f,g,h,ncol=2,nrow=4)
+ggsave(p,filename=paste("Freq_Events_Esc",".png", sep=""))
+
 
 ggsave("low_level_freq_reb_gov.png",a)
 ggsave("low_level_freq_opp_gov.png",b)
@@ -303,7 +351,7 @@ cm_data_lag<- cm_data_lag %>% mutate(is_hole = if_else(previous_value > 0 & next
 
 
 
-
+%>% 
 
 
 
