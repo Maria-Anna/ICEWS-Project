@@ -1,4 +1,4 @@
-#Variablen Template
+#Variable Template
 
 #Log:
 
