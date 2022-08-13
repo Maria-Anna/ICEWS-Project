@@ -1,12 +1,13 @@
-####################################################### MSE vs. TADDA #######################################################
+########################################################### MSE vs. TADDA #######################################################
 
 #Load necessary packages:
 library(xtable)
 library(data.table)
 
-#------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) filtered
+#Set Working directory
 
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#Fritz. et al. (2021) filtered:
 
 #Generate data file directory
 data_files = paste0("Prediction_filtered/",list.files("Prediction_filtered/"))
@@ -31,10 +32,8 @@ results_mse_sb = results[,.(mse_mcw = mean((log1p(observation) - log1p(predictio
 print(xtable(results_mse_sb, type="latex", digits = 8),file="mse_sb.tex")
 
 
-
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS
-
+#Fritz. et al. (2021) and ICEWS:
 
 
 data_files = paste0("Prediction_ICEWS/",list.files("Prediction_ICEWS/"))
@@ -62,7 +61,7 @@ print(xtable(results_mse_icews, type="latex", digits = 8),file="mse_icews.tex")
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, Only Low Level
+#Fritz. et al. (2021) and ICEWS, Only Low Level:
 
 
 
@@ -92,8 +91,7 @@ print(xtable(results_mse_icews_low_level, type="latex", digits = 8),file="mse_ic
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, Only significant Escalation Cov
-
+#Fritz. et al. (2021) and ICEWS, Only significant Escalation Cov:
 
 
 data_files = paste0("Prediction_ICEWS_Esc/",list.files("Prediction_ICEWS_Esc/"))
@@ -122,8 +120,7 @@ print(xtable(results_mse_icews_escalation, type="latex", digits = 8),file="resul
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, CM and PGM Level
-
+#Fritz. et al. (2021) and ICEWS, CM and PGM Level (with cap factor interaction):
 
 
 data_files = paste0("Prediction_ICEWS_CM_PGM/",list.files("Prediction_ICEWS_CM_PGM/"))
@@ -151,37 +148,7 @@ print(xtable(results_mse_icews_cm_pgm, type="latex", digits = 8),file="results_m
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, CM and PGM with aggregated events over 3 months
-
-
-
-data_files = paste0("Prediction_ICEWS_Aggr/",list.files("Prediction_ICEWS_Aggr/"))
-data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
-
-data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
-results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
-
-
-#MSE and TADDA
-obs_delta = results$observation_log_change
-pred_delta = results$predicted_log_change
-
-tadda = function(obs_delta, pred_delta, epsilon = 0.048){
-  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
-          ((abs(obs_delta-pred_delta)> epsilon))))
-}
-
-
-results_mse_icews_aggregate = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
-                                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
-
-#save as latex
-print(xtable(results_mse_icews_aggregate, type="latex", digits = 8),file="results_mse_icews_aggregate.tex")
-
-
-#------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, Escalation Cov with Cap Dist in Stage 2 and Stage 3
-
+#Fritz. et al. (2021) and ICEWS, Escalation Cov with Cap Dist in Stage 2 and Stage 3:
 
 
 data_files = paste0("Prediction_ICEWS_cm_cap/",list.files("Prediction_ICEWS_cm_cap/"))
@@ -208,36 +175,9 @@ results_mse_icews_cm_cap = results[,.(mse_mcw = mean((log1p(observation) - log1p
 print(xtable(results_mse_icews_cm_cap, type="latex", digits = 8),file="results_mse_icews_cm_cap.tex")
 
 
-#------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) Filtered for three months window
-
-
-data_files = paste0("Prediction_filtered_window/",list.files("Prediction_filtered_window/"))
-data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
-
-data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
-results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
-
-
-#MSE and TADDA
-obs_delta = results$observation_log_change
-pred_delta = results$predicted_log_change
-
-tadda = function(obs_delta, pred_delta, epsilon = 0.048){
-  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
-          ((abs(obs_delta-pred_delta)> epsilon))))
-}
-
-
-results_mse_filtered_three = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
-                                      tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
-
-#save as latex
-print(xtable(results_mse_filtered_three, type="latex", digits = 8),file="results_mse_filtered_three.tex")
-
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, with CM and PGM with no intercation
+#Fritz. et al. (2021) and ICEWS, with CM and PGM with no interaction:
 
 
 data_files = paste0("Prediction_ICEWS_CM_PGM_NO_INT/",list.files("Prediction_ICEWS_CM_PGM_NO_INT/"))
@@ -264,7 +204,7 @@ results_mse_cm_pgm_no_int = results[,.(mse_mcw = mean((log1p(observation) - log1
 print(xtable(results_mse_cm_pgm_no_int, type="latex", digits = 8),file="results_mse_cm_pgm_no_int.tex")
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, with CM and PGM and Cap Dist Interaction
+#Fritz. et al. (2021) and ICEWS, with CM and PGM and Cap Dist Interaction:
 
 
 data_files = paste0("Prediction_ICEWS_CM_PGM_CAP_DIST/",list.files("Prediction_ICEWS_CM_PGM_CAP_DIST/"))
@@ -292,7 +232,7 @@ print(xtable(results_mse_cm_pgm_cap_dist, type="latex", digits = 8),file="result
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) and ICEWS, Aggregation over 2 Months Window
+#Fritz. et al. (2021) and ICEWS, Aggregation over 2 Months Window:
 
 
 data_files = paste0("Prediction_ICEWS_Aggr_2_months/",list.files("Prediction_ICEWS_Aggr_2_months/"))
@@ -319,7 +259,7 @@ results_mse_aggreg_2_months = results[,.(mse_mcw = mean((log1p(observation) - lo
 print(xtable(results_mse_aggreg_2_months , type="latex", digits = 8),file="results_mse_aggreg_2_months .tex")
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Fritz. et al. (2021) Filtered for two months window
+#Fritz. et al. (2021) Filtered for two months window:
 
 
 data_files = paste0("Prediction_filtered_window_2/",list.files("Prediction_filtered_window_2/"))
@@ -345,6 +285,59 @@ results_filtered_window_2 = results[,.(mse_mcw = mean((log1p(observation) - log1
 #save as latex
 print(xtable(results_filtered_window_2, type="latex", digits = 8),file="results_filtered_window_2.tex")
 
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#Fritz. et al. (2021) and ICEWS, aggregated events over 3 months:
+
+
+data_files = paste0("Prediction_ICEWS_Aggr/",list.files("Prediction_ICEWS_Aggr/"))
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
+
+
+#MSE and TADDA
+obs_delta = results$observation_log_change
+pred_delta = results$predicted_log_change
+
+tadda = function(obs_delta, pred_delta, epsilon = 0.048){
+  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
+          ((abs(obs_delta-pred_delta)> epsilon))))
+}
+
+
+results_mse_icews_aggregate = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+                                         tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
+
+#save as latex
+print(xtable(results_mse_icews_aggregate, type="latex", digits = 8),file="results_mse_icews_aggregate.tex")
+
+#------------------------------------------------------------------------------------------------------------------------------------------------#
+#Fritz. et al. (2021) filtered for three months window:
+
+
+data_files = paste0("Prediction_filtered_window/",list.files("Prediction_filtered_window/"))
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+
+data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
+results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
+
+
+#MSE and TADDA
+obs_delta = results$observation_log_change
+pred_delta = results$predicted_log_change
+
+tadda = function(obs_delta, pred_delta, epsilon = 0.048){
+  mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
+          ((abs(obs_delta-pred_delta)> epsilon))))
+}
+
+
+results_mse_filtered_three = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
+                                        tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48)), by = s]
+
+#save as latex
+print(xtable(results_mse_filtered_three, type="latex", digits = 8),file="results_mse_filtered_three.tex")
 
 
 

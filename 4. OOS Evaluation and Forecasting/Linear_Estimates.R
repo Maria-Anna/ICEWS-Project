@@ -1,24 +1,20 @@
-####################################################### Estimation Tables#######################################################
+########################################################## Estimation Tables #######################################################
 
-#Estimate Tables for lag s=2 and s=7
-#Estimate Tables for various models
-#Estimate Tables with training data from 1990-01 to 2020-08 
-
-#Load necessary packagaes
+#Load necessary packages
 library(gtools)
+library(knitr)
+
+#Set working directory
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 #For all ICEWS Variables
 #s=2
-#load package
-library(knitr)
 
 #load try model 1
 load("Prediction_ICEWS/models/try_model_1.RData")
 summary_1 = summary(try_model_1)
 summary_1
 print(xtable(round(summary_1$p.table, digits = 4), type = "latex"), file = "Stage_1_estimates_2.tex")
-
 
 
 #load try model 2
@@ -58,7 +54,7 @@ print(xtable(round(summary_3$p.table, digits = 4), type = "latex"), file = "Stag
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For Escalation Cov
+#For Escalation Cov (no demands)
 #s=2
 
 load("Prediction_ICEWS_Esc/models/try_model_1_s2.RData")
@@ -195,7 +191,7 @@ xtable(summary_3, digits = 4)
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
-#For CM and PGM with PGM Cap
+#For CM and PGM with PGM Cap Dist
 #s=2
 load("Prediction_ICEWS_CM_PGM_CAP_DIST/models/try_model_1_s2.RData")
 load("Prediction_ICEWS_CM_PGM_CAP_DIST/models/try_model_2_s2.RData")

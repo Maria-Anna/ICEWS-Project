@@ -1,6 +1,6 @@
 ################################################################ ESTIMATE MODELS WITH MCW and ICEWS: 3-Months Aggregation ####################################################################
 
-#Remark: Fritz et al. (2021) estimation model with MCW, with data from 1995-01-01 till 2020-08-01 and ICEWS escalation variables
+#Remark: Fritz et al. (2021) model with MCW, with data from 1995-01-01 till 2020-08-01 and ICEWS escalation variables
 # + NAs are replaced by 0
 
 #Load necessary packages
@@ -23,15 +23,11 @@ library(plyr)
 
 #Set working directory
 
-#for Clara
-setwd("~/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Data sets")
-
 #Run helper functions script
 rm(list=ls())
 source('helper_functions.R')
 
 #Load data sets
-
 cm_data = fread("cm_icews_data.csv")
 pgm_data = fread("pgm_icews_data.csv")
 
@@ -53,10 +49,8 @@ cm_data<- cm_data %>% group_by(country_id) %>%
          gov_reb_accommodations_aggr = rollsumr(gov_reb_accommodations, k = 2, fill = NA)
   )
 
-#Remove NA Rows: new data frame contains observations from 1995-02 onwards
+#Remove NA Rows: new data frame contains observations from 1995-02 on wards
 cm_data<- cm_data %>% filter(date>="1995-02-01")
-
-
 
 #PGM data set
 pgm_data = pgm_data[order(month_id, pg_id)]
@@ -71,7 +65,7 @@ pgm_data<- pgm_data %>% group_by(pg_id) %>%
          gov_reb_accommodations_aggr = rollsumr(gov_reb_accommodations, k = 2, fill = NA)
   )
 
-#Remove NA Rows: new data frame contains observations from 1995-02 onwards
+#Remove NA Rows: new data frame contains observations from 1995-02 on wards
 pgm_data<- pgm_data %>% filter(date>="1995-02-01")
 
 #save data sets
@@ -153,7 +147,7 @@ for(i in 1:length(dates)){
     
     #STEP 2: Pre Estimation- train models with pre-training data up to t-s-1, 2016-10-01
     
-    try_model_1 = bam(ged_dummy_sb~ s(month_id, bs="gp") +  #outcome variable: dummy whether state based conflict in country-month, corresponds to future_target, meaning: for 1990-01-01 the sb value is for 1990-03-01
+    try_model_1 = bam(ged_dummy_sb~ s(month_id, bs="gp") +  #outcome variable: dummy whether state based fatality in country-month, corresponds to future_target, meaning: for 1990-01-01 the sb value is for 1990-03-01
                         s(log1p(time_since_ged_dummy_os), bs="ps")+
                         s(log1p(time_since_ged_dummy_ns), bs="ps")+
                         s(log1p(time_since_ged_dummy_sb), bs="ps")+
@@ -183,10 +177,10 @@ for(i in 1:length(dates)){
                       data  =all_data$train_data_stage_1,family = binomial(), #data set used: date target (upshifted date by lag s) goes from 1993-01-01 till 2016-10-01 (t-s-1, 2017-01-01 -3 = 2016-10-01)
                       discrete = T, nthreads = 20,use.chol = T)
     
-    #Remark: predict at country-month level prob. of state-based conflict for e.g for 2016-10-01 with data of 2016-08-01 and so on
+    #Remark: predict at country-month level prob. of state-based fatality for e.g for 2016-10-01 with data of 2016-08-01 and so on
     
     
-    try_model_2 =bam(future_ged_dummy_sb~ + s(month_id, bs="gp") + #outcome variable: dummy whether state based conflict in prio grid-month, meaning: for 1990-01-01 the sb value is for 1990-03-01
+    try_model_2 =bam(future_ged_dummy_sb~ + s(month_id, bs="gp") + #outcome variable: dummy whether state based fatality in prio grid-month, meaning: for 1990-01-01 the sb value is for 1990-03-01
                        factor(month) + 
                        s(log1p(time_since_ged_dummy_os.x), bs="ps")+
                        s(log1p(time_since_ged_dummy_ns.x), bs="ps")+
@@ -218,10 +212,10 @@ for(i in 1:length(dates)){
                      discrete = T,nthreads = 20,use.chol = T)
     
     
-    #Remark: predict at prio grid-month level (including only prio grid with country-month sb conflicts) prob. of state-based conflict for e.g for 2016-10-01 with data of 2016-08-01 and so on
+    #Remark: predict at prio grid-month level (including only prio grid with country-month sb fatalitys) prob. of state-based fatality for e.g for 2016-10-01 with data of 2016-08-01 and so on
     
     
-    try_model_3 = bam(future_ged_best_sb ~ s(month_id, bs="gp") + #outcome variable: number of state-based conflicts in prio grid-month, meaning: for 1990-01-01 the sb number value is for 1990-03-01
+    try_model_3 = bam(future_ged_best_sb ~ s(month_id, bs="gp") + #outcome variable: number of state-based fatalitys in prio grid-month, meaning: for 1990-01-01 the sb number value is for 1990-03-01
                         factor(month) + 
                         s(time_since_ged_dummy_os.x, bs="ps")+
                         s(time_since_ged_dummy_ns.x, bs="ps")+
@@ -254,7 +248,7 @@ for(i in 1:length(dates)){
     class(try_model_1)[1] = "gam"
     class(try_model_2)[1] = "gam"
     
-    #Remark: predict at prio grid-month level (including only prio grid with prio grid_months with sb conflicts) the intensity of state-based conflict for e.g for 2016-10-01 with data of 2016-08-01 and so on
+    #Remark: predict at prio grid-month level (including only prio grid with prio grid_months with sb fatalitys) the intensity of state-based fatality for e.g for 2016-10-01 with data of 2016-08-01 and so on
     
     
     #STEP 3: Calibration- calibrate the thresholds with data from t-s, 2016-11-01
@@ -263,7 +257,7 @@ for(i in 1:length(dates)){
     all_data$cm_calibrate_1$pred_stage_1 = predict.gam(try_model_1,newdata =all_data$cm_calibrate_1, type = "response") #data set used: cm_calibrate_1, only data from 2016-11-01
     #predict using model 1 and cm_calibrate_1
     
-    all_data$pgm_calibrate_1$pred_stage_1 = all_data$cm_calibrate_1$pred_stage_1[match(all_data$pgm_calibrate_1$key_cm, #data set used: pgm_calibrate_1, only data from 2016-11-01, observations of prio-grid included with country-month observations with no sb-conflicts 
+    all_data$pgm_calibrate_1$pred_stage_1 = all_data$cm_calibrate_1$pred_stage_1[match(all_data$pgm_calibrate_1$key_cm, #data set used: pgm_calibrate_1, only data from 2016-11-01, observations of prio-grid included with country-month observations with no sb-fatalitys 
                                                                                        all_data$cm_calibrate_1$key_cm)] #save in pgm_calibrate_1 the pred_stage_1 at country-month level
     #Stage 2:
     all_data$pgm_calibrate_1$pred_stage_2 = predict.gam(try_model_2,all_data$pgm_calibrate_1, type = "response") #predict using model 2 and pgm_calibrate_1
@@ -415,7 +409,7 @@ for(i in 1:length(dates)){
     
     gc(full = T) # garbage collection 
     
-    #STEP 5.1: Save predictions of each stage in cm_data_comp and pgm_data_comp (the latter data set include the new generated variables of functions but are not "cleaned", meaning in pgm data set still prio grid included with country-months without state-based conflicts) 
+    #STEP 5.1: Save predictions of each stage in cm_data_comp and pgm_data_comp (the latter data set include the new generated variables of functions but are not "cleaned", meaning in pgm data set still prio grid included with country-months without state-based fatalitys) 
     
     all_data$cm_data_comp$pred_stage_1 = predict.gam(try_model_1,newdata =all_data$cm_data_comp, type = "response") #save in cm_data_comp with future date 2017-01-01: predictions of model 1
     all_data$pgm_data_comp$pred_stage_1 = all_data$cm_data_comp$pred_stage_1[match(all_data$pgm_data_comp$key_cm, #save in pgm_data_comp with future date 2017-01-01: predictions of model 1 for country-month of cm_data_comp
@@ -521,7 +515,7 @@ for(i in 1:length(dates)){
     writeLines(paste(" 8. MSE (not tuned TH)= " , round(mean((result$predicted_log_change_untuned- #MSE score for untuned threshold (0.5 threshold)
                                                                 result$observation_log_change)^2),digits = 3), "\n"))
     
-    writeLines(paste(" 9. MSE (only 0) = " , round(mean(log1p(result$observation)^2),digits = 3), "\n")) #MSE score for observed state-based conflicts
+    writeLines(paste(" 9. MSE (only 0) = " , round(mean(log1p(result$observation)^2),digits = 3), "\n")) #MSE score for observed state-based fatalitys
     
     writeLines(paste(" 10. MSE (alt-tuned TH)= " , round(mean((result$predicted_log_change_alt- #MSE score for tuned threshold (optimal MSE threshold)
                                                                  result$observation_log_change)^2),digits = 3), "\n"))
