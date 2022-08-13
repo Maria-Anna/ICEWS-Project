@@ -1,20 +1,18 @@
-###################################################THE ESCALATION VARIABLES- Prio Grid########################################
+################################################### The Escalation Data Set: PGM Level ########################################
 
-#Load packages
+#Load necessary packages
 library(haven)
 library(dplyr)
-library(readr)
+
+#Set working directory
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################
-###### Load Data #####################
+#Load Data
 ######################################
 
-#For Clara
+#Load data set
 data_icews_pgm<-readRDS("data_icews_pgm")
-
-#For Maria-Anna
-load("C:/Users/NUTELLA/Downloads/data_cm.Rdata")
 
 #Modify Variables
 data<-data_icews_pgm
@@ -25,10 +23,16 @@ data<- data %>% mutate(Country = replace(Country, Country ==  "Congo, DRC", "Dem
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################
-### Escalation Variables ############
+# The Variable Construction
 ######################################
 
-levels(factor(data$CAMEO.Code))
+#Motivation and Source: Blair and Sambanis (2020 and 2021)
+#Generate 10 variables that operationalize the process of conflict escalation and de-escalation
+
+#Step 0:
+#Req 1: List of CAMEO Codes for Categories LV, NR, D and A
+#Req 2: List of Sectors for Categories GOV, REG, OPP
+
 
 low_level_violence<- c("145", "1451","1452","1453", "1454", "170", "180", "183", "171", "175", "186", "191","193")
 
@@ -155,12 +159,9 @@ rebels<-c("Radicals / Extremists / Fundamentalists","Organized Violent","Rebel",
 
 opposition<-c("Dissident","Protestors / Popular Opposition / Mobs","Exiles","Opposition Major Party (Out of Government)","Opposition Minor Party (Out of Government)","Opposition Provincial Party (Out of Government)","Opposition Municipal Party (Out of Government)","Banned Parties")
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#########################################
-####### Make Data #######################
-#########################################
-
-#Generate 10 new variables
+#Step 1: 
+#Classify CAMEO into LV, NR, AC and D
+#Classify Sectors into GOV, REB and OPP
 
 data <- data %>% mutate(low_level_violence = case_when(CAMEO.Code %in% low_level_violence ~ 1,           
                                                        !CAMEO.Code %in% low_level_violence ~ 0),
@@ -192,10 +193,10 @@ data <- data %>% mutate(low_level_violence = case_when(CAMEO.Code %in% low_level
                         target_opposition = case_when( grepl(paste(opposition, collapse="|"), Target.Sectors)~1,
                                                        !grepl(paste(opposition, collapse="|"), Target.Sectors)~0))
 
+#Step 1.1:
 #Allocate to one sector in case of ambiguous sector mapping
 
-#SOURCE SECTOR:
-
+#For Source Sector:
 data <- data %>%
   mutate(source_rebels = case_when(source_government != 0 & source_opposition != 0 &  source_rebels != 0 ~ 0,
                                    TRUE ~ source_rebels))
@@ -211,7 +212,7 @@ data <- data %>%
   mutate(across(c(source_rebels,source_government,source_opposition), ~case_when(source_opposition == 0 & source_rebels != 0 & source_government!=0~ 0 , TRUE~1*(.))))
 
 
-#TARGET SECTOR:
+#For Target Sector
 data <- data %>%
   mutate(target_rebels = case_when(target_government != 0 & target_opposition != 0 &  target_rebels != 0 ~ 0,
                                    TRUE ~ target_rebels))
@@ -230,7 +231,8 @@ data <- data %>%
   mutate(across(c(target_rebels,target_government,target_opposition), ~case_when(target_opposition == 0 & target_rebels != 0 & target_government!=0  ~ 0 , TRUE~1*(.))))
 
 
-# Generate final 10 variables
+#Step 1.2:
+#Generate 10 Variables at CD Level
 
 data<- data %>% mutate( gov_opp_accommodations     =      case_when(source_government == 1 & target_opposition == 1 &  accommodations == 1 ~ 1,
                                                                     TRUE ~ 0),
@@ -265,7 +267,8 @@ data<- data %>% mutate( gov_opp_accommodations     =      case_when(source_gover
                         key_cameo                  = paste(year, month, gid, sep = "_"))
 
 
-#Sum generated variables by Country-Month
+#Step 2:
+#Aggregate variable values at PGM level
 
 data_sum <- data %>%
   group_by(key_cameo) %>%
@@ -280,42 +283,40 @@ data_sum <- data %>%
             reb_gov_demands  = sum(reb_gov_demands),
             reb_gov_low_level = sum(reb_gov_low_level))
 
-#save as csv data
+
+#Step 3:
+#save as csv data and connect to data sets of choice at PGM level
 #write.csv(data_sum, file="data_escalation_prio.csv", row.names = F)
 
 #---------------------------------------------------------------------------------------------------------------------------
-##########################################################################
-####### Combine cm_data and ESCALATION variable by CM ####################
-#########################################################################
+######################################################
+# Connect to CM and PGM Data Set by Fritz et al. (2021)
+######################################################
 
-#Load data sets:
-
-#Maria-Anna
-cm_data<-fread("C:/Users/NUTELLA/Documents/Consulting Bewaffnete Konflikte/forecasting_competition_replication/Data/cm_data.csv")
-pgm_data<-read.table("C:/Users/NUTELLA/Documents/Consulting Bewaffnete Konflikte/Data/pgm_somalia.csv", sep = ";")
-
-#Clara
+#Load CM data:
 cm_data = fread("cm_data.csv")
-load("/Users/clarita/Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Data Sets/pgm_data.RData")
 
-#for CIP pool
-load("pgm_data.Rdata")
-cm_data = fread("C:/Users/ru23kek/Downloads/cm_data.csv")
-data_sum= fread("data_escalation_prio.csv")
+#Load PGM data:
+load("/pgm_data.RData")
+
 
 #Change country names to uniform country names
+cm_data<- cm_data %>% mutate(country_name = replace(country_name, country_name ==   "The Gambia"  ,"Gambia"),
+                             country_name = replace(country_name, country_name ==   "Congo, DRC"  ,"Democratic Republic of Congo"),
+                             year_month   = format(as.Date(cm_data$date, format="%Y-%m-%d"),"%Y-%m"),
+                             key_cameo= paste(year, month, country_name, sep = "_"))
 
 pgm_data<- pgm_data %>% mutate(country_name = replace(country_name, country_name ==   "The Gambia"  ,"Gambia"),
                                country_name = replace(country_name, country_name ==   "Congo, DRC"  ,"Democratic Republic of Congo"),
                                year_month   = format(as.Date(pgm_data$date, format="%Y-%m-%d"),"%Y-%m"),
-                               key_cameo= paste(year, month, pg_id,  sep = "_"))
+                               key_cameo= paste(year, month, country_name,  sep = "_"))
 
 
 #Drop all years in Fritz et al. (2021) data set that are not included in our data
 
 #all below 1995-01
+cm_data<- cm_data %>% filter(year_month>="1995-01")
 pgm_data<- pgm_data %>% filter(year_month>="1995-01")
-
 
 
 #keep relevant variables of PGM data (pgm_data)
@@ -360,20 +361,15 @@ pgm_data<-pgm_data %>% select(c("key_cameo",
 #Merge two data sets: pgm_data (28 columns) and data_sum (11 columns) by key_cameo
 pgm_icews_data_pg<- left_join(pgm_data,data_sum, by="key_cameo")
 
-#write.csv(cm_icews_data, file="cm_icews_data.csv", row.names = F)
-#write.csv(pgm_icews_data_pg, file="pgm_icews_data_pg.csv", row.names = F)
 
-#merge pgm data set with capital cities
+#Add Variable that indicates if PRIO grid in Capital or not
 capital<-fread("capital.csv")
-dupl<- capital[duplicated(capital$pg_id),]
-capital<-capital %>% filter(pg_id!="123511")
-
 #Remark:
 #duplicates regarding capital city
 #Prio ID: 123511 - Brazzaville - Congo
 #Prio ID: 123511 - Kinshasa (Léopoldville) - Democratic Republic of Congo
-
-#merge with pg data set
+capital<-capital %>% filter(pg_id!="123511")
+#merge with data set
 pgm_icews_data_pg<-left_join(pgm_icews_data_pg,capital, by="pg_id")
 pgm_icews_data_pg[country_name=="Congo" & pg_id=="123511",]$capname<-"Brazzaville"
 pgm_icews_data_pg[country_name=="Democratic Republic of Congo" & pg_id=="123511",]$capname<-"Kinshasa (Léopoldville)"
@@ -381,6 +377,10 @@ pgm_icews_data_pg[country_name=="Democratic Republic of Congo" & pg_id=="123511"
 #make factor variable
 pgm_icews_data_pg$capital_factor<-ifelse(!is.na(pgm_icews_data_pg$capname),1,0)
 
+#---------------------------------------------------------------------------------------------------------------------------
+######################################################
+# Export and Save Data Sets
+######################################################
 
 #write.csv(pgm_icews_data_pg, file="pgm_icews_data_pg.csv", row.names = F)
 

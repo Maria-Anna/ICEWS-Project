@@ -1,4 +1,4 @@
-########################################################################THE COUNTRY-MONTH##########################################################################
+######################################################################## CM Data + ICEWS ##########################################################################
 
 #Load necessary packages
 library(dplyr)
@@ -8,50 +8,50 @@ library(tidyr)
 library(tidyselect)
 library(tidyverse)
 
-rm(list=ls())
+#Set working directory
 
+#----------------------------------------------------------------------------------------------------------------------------------------------
 ###################################################
-############ Prepare Data Set ######################
+#Prepare Data Set
 ###################################################
 
-#Load ICEWS Africa data set
-events_africa<- read.delim("~/ICEWS-Project/Data/events_africa.tsv")
-events_africa<- read.delim("/Users/clarita/Desktop/Consulting\ Bewaffnete\ Konflikte/Datasets_Africa/TSV\ Data\ Sets/events_africa.tsv")
+#Load ICEWS Events Africa data set
+#Remark: required is "make_events_africa.R"
+events_africa<- read.delim("~/events_africa.tsv")
+#Set date as date format
 events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
 
 #Append 2020 data set (month 5 to 8)
-data_2020<- read.csv("~/ICEWS-Project/Data/data_2020.csv")
+data_2020<- read.csv("~/data_2020.csv")
 data_2020$Event.Date <- as.Date(data_2020$Event.Date, format="%Y-%m-%d")
 events_africa<-rbind(events_africa, data_2020)
 
-#Add variables
+#Add variables: Year, Year-Month and Month
 events_africa$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
 events_africa$Year_month<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
 events_africa$Month<-as.numeric(format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"), "%m"))
 
 
 #Uniquely identify observations
+#Remark: Event ID is NOT unique in the ICEWS data set
 events_africa$ID<- cumsum(!duplicated(events_africa))
 
+#----------------------------------------------------------------------------------------------------------------------------------------------
+###################################################
+#Load CM Data by Fritz et al. (2021)
+###################################################
 
-#Summary data set: 1335303 observations and 24 variables
-
-######################################################
-#########Load and Prepare Country Code################
-######################################################
-
-#Upload Country data from Fritz et al. (2021)
-cm_data = fread("~/ICEWS-Project/Data/cm_data.csv")
+#Upload CM by Fritz et al. (2021)
+cm_data = fread("~/cm_data.csv")
 
 #Keep per Country the Country ID
 country_code <-cm_data[,c(6:7)]
 country_code<-country_code[!duplicated(country_code),]
-#rm(cm_data)
 
 #Country Code Remarks:
 #In total 55 Countries (incl.Israel)
-#Observations that are double: Ethiopia, South Africa, Sudan, Tanzania
-#Observations with different country name: "Congo, DRC" and "Democratic Republic of Congo" and "The Gambia" and "Gambia"
+#Observations that posses 2 country codes: Ethiopia, South Africa, Sudan, Tanzania
+#Observations with different country names: "Congo, DRC" and "Democratic Republic of Congo" and "The Gambia" and "Gambia"
 
 #Year-month where countries change country code:
 #Ethiopia: 1993-05-01, from 191 to 57
@@ -59,9 +59,11 @@ country_code<-country_code[!duplicated(country_code),]
 #Sudan: 2011-07 from 59 to 245
 #Tanzania: 1996-02 from 236 to 242
 
-################################################################
-############ Generate Variables#################################
-################################################################
+#----------------------------------------------------------------------------------------------------------------------------------------------
+###################################################
+#Combine ICEWS and CM Data of Fritz et al. (2021)
+###################################################
+
 #Generate following variables:
 #key_cm: monthid_countryid
 #key_pm: monthid_pgid
@@ -79,13 +81,13 @@ country_code<-country_code[!duplicated(country_code),]
 #Country ID
 ##############
 
-#Generate Country Code list for Africa
+#Generate country code list for Africa
 country_code$country_id<-as.character(country_code$country_id)
 country_code<-subset(country_code,country_id!="191")#for Ethiopia keep Country ID 57
 country_code<-subset(country_code,country_id!="192")#for South Africa keep Country ID 163
 country_code<-subset(country_code,country_name!="Sudan" & country_name!="Tanzania")
 
-#Change Country names to uniform country names
+#Change country names to uniform country names
 events_africa$Country<-as.character(events_africa$Country) #Set country name as character value
 events_africa$Source.Country<-as.character(events_africa$Source.Country) 
 events_africa$Target.Country<-as.character(events_africa$Target.Country) 
@@ -108,11 +110,9 @@ events_africa["Target.Country"][events_africa["Target.Country"]=="Gambia"] <- "T
 events_africa<-merge(events_africa,country_code, by.x = "Country", by.y="country_name", all=T, sort=F)
 
 #for countries with changing ID across years:
-
 #for Tanzania: till 1996-02 Country ID 236, from 1996-02 Country ID 242
 events_africa$country_id[events_africa$Year_month<"1996-02" & events_africa$Country=="Tanzania"]<- "236"
 events_africa$country_id[events_africa$Year_month>="1996-02" & events_africa$Country=="Tanzania"]<- "242"
-
 #for Sudan: till 1996-02 Country ID 236, from 1996-02 Country ID 242
 events_africa$country_id[events_africa$Year_month<"2011-07" & events_africa$Country=="Sudan"]<- "59"
 events_africa$country_id[events_africa$Year_month>"2011-07" & events_africa$Country=="Sudan"]<- "245"
@@ -120,9 +120,6 @@ events_africa$country_id[events_africa$Year_month>"2011-07" & events_africa$Coun
 ##############
 #Month ID
 ##############
-
-#Upload Country data from Fritz et al. (2021)
-cm_data = fread("~/ICEWS-Project/Data/cm_data.csv")
 
 #Generate Month Code list for Year-month
 month_code<-cm_data[,c(1,10)] #keep for each year-month the month_id
@@ -147,13 +144,14 @@ events_africa$key_cy[events_africa$Year_month=="2011-07" & events_africa$Country
 ###############
 #CAMEO ROOT
 ###############
-#Install package from github
-library("remotes")
-#remotes::install_github("andybega/icews")
-library(icews)
-library(DBI)
 
-#load CAMEO dataset and keep relevant variables
+#Install package from github
+#library("remotes")
+#remotes::install_github("andybega/icews")
+#library(icews)
+#library(DBI)
+
+#load CAMEO data set and keep relevant variables
 data("cameo_codes")
 cameo_codes<-cameo_codes[,c("name","lvl0")]
 
@@ -176,11 +174,13 @@ events_africa$date<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),
 #cameo root code
 names(events_africa)[names(events_africa) == "lvl0"] <- "CAMEO_root"
 
-data_icews_cm<-events_africa
 
-################################################################
-############Export Full Prio Dataset###########################
-###############################################################
+#----------------------------------------------------------------------------------------------------------------------------------------------
+###################################################
+#Export and Save Data Set
+###################################################
+
+data_icews_cm<-events_africa
 
 #Save
 #write.csv(data_icews_cm, file = "data_icews_cm.csv", row.names = FALSE)

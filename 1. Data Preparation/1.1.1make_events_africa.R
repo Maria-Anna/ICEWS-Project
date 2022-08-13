@@ -1,30 +1,26 @@
-#############################################################Read Data Set###################################################################
+############################################################# Read ICEWS ###################################################################
+
+#Load necessary packages
 library(plyr)
 library(dplyr)
 
+#Set working directory
+#Working directory should contain folder with: tsv and tab files with ICEWS data from 1995 to 2020
 
-#directory Clara
-#directory<- "Desktop/Consulting Bewaffnete Konflikte/Datasets_Africa/Downloaded"
-#setwd(directory)
-#Directory Maria-Anna
-#setwd("C:/Users/mtsitsipa/Documents/Consulting/ICEWS")
+#----------------------------------------------------------------------------------------------------------------------------------------------
+######################################################
+#Read Data:
+######################################################
 
-#Set filename
-file_name<- "data_icews_cm.csv"
-
-#Assign Path were all ICEWS Files (Für die Zukunft wenn wir die Daten auf Github haben)
-#path<- "~/ICEWS-Project/Data/Raw Data/ICEWS"
-#set Working Directory
-#setwd(path)
-
-#List with all names of all tab and tsv files in the working directory 
-names_files_tab = list.files( pattern= "*.tab")
+#Generate list with all names of all tab and tsv files in the working directory 
+names_files_tab = list.files(pattern= "*.tab")
 names_files_tsv= list.files(pattern="*.tsv")
-
+ 
 #Read all files 
 list_all_ICEWS = lapply(c(names_files_tab, names_files_tsv), read.delim, quote="",na.strings=c("","NA"))
 
-#Read 2017 File
+#Read 2017 file 
+#Remark: 2017 should be read parallel because of coding errors that need to be corrected for
 data<-read.delim("Events.2017.20201119.tab",na.strings=c("NULL","NA"))
 #Convert Factor to character
 data$CAMEO.Code<- as.character(data$CAMEO.Code)
@@ -34,12 +30,11 @@ data<-data %>%
 #Convert CAMEO.Code to numeric
 data$CAMEO.Code<- as.integer(as.numeric(data$CAMEO.Code))
 
-#Replace old dataframe with new
+#Replace old 2017 data set in list with new 2017 data set
 list_all_ICEWS[[21]]<-data
 
-#load parallel full 2020 data set and keep months 5,6,7 and 8
-directory<- "/Users/clarita/Desktop/Consulting\ Bewaffnete\ Konflikte/Datasets_Africa/TSV\ Data\ Sets/2017"
-setwd(directory)
+#Read and add 2020 data set and keep months 5,6,7 and 8
+#Remark: in future analysis 2020 can be used without month filter (in this project: month 1 to 8 needed)
 data_2020<- read.delim("events.2020.20220623.tab",na.strings=c("","NA"))
 #Cameo Code as integer
 data_2020$CAMEO.Code<- as.character(data_2020$CAMEO.Code)
@@ -49,8 +44,12 @@ data_2020$Event.Date<-as.Date(data_2020$Event.Date)
 data_2020 <- data_2020 %>% filter(Event.Date>="2020-05-01")
 data_2020 <- data_2020 %>% filter(Event.Date<"2020-09-01")
 
+#----------------------------------------------------------------------------------------------------------------------------------------------
+######################################################
+#Relevant Country List:
+######################################################
 
-#Filter Africa (in total: 54 african countries without variation in the name)
+#Generate list with 54 African countries + Israel
 states_africa<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde","Cape Verde", "Cameroon","Central African Republic",
                  "Chad", "Comoros","Congo","Congo, DRC", "Democratic Republic of Congo", "Congo, Democratic Republic of the","Cote d'Ivoire","Republic of Cote d'Ivoire", "DRC Cote d'Ivoire",
                  "Congo, Republic of the Cote d'Ivoire","Djibouti","Egypt","Equatorial Guinea","Eritrea","Eswatini","Ethiopia","Gabon","Gambia","Ghana","Guinea","Guinea-Bissau","Kenya",
@@ -58,7 +57,7 @@ states_africa<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Buru
                  "Nigeria","Ruanda", "Rwanda", "Sao Tome and Principe","Senegal","Seychelles","Sierra Leone","Somalia", "South Africa", "South Sudan",
                  "Sudan","Swaziland","Tanzania","The Gambia","Togo","Tunisia", "Uganda", "Zambia", "Zimbabwe", "Israel")
 
-#Possible to add a variable to each dataset to mark the dataset year it was extracted from
+#Possible to add a variable to each data set to mark the data set year it was extracted from
 #year <- 0
 #for (year in 1995:2020){
   #temp <- list_all_ICEWS[[year-1994]]
@@ -66,49 +65,48 @@ states_africa<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Buru
   #list_all_ICEWS[[year-1994]]<-temp
 #}
 
-
-
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################################
-#Dataset: Events in Africa, from Africa and to Africa
+#Filter Data Set: Events within countries
 ######################################################
 
-#Events with Source.Country, Target.Country and Country Africa
+#Relevant for project: Events with Source.Country, Target.Country and Country == Africa and Source.Country==Target.Country==Country
 
-#List with datasets that fulfill above condition
+#Filter ICEWS data set to contain events on the African continent
 list_africa_total<-lapply(list_all_ICEWS, function(x) dplyr::filter(x, Country %in% states_africa & Source.Country %in% states_africa & Target.Country %in% states_africa))
 
-#Dataset of events that fulfill condition
+#Generate data set from list
 events_africa_total<-reshape::merge_all(list_africa_total)
 
-#Keep only observations where source, target and country in the same country
+#Keep only observations where Source.Country==Target.Country==Country
 events_africa_total$Country<-as.character(events_africa_total$Country)
 events_africa_total$Source.Country<-as.character(events_africa_total$Source.Country)
 events_africa_total$Target.Country<-as.character(events_africa_total$Target.Country)
 events_africa<- subset(events_africa_total, events_africa_total$Country==events_africa_total$Source.Country & events_africa_total$Country==events_africa_total$Target.Country)
 
-#Export dataset
-write.csv(events_africa, file= "~/ICEWS-Project/Data/Preparation Data/events_africa.csv")
+#Save data set as csv
+#Remark: relevant data set for future analysis
+write.csv(events_africa, file= "~/events_africa.csv")
 
-#for 2020:
-#filter for above condition
+#for 2020 parallel analysis:
+#filter for above mentioned condition
 data_2020 <- data_2020 %>% filter(Country %in% states_africa & Source.Country %in% states_africa & Target.Country %in% states_africa)
-#save as csv
+data_2020<- subset(data_2020, data_2020$Country==data_2020$Source.Country & data_2020$Country==data_2020$Target.Country)
+#save as 2020 data set as csv
 #write.csv(data_2020, file="data_2020.csv", row.names = F)
 
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 ####################################################
-#Full ICEWS dataset: directly from harvard dataverse
+#Full ICEWS data set directly from harvard dataverse
 ####################################################
 
 #Upload Package from: https://www.andybeger.com/icews/reference/read_icews.html
-#Remark: Variable names differ from the above used datasets
+#Remark: Variable names differ from the above used data sets
 
 #Sys.setenv(DATAVERSE_SERVER = "dataverse.harvard.edu")
 #library("icews")
-
 #dir.create("~/Downloads/icews")
 #download_data("~/Downloads/icews")
 #events_icews <- read_icews("~/Downloads/icews")
