@@ -61,6 +61,24 @@ missings_cm<-as.data.frame(table(sort((cm_data_icews_na$country_name))))
 missings_cm<-missings_cm[order(missings_cm$Freq),]
 print(xtable(missings_cm, type = "latex"), file = "missings_cm.tex")
 
+#Generate Plot with missings by country
+missings_cm$Freq<-missings_cm$Freq/12
+missings_cm%>%arrange(Freq)%>%mutate(Var1=factor(Var1,levels = Var1))%>%
+  ggplot(aes(x=Freq, y=Var1)) +
+  geom_point(size=1)+
+  ylab(label="Country")+xlab(label="Average Event Number between 1995-2020")+
+  scale_color_manual(values = c(median= "red"), labels="Median")+
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.line = element_line(colour = "black"),
+        axis.text = element_text(size=12,colour = "black"),
+        legend.position = c(0.9,0.5),
+        legend.title = element_blank(),
+        legend.key.size = unit(1.5, 'cm'),
+        legend.background = element_blank(),
+        legend.text=element_text(size=12))
 
 #-------------------------------------------------------------------------------------------------------------------------------------#
 #################################
@@ -163,7 +181,7 @@ h<-cm_data%>% filter(gov_reb_nonviol_repression>"0") %>% ggplot(aes(gov_reb_nonv
 
 
 p<-grid.arrange(a,b,c,d,e,f,g,h,ncol=2,nrow=4)
-#ggsave(p,filename=paste("Freq_Events_Esc",".png", sep=""))
+ggsave(p,filename=paste("Freq_Events_Esc",".png", sep=""))
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
