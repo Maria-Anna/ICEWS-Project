@@ -15,7 +15,7 @@ library(data.table)
 ###########################################
 
 #By Blair and Samabanis (2020)
-X1mo_data <-read_dta("/1mo_data.dta")
+X1mo_data <-read_dta("1mo_data.dta")
 
 #Escalation Data on CM level
 data_sum<-fread("data_escalation.csv")
