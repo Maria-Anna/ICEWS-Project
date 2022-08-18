@@ -1,0 +1,85 @@
+Overview of the libraries
+
+---------------------------------------------------------------------------------------------------------
+Reading the Data:
+
+library(haven)
+library(readr)
+
+--------------------------------------------------------------------------------------------------------
+Data preparation and modification:
+
+library(plyr)
+library(dplyr)
+library(data.table)
+library(tidyr)
+library(tidyselect)
+library(tidyverse)
+library(lubridate)
+
+#Modify CAMEO Code
+#Install package from github
+#library("remotes")
+#remotes::install_github("andybega/icews")
+#library(icews)
+#library(DBI)
+
+---------------------------------------------------------------------------------------------------------
+Polygons for ploting prio grids:
+
+library(sf) 
+library(geometry)
+library(vroom)
+library(crsuggest)
+library(giscoR)
+library(cshapes)
+
+
+---------------------------------------------------------------------------------------------------------
+Descriptive:
+
+library(ggplot2)
+library(gridExtra)
+library(ggpubr)
+library(viridis)
+library(cowplot)
+library(stargazer)
+library(moments)
+library(expss)
+
+Animation:
+library(gganimate)
+library(gifski)
+library(transformr)
+
+
+
+Überprüfe ob die noch gebraucht werden
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(ggpmisc)
+library(gridGraphics)
+library(gridBase)
+
+---------------------------------------------------------------------------------------------------------
+Prediction and Models
+
+library(grid)
+library(pryr)
+library(DEoptim)
+library(countreg)
+library(mgcv)
+library(MASS)
+
+---------------------------------------------------------------------------------------------------------
+Evaluation of Estimates:
+
+library(gtools)
+library(knitr)
+library(xtable)
+
+
+
+
+
+
