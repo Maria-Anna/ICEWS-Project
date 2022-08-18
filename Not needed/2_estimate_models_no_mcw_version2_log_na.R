@@ -1,6 +1,7 @@
-################################################################# ESTIMATE MODELS WITH MCW ####################################################################
+################################################################# ESTIMATE MODELS WITHOUT MCW and ICEWS ####################################################################
 
-#Remark: Fritz et al. (2021) estimation model with MCW, with data from 1995-01-01 till 2020-04-01
+#Remark: Fritz et al. (2021) estimation model without MCW, with data from 1995-01-01 till 2020-08-01 and ICEWS escalation variables
+# + NAs are replaced by 0
 
 #Load necessary packages
 library(mgcv)
@@ -28,14 +29,13 @@ rm(list=ls())
 source('helper_functions.R')
 
 #Load data sets
-cm_data = fread("cm_data.csv")
-load("pgm_data.RData")
 
-#Filter for years 1995-2020
-cm_data<- cm_data %>% filter(year>="1995")
-cm_data<- cm_data %>% filter(date<="2020-04-01")
-pgm_data<- pgm_data %>% filter(year>="1995")
-pgm_data<- pgm_data %>% filter(date<="2020-04-01")
+cm_data = fread("cm_icews_data.csv")
+pgm_data = fread("pgm_icews_data.csv")
+
+#Replace NA with 0 (missing events on country-month level are interpreted as 0 events)
+cm_data[is.na(cm_data),]<-0
+pgm_data[is.na(pgm_data),]<-0
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ############################################
@@ -120,11 +120,21 @@ for(i in 1:length(dates)){
                         log(fvp_population200)+
                         log(fvp_gdp200)  +
                         polity +
-                        log1p(milit_exp) + 
-                        log1p(mcw_receiver_rolling)+
-                        log1p(mcw_receiver_acute) +
+                        #log1p(milit_exp) + 
+                        #log1p(mcw_receiver_rolling)+
+                        #log1p(mcw_receiver_acute) +
                         te(avr_lon, avr_lat) +
-                        s(name_fac, bs="re"), #country effect: use of name_fac instead of country_name due to missingness in country_name
+                        s(name_fac, bs="re") +
+                        log1p(reb_gov_demands) +
+                        log1p(opp_gov_demands) +
+                        log1p(gov_opp_accommodations) +
+                        log1p(gov_reb_accommodations) +
+                        log1p(gov_opp_nonviol_repression) +
+                        log1p(gov_reb_nonviol_repression) +
+                        log1p(reb_gov_low_level) +
+                        log1p(opp_gov_low_level) + 
+                        log1p(gov_reb_low_level) +
+                        log1p(gov_opp_low_level), #country effect: use of name_fac instead of country_name due to missingness in country_name
                       data  =all_data$train_data_stage_1,family = binomial(), #data set used: date target (upshifted date by lag s) goes from 1993-01-01 till 2016-10-01 (t-s-1, 2017-01-01 -3 = 2016-10-01)
                       discrete = T, nthreads = 20,use.chol = T)
     
@@ -145,10 +155,20 @@ for(i in 1:length(dates)){
                        log(fvp_population200)+
                        log(fvp_gdp200)  +
                        polity +
-                       log(milit_exp) +
-                       pgd_capdist*log1p(mcw_receiver_rolling)+ #new included interaction
-                       pgd_capdist*log1p(mcw_receiver_acute) + #new included interaction
-                       te(long, lat),
+                       #log(milit_exp) +
+                       #pgd_capdist*log1p(mcw_receiver_rolling)+ #new included interaction
+                       #pgd_capdist*log1p(mcw_receiver_acute) + #new included interaction
+                       te(long, lat) +
+                       log1p(reb_gov_demands) +
+                       log1p(opp_gov_demands) +
+                       log1p(gov_opp_accommodations) +
+                       log1p(gov_reb_accommodations) +
+                       log1p(gov_opp_nonviol_repression) +
+                       log1p(gov_reb_nonviol_repression) +
+                       log1p(reb_gov_low_level) +
+                       log1p(opp_gov_low_level) + 
+                       log1p(gov_reb_low_level) +
+                       log1p(gov_opp_low_level) ,
                      data  = all_data$train_data_stage_2 ,family = binomial(), #data set used: date target (upshifted date by lag s) goes from 2003-12-01 till 2016-10-01 (t-s-1, 2017-01-01 -3 = 2016-10-01)
                      discrete = T,nthreads = 20,use.chol = T)
     
@@ -168,10 +188,20 @@ for(i in 1:length(dates)){
                         log(fvp_population200)+
                         log(fvp_gdp200)  +
                         polity +
-                        log(milit_exp) +
-                        pgd_capdist*log1p(mcw_receiver_rolling)+
-                        pgd_capdist* log1p(mcw_receiver_acute) +
-                        te(long, lat), data  = all_data$train_data_stage_3 ,family = ztpoisson(),#data set used: date target (upshifted date by lag s) goes from 2003-12-01 till 2016-10-01 (t-s-1, 2017-01-01 -3 = 2016-10-01)
+                        #log(milit_exp) +
+                        #pgd_capdist*log1p(mcw_receiver_rolling)+
+                        #pgd_capdist* log1p(mcw_receiver_acute) +
+                        te(long, lat) +
+                        log1p(reb_gov_demands) +
+                        log1p(opp_gov_demands) +
+                        log1p(gov_opp_accommodations) +
+                        log1p(gov_reb_accommodations) +
+                        log1p(gov_opp_nonviol_repression) +
+                        log1p(gov_reb_nonviol_repression) +
+                        log1p(reb_gov_low_level) +
+                        log1p(opp_gov_low_level) + 
+                        log1p(gov_reb_low_level) +
+                        log1p(gov_opp_low_level) , data  = all_data$train_data_stage_3 ,family = ztpoisson(),#data set used: date target (upshifted date by lag s) goes from 2003-12-01 till 2016-10-01 (t-s-1, 2017-01-01 -3 = 2016-10-01)
                       discrete = T, nthreads = 20,use.chol = T)
     
     
@@ -245,11 +275,21 @@ for(i in 1:length(dates)){
                         log(fvp_population200)+
                         log(fvp_gdp200)  +
                         polity +
-                        log1p(milit_exp) + 
-                        log1p(mcw_receiver_rolling)+
-                        log1p(mcw_receiver_acute) +
+                        #log1p(milit_exp) + 
+                        #log1p(mcw_receiver_rolling)+
+                        #log1p(mcw_receiver_acute) +
                         te(avr_lon, avr_lat) +
-                        s(name_fac, bs="re"),data  =all_data$train_data_stage_1,family = binomial(),
+                        s(name_fac, bs="re") +
+                        log1p(reb_gov_demands) +
+                        log1p(opp_gov_demands) +
+                        log1p(gov_opp_accommodations) +
+                        log1p(gov_reb_accommodations) +
+                        log1p(gov_opp_nonviol_repression) +
+                        log1p(gov_reb_nonviol_repression) +
+                        log1p(reb_gov_low_level) +
+                        log1p(opp_gov_low_level) + 
+                        log1p(gov_reb_low_level) +
+                        log1p(gov_opp_low_level) ,data  =all_data$train_data_stage_1,family = binomial(),
                       discrete = T, nthreads = 20,use.chol = T)
     
     
@@ -267,11 +307,20 @@ for(i in 1:length(dates)){
                        log(fvp_population200)+
                        log(fvp_gdp200)  +
                        polity +
-                       log(milit_exp) +
-                       pgd_capdist*log1p(mcw_receiver_rolling)+
-                       pgd_capdist*log1p(mcw_receiver_acute) +
-                       te(long, lat),
-                     data  = all_data$train_data_stage_2 ,family = binomial(),
+                       #log(milit_exp) +
+                       #pgd_capdist*log1p(mcw_receiver_rolling)+
+                       #pgd_capdist*log1p(mcw_receiver_acute) +
+                       te(long, lat) +
+                       log1p(reb_gov_demands) +
+                       log1p(opp_gov_demands) +
+                       log1p(gov_opp_accommodations) +
+                       log1p(gov_reb_accommodations) +
+                       log1p(gov_opp_nonviol_repression) +
+                       log1p(gov_reb_nonviol_repression) +
+                       log1p(reb_gov_low_level) +
+                       log1p(opp_gov_low_level) + 
+                       log1p(gov_reb_low_level) +
+                       log1p(gov_opp_low_level) , data  = all_data$train_data_stage_2 ,family = binomial(),
                      discrete = T,nthreads = 20,use.chol = T)
     
     try_model_3 = bam(future_ged_best_sb ~ s(month_id, bs="gp") + #same model as step 2, but with t-s
@@ -286,10 +335,20 @@ for(i in 1:length(dates)){
                         log(fvp_population200)+
                         log(fvp_gdp200)  +
                         polity +
-                        log(milit_exp) +
-                        pgd_capdist*log1p(mcw_receiver_rolling)+
-                        pgd_capdist* log1p(mcw_receiver_acute) +
-                        te(long, lat), data  = all_data$train_data_stage_3 ,family = ztpoisson(),
+                        #log(milit_exp) +
+                        #pgd_capdist*log1p(mcw_receiver_rolling)+
+                        #pgd_capdist* log1p(mcw_receiver_acute) +
+                        te(long, lat) +
+                        log1p(reb_gov_demands) +
+                        log1p(opp_gov_demands) +
+                        log1p(gov_opp_accommodations) +
+                        log1p(gov_reb_accommodations) +
+                        log1p(gov_opp_nonviol_repression) +
+                        log1p(gov_reb_nonviol_repression) +
+                        log1p(reb_gov_low_level) +
+                        log1p(opp_gov_low_level) + 
+                        log1p(gov_reb_low_level) +
+                        log1p(gov_opp_low_level) , data  = all_data$train_data_stage_3 ,family = ztpoisson(),
                       discrete = T, nthreads = 20,use.chol = T)
     
     class(try_model_1)[1] = "gam"
@@ -466,11 +525,21 @@ for(s in s_values) {
                       log(fvp_population200)+
                       log(fvp_gdp200)  +
                       polity +
-                      log1p(milit_exp) + 
-                      log1p(mcw_receiver_rolling)+
-                      log1p(mcw_receiver_acute) +
+                      #log1p(milit_exp) + 
+                      #log1p(mcw_receiver_rolling)+
+                      #log1p(mcw_receiver_acute) +
                       te(avr_lon, avr_lat) +
-                      s(name_fac, bs="re"),data  =all_data$train_data_stage_1, #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
+                      s(name_fac, bs="re") +
+                      log1p(reb_gov_demands) +
+                      log1p(opp_gov_demands) +
+                      log1p(gov_opp_accommodations) +
+                      log1p(gov_reb_accommodations) +
+                      log1p(gov_opp_nonviol_repression) +
+                      log1p(gov_reb_nonviol_repression) +
+                      log1p(reb_gov_low_level) +
+                      log1p(opp_gov_low_level) + 
+                      log1p(gov_reb_low_level) +
+                      log1p(gov_opp_low_level) ,data  =all_data$train_data_stage_1, #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
                     family = binomial(),
                     discrete = T, nthreads = 20,use.chol = T)
   
@@ -489,11 +558,20 @@ for(s in s_values) {
                      log(fvp_population200)+
                      log(fvp_gdp200)  +
                      polity +
-                     log(milit_exp) +
-                     pgd_capdist*log1p(mcw_receiver_rolling)+
-                     pgd_capdist*log1p(mcw_receiver_acute) +
-                     te(long, lat),
-                   data  = all_data$train_data_stage_2 ,family = binomial(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
+                     #log(milit_exp) +
+                     #pgd_capdist*log1p(mcw_receiver_rolling)+
+                     #pgd_capdist*log1p(mcw_receiver_acute) +
+                     te(long, lat) +
+                     log1p(reb_gov_demands) +
+                     log1p(opp_gov_demands) +
+                     log1p(gov_opp_accommodations) +
+                     log1p(gov_reb_accommodations) +
+                     log1p(gov_opp_nonviol_repression) +
+                     log1p(gov_reb_nonviol_repression) +
+                     log1p(reb_gov_low_level) +
+                     log1p(opp_gov_low_level) + 
+                     log1p(gov_reb_low_level) +
+                     log1p(gov_opp_low_level) , data  = all_data$train_data_stage_2 ,family = binomial(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
                    discrete = T,nthreads = 20,use.chol = T)
   
   
@@ -509,10 +587,20 @@ for(s in s_values) {
                       log(fvp_population200)+
                       log(fvp_gdp200)  +
                       polity +
-                      log(milit_exp) +
-                      pgd_capdist*log1p(mcw_receiver_rolling)+
-                      pgd_capdist* log1p(mcw_receiver_acute) +
-                      te(long, lat), data  = all_data$train_data_stage_3 ,family = ztpoisson(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
+                      #log(milit_exp) +
+                      #pgd_capdist*log1p(mcw_receiver_rolling)+
+                      #pgd_capdist* log1p(mcw_receiver_acute) +
+                      te(long, lat) +
+                      log1p(reb_gov_demands) +
+                      log1p(opp_gov_demands) +
+                      log1p(gov_opp_accommodations) +
+                      log1p(gov_reb_accommodations) +
+                      log1p(gov_opp_nonviol_repression) +
+                      log1p(gov_reb_nonviol_repression) +
+                      log1p(reb_gov_low_level) +
+                      log1p(opp_gov_low_level) + 
+                      log1p(gov_reb_low_level) +
+                      log1p(gov_opp_low_level) , data  = all_data$train_data_stage_3 ,family = ztpoisson(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
                     discrete = T, nthreads = 20,use.chol = T)
   
   class(try_model_1)[1] = "gam"
@@ -579,11 +667,21 @@ for(s in s_values) {
                       log(fvp_population200)+
                       log(fvp_gdp200)  +
                       polity +
-                      log1p(milit_exp) + 
-                      log1p(mcw_receiver_rolling)+
-                      log1p(mcw_receiver_acute) +
+                      #log1p(milit_exp) + 
+                      #log1p(mcw_receiver_rolling)+
+                      #log1p(mcw_receiver_acute) +
                       te(avr_lon, avr_lat) +
-                      s(name_fac, bs="re"),data  =all_data$train_data_stage_1,family = binomial(),
+                      s(name_fac, bs="re") +
+                      log1p(reb_gov_demands) +
+                      log1p(opp_gov_demands) +
+                      log1p(gov_opp_accommodations) +
+                      log1p(gov_reb_accommodations) +
+                      log1p(gov_opp_nonviol_repression) +
+                      log1p(gov_reb_nonviol_repression) +
+                      log1p(reb_gov_low_level) +
+                      log1p(opp_gov_low_level) + 
+                      log1p(gov_reb_low_level) +
+                      log1p(gov_opp_low_level) ,data  =all_data$train_data_stage_1,family = binomial(),
                     discrete = T, nthreads = 20,use.chol = T)
   
   try_model_2 =bam(future_ged_dummy_sb~  s(month_id, bs="gp") +
@@ -600,11 +698,20 @@ for(s in s_values) {
                      log(fvp_population200)+
                      log(fvp_gdp200)  +
                      polity +
-                     log(milit_exp) +
-                     pgd_capdist*log1p(mcw_receiver_rolling)+
-                     pgd_capdist*log1p(mcw_receiver_acute) +
-                     te(long, lat),
-                   data  = all_data$train_data_stage_2 ,family = binomial(),
+                     #log(milit_exp) +
+                     #pgd_capdist*log1p(mcw_receiver_rolling)+
+                     #pgd_capdist*log1p(mcw_receiver_acute) +
+                     te(long, lat) +
+                     log1p(reb_gov_demands) +
+                     log1p(opp_gov_demands) +
+                     log1p(gov_opp_accommodations) +
+                     log1p(gov_reb_accommodations) +
+                     log1p(gov_opp_nonviol_repression) +
+                     log1p(gov_reb_nonviol_repression) +
+                     log1p(reb_gov_low_level) +
+                     log1p(opp_gov_low_level) + 
+                     log1p(gov_reb_low_level) +
+                     log1p(gov_opp_low_level) ,data  = all_data$train_data_stage_2 ,family = binomial(),
                    discrete = T,nthreads = 20,use.chol = T)
   
   
@@ -620,10 +727,20 @@ for(s in s_values) {
                       log(fvp_population200)+
                       log(fvp_gdp200)  +
                       polity +
-                      log(milit_exp) +
-                      pgd_capdist*log1p(mcw_receiver_rolling)+
-                      pgd_capdist* log1p(mcw_receiver_acute) +
-                      te(long, lat), data  = all_data$train_data_stage_3 ,family = ztpoisson(),
+                      #log(milit_exp) +
+                      #pgd_capdist*log1p(mcw_receiver_rolling)+
+                      #pgd_capdist* log1p(mcw_receiver_acute) +
+                      te(long, lat) +
+                      log1p(reb_gov_demands) +
+                      log1p(opp_gov_demands) +
+                      log1p(gov_opp_accommodations) +
+                      log1p(gov_reb_accommodations) +
+                      log1p(gov_opp_nonviol_repression) +
+                      log1p(gov_reb_nonviol_repression) +
+                      log1p(reb_gov_low_level) +
+                      log1p(opp_gov_low_level) + 
+                      log1p(gov_reb_low_level) +
+                      log1p(gov_opp_low_level) , data  = all_data$train_data_stage_3 ,family = ztpoisson(),
                     discrete = T, nthreads = 20,use.chol = T)
   
   

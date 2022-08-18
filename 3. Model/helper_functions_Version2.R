@@ -18,7 +18,7 @@ optim_mse = function(lambda, pred_data){ #function requires lambda and data cont
   pred_data$pred_final[!pred_data$higher_than_stage_2] = 0 #replace NA with 0 if predictions of stage 2 !>lambda, given that they were >lambda in stage 1
   pred_data$pred_final[is.na(pred_data$pred_final)] = 
     pred_data$pred_stage_3[is.na(pred_data$pred_final)] #replace NA with predictions from stage 3 if still missing
-  return(mean((log1p( pred_data$future_ged_best_sb) - log1p(pred_data$pred_final))^2)) #calculate MSE: Average of (log1p(Number of future state-based conflicts)-log1p(Predicted number))^2
+  return(mean((log1p( pred_data$future_ged_best_sb) - log1p(pred_data$pred_final))^2)) #calculate MSE: Average of (log1p(Number of future fatalities)-log1p(Predicted number of fatalities))^2
 }
 
 #Balance Statistic:
@@ -34,7 +34,7 @@ optim_balance = function(lambda, pred_data){ #function requires lambda and data 
   pred_data$pred_final[!pred_data$higher_than_stage_1] = 0 # replace NA with 0 if predictions of stage 1 !>lambda
   pred_data$pred_final[!pred_data$higher_than_stage_2] = 0 #replace NA with 0 if predictions of stage 2 !>lambda, given that they were >lambda in stage 1
   pred_data$pred_final[is.na(pred_data$pred_final)] = pred_data$pred_stage_3[is.na(pred_data$pred_final)] #replace NA with predictions from stage 3 if still missing
-  return(abs((sum(log1p( pred_data$future_ged_best_sb)) - sum(log1p(pred_data$pred_final))))) #calculate BS: absolute difference of the sum of log1p(number of future state based conflicts) and log1p(number of predicted conflicts) 
+  return(abs((sum(log1p( pred_data$future_ged_best_sb)) - sum(log1p(pred_data$pred_final))))) #calculate BS: absolute difference of the sum of log1p(number of future fatalities) and log1p(number of predicted fatalities) 
 }
 
 
@@ -53,7 +53,7 @@ prepare_model_cm = function(cm_data,S){ # function requires the cm_data set and 
   
   #NEW VARIABLES:
   cm_data[, future_target:=c(ged_dummy_sb[-(1:S)],rep(NA, S)), by=country_id] #new variable future_target: by country ID, 
-                                                                              #the last S observations of state-based dummy are shifted up by S and replaced by NA
+                                                                              #the last S observations of fatality occurrence  are shifted up by S and replaced by NA
   
   cm_data[, date_target:=c(date[-(1:S)],rep(NA, S)), by=country_id] #new variable date_target: by country ID, 
                                                                     #the last S observations of date  are shifted up by S and replaced by NA
@@ -82,10 +82,10 @@ prepare_model_pgm = function(pgm_data,S){ #function requires the pgm_data set an
   
   #NEW VARIABLES:
   pgm_data[, future_ged_dummy_sb:=c(ged_dummy_sb[-(1:S)],rep(NA, S)), by=pg_id] #new variable future_ged_dummy_sb: by Prio ID, 
-                                                                                #the last S observations of state-based dummy are shifted up by S and replaced by NA
+                                                                                #the last S observations of fatality occurrence  are shifted up by S and replaced by NA
   
   pgm_data[, future_ged_best_sb:=c(ged_best_sb[-(1:S)],rep(NA, S)), by=pg_id] #new variable future_ged_best_sb: by Prio ID, 
-                                                                              #the last S observations of number of state-based conflicts are shifted up by S and replaced by NA
+                                                                              #the last S observations of number of fatalities are shifted up by S and replaced by NA
   
   pgm_data[, date_target:=c(date[-(1:S)],rep(NA, S)), by=pg_id] #new variable date_target: by Prio ID, 
                                                                 #the last S observations of date are shifted up by S and replaced by NA
@@ -114,7 +114,7 @@ data_prep = function(cm_data,pgm_data, S) { #function requires cm_data and pgm_d
   #STAGE 1:
   cm_data_1 = prepare_model_cm(cm_data =cm_data,S = S) #cm_data_1 includes lag and the two generate variables future_target and date_target
   data_stage_1 = cm_data_1 #date_stage1 equals the cm_data_1
-  tmp_data = cm_data_1[ged_dummy_sb == 1, c("country_id", "key_cm")] #tmp_data includes only key_cm (countries and months) with state-based conflicts
+  tmp_data = cm_data_1[ged_dummy_sb == 1, c("country_id", "key_cm")] #tmp_data includes only key_cm (countries and months) with fatalities
   pgm_data_1 = prepare_model_pgm(pgm_data,S = S) #pgm_data_1 includes lag and the three generate variables future_ged_dummy_sb, date_target and future_ged_best_sb 
   
   #STAGE 2:
@@ -205,7 +205,7 @@ prepare_model_cm_forecast = function(cm_data,S, forecast_date){ #functions requi
   
   #NEW VARIABLES
   cm_data[, future_target:=c(ged_dummy_sb[-(1:S)],rep(NA, S)), by=country_id] #new variable future_target: by country ID, 
-                                                                              #the last S observations of state-based conflicts are shifted up by S and replaced by NA
+                                                                              #the last S observations of fatalities are shifted up by S and replaced by NA
   
   cm_data[, date_target:=c(date[-(1:S)],rep(NA, S)), by=country_id] #new variable date_target: by country ID, 
                                                                     #the last S observations of date are shifted up by S and replaced by NA
@@ -238,10 +238,10 @@ prepare_model_pgm_forecast = function(pgm_data,S, forecast_date){ #functions req
 
   #NEW VARIABLES
   pgm_data[, future_ged_dummy_sb:=c(ged_dummy_sb[-(1:S)],rep(NA, S)), by=pg_id] #new variable future_ged_dummy_sb: by Prio ID, 
-                                                                                #the last S observations of state-based dummy are shifted up by S and replaced by NA
+                                                                                #the last S observations of fatality occurrence  are shifted up by S and replaced by NA
   
   pgm_data[, future_ged_best_sb:=c(ged_best_sb[-(1:S)],rep(NA, S)), by=pg_id] #new variable future_ged_best_sb: by Prio ID, 
-                                                                              #the last S observations of number of state-based conflicts are shifted up by S and replaced by NA
+                                                                              #the last S observations of number of fatalities are shifted up by S and replaced by NA
   
   pgm_data[, date_target:=c(date[-(1:S)],rep(NA, S)), by=pg_id] #new variable date target: by Prio ID, 
                                                                 #the last S observations of date target are shifted up by S and replaced by NA
@@ -280,10 +280,10 @@ data_prep_forecast = function(cm_data,pgm_data, S) { #function requires cm data,
   pgm_data_1 = prepare_model_pgm_forecast(pgm_data,S = S, forecast_date = forecast_date) # pgm_data_1 includes the four new generate variables from above
   
   #STAGE 2
-  data_stage_2 = pgm_data_1[key_cm %in% tmp_data$key_cm] #keep only prio grid observations where the country-month had a state based conflict
+  data_stage_2 = pgm_data_1[key_cm %in% tmp_data$key_cm] #keep only prio grid observations where the country-month had a fatality 
   
   #STAGE 3
-  data_stage_3 = data_stage_2[future_ged_dummy_sb>0] #keep only prio grids of stage 2 where the number of state based conflicts is higher than zero
+  data_stage_3 = data_stage_2[future_ged_dummy_sb>0] #keep only prio grids of stage 2 where the number of fatalities is higher than zero
   
   
   ################################################################################################

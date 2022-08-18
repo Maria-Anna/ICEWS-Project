@@ -1,32 +1,45 @@
-#######################################ROBUSTNESS CHECK: ICEWS VS BLAIR AND SAMBANIS (2020)########################
+#################################################### ROBUSTNESS CHECK: ICEWS VS. BLAIR AND SAMBANIS (2020) ########################
 
 #Load packages
 library(haven)
 library(dplyr)
 library(ggplot2)
 library(gridExtra)
+library(data.table)
+
+#Set working directory
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#######################################
-#Load BS Data Set
-######################################
-X1mo_data <-read_dta("/Users/clarita/Desktop/Consulting Projekt -Administratives/Blair_and_Sambanis_Replication_code/Corrected/replication/data/1mo_data.dta")
+############################################
+#Load Data Sets
+###########################################
+
+#By Blair and Samabanis (2020)
+X1mo_data <-read_dta("1mo_data.dta")
+
+#Escalation Data on CM level
+data_sum<-fread("data_escalation.csv")
+data<-fread("data_icews_cm.csv")
+
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-###############################################
-#Compare data set 2001 to 2015 with BS (2020)
-###############################################
+###################################################
+#Compare Escalation Variable Values with BS (2020)
+##################################################
 
-#Keep relevant variables of BS (2020)
+#Set data to equal country names
+data<- data %>% mutate(Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"),
+                             Country = replace(Country, Country ==   "Congo, DRC"  ,"Democratic Republic of Congo"))
 
+#Filter BS (2020) data set
 X1mo_data_check<-X1mo_data %>% select(year, month,country_name, gov_opp_accommodations, gov_opp_low_level, gov_opp_nonviol_repression, opp_gov_demands, opp_gov_low_level,gov_reb_accommodations, gov_reb_low_level, gov_reb_nonviol_repression, reb_gov_demands, reb_gov_low_level ) %>%
   filter(country_name %in%  levels(factor(data$Country))) %>%
   mutate(key_cameo= paste(year, month, country_name, sep = "_"))
 
-#keep observations from 2001 to 2015
+#Keep observations from 2001 to 2015
 data_sum_filtered <- data_sum %>% semi_join(X1mo_data_check, by="key_cameo")
 
-#compare both data sets
+#Compare both data sets
 escalation_variables<- c("key_cameo",
                          "gov_opp_accommodations",
                          "gov_opp_low_level",
@@ -39,10 +52,10 @@ escalation_variables<- c("key_cameo",
                          "reb_gov_demands",
                          "reb_gov_low_level")
 
-#data set with all observations that are in ICEWS but not in Blair and Sambanis (2020)
+#Data set with all observations that are in ICEWS but not in Blair and Sambanis (2020)
 data_sum_not_in_BS<- data_sum_filtered %>% anti_join(X1mo_data_check, by=escalation_variables)
 
-#data set with all observations that are in ICEWS and in Blair and Sambanis (2020)
+#Data set with all observations that are in ICEWS and in Blair and Sambanis (2020)
 data_sum_in_BS<- data_sum_filtered %>% semi_join(X1mo_data_check, by=escalation_variables)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -50,19 +63,19 @@ data_sum_in_BS<- data_sum_filtered %>% semi_join(X1mo_data_check, by=escalation_
 #Plot Difference to BS (2020)
 ###############################################
 
-#generate two data sets: BS and ICEWS
+#Generate two data sets: BS and ICEWS
 data_diff<- data_sum %>% filter(key_cameo %in% data_sum_not_in_BS$key_cameo)
 X1_diff<- X1mo_data_check %>% filter(key_cameo %in% data_sum_not_in_BS$key_cameo)
 
-#keep relevant columns
+#Keep relevant columns
 X1_diff<-X1_diff[,4:14]
 
-#order both data sets by key_cameo
+#Order both data sets by key_cameo
 X1_diff<-X1_diff[order(X1_diff$key_cameo),]
 data_diff<-data_diff[order(data_diff$key_cameo),]
 
 
-#generate difference between data sets
+#Generate difference between data sets
 diff<- data.frame(idx = seq(1,817, by= 1),
                   key_cameo=data_diff$key_cameo,
                   gov_opp_accommodations= (data_diff$gov_opp_accommodations - X1_diff$gov_opp_accommodations),
@@ -103,7 +116,6 @@ p1<-ggplot(diff, aes(idx,reb_gov_demands))+geom_point()+
 
 
 #Accommodation
-
 p2<-ggplot(diff, aes(idx,gov_opp_accommodations))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
@@ -128,7 +140,6 @@ p3<-ggplot(diff, aes(idx,gov_reb_accommodations))+geom_point()+
 
 
 #Non-Violent Repression
-
 p4<-ggplot(diff, aes(idx,gov_opp_nonviol_repression))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
@@ -199,7 +210,6 @@ p9<-ggplot(diff, aes(idx,gov_reb_low_level))+geom_point()+
 
 
 #Grid arrange plots
-
 
 #demands
 ggsave(p,filename="opp_gov_demands.png")

@@ -1,4 +1,4 @@
-################################################### The Escalation Data Set: CM Level ########################################
+################################################### The Escalation Data Set: PGM Level ########################################
 
 #Load necessary packages
 library(haven)
@@ -12,10 +12,10 @@ library(dplyr)
 ######################################
 
 #Load data set
-load("~/data_icews_cm.RData")
+data_icews_pgm<-readRDS("data_icews_pgm")
 
 #Modify Variables
-data<-data_icews_cm
+data<-data_icews_pgm
 data$year <- as.numeric(data$year)
 data<- data %>% mutate(Country = replace(Country, Country ==  "Congo, DRC", "Democratic Republic of Congo"),
                        Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"))
@@ -264,12 +264,11 @@ data<- data %>% mutate( gov_opp_accommodations     =      case_when(source_gover
                         reb_gov_low_level          =      case_when(source_rebels == 1 & target_government == 1 &  low_level_violence == 1 ~ 1,
                                                                     TRUE ~ 0),
                         
-                        key_cameo                  = paste(year, month, Country, sep = "_"))
-
+                        key_cameo                  = paste(year, month, gid, sep = "_"))
 
 
 #Step 2:
-#Aggregate variable values at CM level
+#Aggregate variable values at PGM level
 
 data_sum <- data %>%
   group_by(key_cameo) %>%
@@ -284,9 +283,10 @@ data_sum <- data %>%
             reb_gov_demands  = sum(reb_gov_demands),
             reb_gov_low_level = sum(reb_gov_low_level))
 
+
 #Step 3:
-#save as csv data and connect to data sets of choice at CM level
-#write.csv(data_sum, file="data_escalation.csv", row.names = F)
+#save as csv data and connect to data sets of choice at PGM level
+#write.csv(data_sum, file="data_escalation_prio.csv", row.names = F)
 
 #---------------------------------------------------------------------------------------------------------------------------
 ######################################################
@@ -318,36 +318,6 @@ pgm_data<- pgm_data %>% mutate(country_name = replace(country_name, country_name
 cm_data<- cm_data %>% filter(year_month>="1995-01")
 pgm_data<- pgm_data %>% filter(year_month>="1995-01")
 
-
-#keep relevant variables of CM data (cm_data)
-cm_data<-cm_data %>% select(c("date",
-                              "key_cameo",      
-                              "year_month",
-                              "month",
-                              "year",
-                              "month_id",
-                              "key_cy",
-                              "key_cm",
-                              "country_name",
-                              "country_id",
-                              "country_iso3",
-                              "name_fac",
-                              "ged_dummy_sb",
-                              "ged_best_sb",
-                              "ged_dummy_ns",
-                              "ged_best_ns",
-                              "ged_dummy_os",
-                              "ged_best_os",
-                              "time_since_ged_dummy_os",
-                              "time_since_ged_dummy_ns",
-                              "time_since_ged_dummy_sb",
-                              "fvp_population200",
-                              "fvp_gdp200",
-                              "polity",
-                              "milit_exp",
-                              "mcw_receiver_rolling",
-                              "mcw_receiver_acute",
-                              "avr_lon", "avr_lat"))
 
 #keep relevant variables of PGM data (pgm_data)
 pgm_data<-pgm_data %>% select(c("key_cameo",
@@ -387,20 +357,33 @@ pgm_data<-pgm_data %>% select(c("key_cameo",
                                 "time_since_ged_dummy_sb.x"))
 
 
-#Merge two data sets: cm_data (28 columns) and data_sum (11 columns) by key_cameo
-cm_icews_data<- left_join(cm_data,data_sum, by="key_cameo")
 
 #Merge two data sets: pgm_data (28 columns) and data_sum (11 columns) by key_cameo
-pgm_icews_data<- left_join(pgm_data,data_sum, by="key_cameo")
+pgm_icews_data_pg<- left_join(pgm_data,data_sum, by="key_cameo")
 
+
+#Add Variable that indicates if PRIO grid in Capital or not
+capital<-fread("capital.csv")
+#Remark:
+#duplicates regarding capital city
+#Prio ID: 123511 - Brazzaville - Congo
+#Prio ID: 123511 - Kinshasa (Léopoldville) - Democratic Republic of Congo
+capital<-capital %>% filter(pg_id!="123511")
+#merge with data set
+pgm_icews_data_pg<-left_join(pgm_icews_data_pg,capital, by="pg_id")
+pgm_icews_data_pg[country_name=="Congo" & pg_id=="123511",]$capname<-"Brazzaville"
+pgm_icews_data_pg[country_name=="Democratic Republic of Congo" & pg_id=="123511",]$capname<-"Kinshasa (Léopoldville)"
+
+#make factor variable
+pgm_icews_data_pg$capital_factor<-ifelse(!is.na(pgm_icews_data_pg$capname),1,0)
 
 #---------------------------------------------------------------------------------------------------------------------------
 ######################################################
 # Export and Save Data Sets
 ######################################################
 
-#write.csv(cm_icews_data, file="cm_icews_data.csv", row.names = F)
-#write.csv(pgm_icews_data, file="pgm_icews_data.csv", row.names = F)
+#write.csv(pgm_icews_data_pg, file="pgm_icews_data_pg.csv", row.names = F)
+
 
 
 

@@ -1,18 +1,11 @@
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-# ------                          Cornelius Fritz                       ------ #
-# ------                              Plots                            ------ #
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
-# ---------------------------------------------------------------------------- #
+########################################################################### PLOTS AND TABLES##############################################################################
 
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path)) 
+#Remark: Fritz et al. (2021) plots R script
 
+#Load necessary packages
 rm(list=ls())
 
 source('helper_functions.R')
-
 library(mgcv)
 library(MASS)
 library(grid)
@@ -26,16 +19,22 @@ library(viridis)
 library(ggpubr)
 library(cowplot)
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+##################
+#Data Preparation
+##################
+
+#Load data sets and country list
 cm_data= fread("Data/cm_data.csv")
 load("Data/pgm_data.RData")
-
 country_list = fread( "Data/country_list.csv")
 load("Data/pgm_data.RData")
-# 1. Preparation ----
+
+#Modify data sets
+
+#cm_data:
 cm_data_included = cm_data
 cm_data_included = cm_data_included[order(month_id,country_id)]
-pgm_data = pgm_data[order(month_id, pg_id)]
-
 cm_data_included$month_rescaled
 cm_data_included$date = as.Date(cm_data_included$date)
 min_month = min(pgm_data$date)
@@ -43,18 +42,20 @@ cm_data_included$month_rescaled =  cm_data_included$month_id - min(cm_data_inclu
 cm_data_included$date_new = ymd(min_month)  + months(cm_data_included$month_rescaled)
 cm_data_included$delay_sb = cm_data_included$ged_dummy_sb 
 
+#pgm_data
+pgm_data = pgm_data[order(month_id, pg_id)]
 min_month = min(pgm_data$date)
 pgm_data$month_rescaled =  pgm_data$month_id - min(pgm_data$month_id)
 pgm_data$date_new = ymd(min_month)  + months(pgm_data$month_rescaled)
 
-# Check the country_ids and country_names 
+#tmp data
 tmp_data = cm_data_included[,.(country_name, country_id)]
 tmp_data = tmp_data[, .(country_id = names(table(country_id))[which.max(table(country_id))]), by=country_name]
 cm_data_included$country_id = tmp_data$country_id[match(cm_data_included$country_name,tmp_data$country_name)]
 pgm_data$country_id = tmp_data$country_id[match(pgm_data$country_name,tmp_data$country_name)]
-
-
 pgm_data_split = split(pgm_data, factor(pgm_data$pg_id))
+
+#tmp_result
 tmp_result = lapply(pgm_data_split, function(x){
   tmp_table_id = table(x$country_id)
   tmp_table_name = table(x$country_name)
@@ -64,23 +65,32 @@ tmp_result = lapply(pgm_data_split, function(x){
   
 })
 
-# Change all South Sudan Pg id (the problem is that they are overwritten since they are Sudan for more years than South Sudan)
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+##################
+#Extras
+##################
+
+#Change all South Sudan Prio grid IDs (the problem is that they are overwritten since they are Sudan for more years than South Sudan)
 tmp_result = rbindlist(tmp_result)
 ids_south_sudan = unique(pgm_data[country_name == "South Sudan", (pg_id)])
 tmp_result$country_name[tmp_result$pg_id %in% ids_south_sudan] = "South Sudan"
 tmp_result$country_id[tmp_result$pg_id %in% ids_south_sudan] = 246
 
 
-# 2. Load Evaluation Forecasts ---- 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+##################
+#Load Forecasts
+##################
 
-# Search for the adequate files
-data_files = paste0("Prediction/",list.files("Prediction/"))
+#Search for the corresponding files: differentiate between result (2017-01 till 2019-12) and forecast (2020-06 and 2020-12)
+data_files = paste0("Prediction_ICEWS/",list.files("Prediction_ICEWS/"))
 data_files_evaluation_forecasts_no_mcw = data_files[grep(pattern = "no_mcw_result_t", data_files)]
 data_files_real_forecasts_no_mcw = data_files[grep(pattern = "no_mcw_forecast", data_files)]
 data_files_real_forecasts = data_files[grep(pattern = "real_mcw_forecast_t_", data_files)]
 data_files_evaluation_forecasts = data_files[grep(pattern = "with_mcw_result_t_", data_files)]
 
-# Prepare the results of the test forecasts 
+#Start with: Evaluation Forecasts (forecasts with MCW) - gen results
 results = rbindlist(lapply(data_files_evaluation_forecasts, fread))
 results$country_id = tmp_result$country_id[match(results$pg_id,  tmp_result$pg_id)]
 results$country_name = tmp_result$country_name[match(results$pg_id,  tmp_result$pg_id)]
@@ -91,10 +101,11 @@ results$pg_lat =  pgm_data$lat[match(results$pg_id,pgm_data$pg_id)]
 results$error_ln = log1p(results$observation) - log1p(results$prediction)
 results$country_iso3 = cm_data$country_iso3[match(results$country_id,cm_data$country_id)]
 results$country_gwo = pgm_data$country_gwo[match(results$country_id,pgm_data$country_id)]
-# The missing gwo Numbers only belong to Sudan (which according to states::gwstates has the number 625)
-results[is.na(country_gwo), "country_gwo"] = 625
-# Some of the iso3 Codes seem to be wrong -> use the codes from states::gwstates 
 
+#Correct for missing gwo numbers of Sudan
+results[is.na(country_gwo), "country_gwo"] = 625
+
+#Correct for iso3 codes
 results$country_name_gwstates = states::gwstates$country_name[match(results$country_name,states::gwstates$country_name)]
 results$country_name_gwstates[results$country_name == "Zimbabwe" ] = "Zimbabwe (Rhodesia)"
 results$country_name_gwstates[results$country_name == "Congo, DRC" ] = "Congo, Democratic Republic of (Zaire)"
@@ -106,32 +117,52 @@ results$country_iso3_corr = states::gwstates$gwc[match(results$country_name_gwst
 results$country_gwo_corr = states::gwstates$gwcode[match(results$country_name_gwstates,states::gwstates$country_name)]
 results$id = paste(results$date, results$s, results$pg_id,sep = "_")
 
+
+#Continue with: Evaluation Forecasts (forecasts with NO MCW) - gen results_no_mcw
 results_no_mcw = rbindlist(lapply(data_files_evaluation_forecasts_no_mcw, fread))
 results_no_mcw$id = paste(results_no_mcw$date, results_no_mcw$s, results_no_mcw$pg_id,sep = "_")
+#for results save new variable
 results$prediction_no_mcw= results_no_mcw$prediction
 
-# Get MSE of the Evaluation Forecasts
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+##################
+#MSE and TADDA
+##################
 
+#get log change observed and predicted from results
 obs_delta = results$observation_log_change
 pred_delta = results$predicted_log_change
 
+#generate function to estimate TADDA
 tadda = function(obs_delta, pred_delta, epsilon = 0.048){
   mean((abs(obs_delta- pred_delta) + abs(pred_delta)*(sign(obs_delta) == sign(pred_delta))* 
-         ((abs(obs_delta-pred_delta)> epsilon))))
+          ((abs(obs_delta-pred_delta)> epsilon))))
 }
 
-results$predicted_log_change_no_mcw = log1p(results$prediction_no_mcw) - log1p(results$observation_s)
+#for MSE and TADDA
+results$predicted_log_change_no_mcw = log1p(results$prediction_no_mcw) - log1p(results$observation_s) #save under results the predicted log change with no mcw
+
+#Save MSE and TADDA for MCW and no MCW (the benchmark results indicated in the paper are not available)
+
 results_mse = results[,.(mse_mcw = mean((log1p(observation) - log1p(prediction))^2),
                          mse_no_mcw = mean((log1p(observation) - log1p(prediction_no_mcw))^2),
                          tadda_mcw = tadda(observation_log_change,predicted_log_change, 0.48), 
-                         tadda_no_mcw = tadda(observation_log_change,predicted_log_change_no_mcw, 0.48)), by = s]
+                         tadda_no_mcw = tadda(observation_log_change,predicted_log_change_no_mcw, 0.48)
+                         ),
+                         by = s]
 
+#generate LATEX table to save the results
 library(kableExtra)
 kable(results_mse,format = "latex",digits = 3)
-# The benchmark results are taken from the introduction article and were sent to us 
-# 3. Load Real Forecasts ---- 
 
-# Prepare the results of the real forecasts 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#####################
+#Load Real Forecasts
+#####################
+
+#Start with: Real Forecasts (forecasts with MCW) - gen_results_forecasts
+
 results_real_forecasts = rbindlist(lapply(data_files_real_forecasts, fread))
 results_real_forecasts$country_id = tmp_result$country_id[match(results_real_forecasts$pg_id,  tmp_result$pg_id)]
 results_real_forecasts$country_name = tmp_result$country_name[match(results_real_forecasts$pg_id,  tmp_result$pg_id)]
@@ -142,9 +173,13 @@ results_real_forecasts$pg_lat =  pgm_data$lat[match(results_real_forecasts$pg_id
 results_real_forecasts$error_ln = log1p(results_real_forecasts$observation) - log1p(results_real_forecasts$prediction)
 results_real_forecasts$country_iso3 = cm_data$country_iso3[match(results_real_forecasts$country_id,cm_data$country_id)]
 results_real_forecasts$country_gwo = pgm_data$country_gwo[match(results_real_forecasts$country_id,pgm_data$country_id)]
-# The missing gwo Numbers only belong to Sudan (which according to states::gwstates has the number 625)
+
+
+#Correct for missing gwo numbers of Sudan
 results_real_forecasts[is.na(country_gwo), "country_gwo"] = 625
-# Some of the iso3 Codes seem to be wrong -> use the codes from states::gwstates 
+
+
+#Correct for iso3 codes
 results_real_forecasts$country_name_gwstates = states::gwstates$country_name[match(results_real_forecasts$country_name,states::gwstates$country_name)]
 results_real_forecasts$country_name_gwstates[results_real_forecasts$country_name == "Zimbabwe" ] = "Zimbabwe (Rhodesia)"
 results_real_forecasts$country_name_gwstates[results_real_forecasts$country_name == "Congo, DRC" ] = "Congo, Democratic Republic of (Zaire)"
@@ -155,36 +190,47 @@ results_real_forecasts$country_name_gwstates[results_real_forecasts$country_name
 results_real_forecasts$country_iso3_corr = states::gwstates$iso3c[match(results_real_forecasts$country_name_gwstates,states::gwstates$country_name)]
 results_real_forecasts$country_gwo_corr = states::gwstates$gwcode[match(results_real_forecasts$country_name_gwstates,states::gwstates$country_name)]
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+##############################
+#Prepare Results for each Task
+##############################
 
-# Save the results for each task separately 
 
-# 1. True forecasts for Oct. 2020 – March 2021. 
+# 1.: True forecasts for Oct. 2020 – March 2021
+
 results_real_forecasts_hand_in = results_real_forecasts[,.(date, prediction, observation_s, pg_id, predicted_log_change)]
-fwrite(results_real_forecasts_hand_in, file = "Raw/ViEWSpred_competition_cornelius_fritz_task_1.csv")
+fwrite(results_real_forecasts_hand_in, file = "Raw/ViEWSpred_competition_cornelius_fritz_task_1.csv") #save as csv
 
-# 2. Forecasts for Jan. 2017 to Dec. 2019.
+# 2. : Forecasts for Jan. 2017 to Dec. 2019.
+
 results_evaluation_forecasts_hand_in = results[,.(date, s,pg_id, prediction,prediction_alt,observation, observation_s, predicted_log_change,observation_log_change)]
 results_evaluation_forecasts_hand_in_task_2 = results_evaluation_forecasts_hand_in[date %within% interval(ymd("2017-01-01"),ymd("2019-12-01"))]
-
 results_evaluation_forecasts_hand_in_task_2[,.(mse_final = mean((log1p(observation) - log1p(prediction))^2)), by = s]
+fwrite(results_evaluation_forecasts_hand_in_task_2, file = "Raw/ViEWSpred_competition_cornelius_fritz_task_2.csv") #save as csv
 
+# 3. : Forecasts for Jan. 2014 through Dec. 2016.
 
-fwrite(results_evaluation_forecasts_hand_in_task_2, file = "Raw/ViEWSpred_competition_cornelius_fritz_task_2.csv")
-
-# 3. Forecasts for Jan. 2014 through Dec. 2016.
 results_evaluation_forecasts_hand_in_task_3 = results_evaluation_forecasts_hand_in[date %within% interval(ymd("2014-01-01"),ymd("2016-12-01"))]
-fwrite(results_evaluation_forecasts_hand_in_task_3, file = "Raw/ViEWSpred_competition_cornelius_fritz_task_3.csv")
-
-# 4. Plots of the Evaluation Forecasts ----
+fwrite(results_evaluation_forecasts_hand_in_task_3, file = "Raw/ViEWSpred_competition_cornelius_fritz_task_3.csv") #save as csv
 
 
-# Create directory for the predictions if it is not yet avaliable 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+##############################
+#Plots
+##############################
+
+#FIRST: Plots of Evaluation Forecasting
+
+
+#Create directory for the predictions
 if(!"Plots" %in% dir()) {
   dir.create(path = "Plots")
 }
 
-# Get world map
-world_data <- cshp(date=as.Date("2012-1-01"), useGW=TRUE)
+
+#Generate map
+world_data <- cshp(date=as.Date("2012-1-01"), useGW=TRUE) #create world map
 world_data = st_as_sf(world_data)
 summary_results = results[,.(mean_err = mean(error), 
                              mean_obs = mean(observation), 
@@ -197,13 +243,17 @@ summary_results = results[,.(mean_err = mean(error),
                              country_lon = country_lon[1], 
                              pg_lat = pg_lat[1], 
                              pg_lon = pg_lon[1]), by = .(pg_id,s)]
-# Subset world data to include only the countries in the PRIO Grid dataset 
+
+
+#subset world data to keep only prio grid IDs of data set
 map_data_1 = world_data[world_data$gwcode %in% results$country_gwo_corr,]
 dates = seq.Date(ymd("2017-01-01"), ymd("2019-12-01"),by = "month")
 
-# Figure 2 in our note 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#Figure 1 of Fritz et al. (2021)
+
 for(tmp in 1:length(dates)){
-  # get a plot that shows the predictions on each stage separately 
   tmp_date = dates[tmp]
   sub_results = results[date == tmp_date]
   country_data = sub_results[,.(observation = sum(observation),
@@ -219,7 +269,7 @@ for(tmp in 1:length(dates)){
   sub_map_data_1 = map_data_1[map_data_1$gwcode %in% sub_countries,]
   micro_results = sub_results[(sub_results$country_gwo_corr %in% sub_countries )& (s == 2),]
   
-  # Stage 1 ----
+  #STAGE 1
   a = ggplot() + 
     theme_pubr() +
     ggtitle("Probabity Prediction") +
@@ -243,8 +293,6 @@ for(tmp in 1:length(dates)){
           axis.line = element_blank()) + 
     theme(legend.position="bottom") +
     scale_fill_viridis(option = "D","",discrete = T)
-  
-  
   
   title <- ggdraw() +
     draw_label(
@@ -277,7 +325,7 @@ for(tmp in 1:length(dates)){
           ),width = 12,height = 5
   )
   
-  # Stage 2 ----
+  #STAGE 2
   
   a = ggplot() + 
     theme_pubr() +
@@ -334,7 +382,7 @@ for(tmp in 1:length(dates)){
           ),width = 12,height = 5
   )
   
-  # Prediction ----
+  #STAGE 3/ PREDICTION
   
   a = ggplot() + 
     theme_pubr() +
@@ -403,7 +451,10 @@ for(tmp in 1:length(dates)){
   )
 }
 
-# 5. Effect Plots ----- 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#SECOND: Plots of Effects
+
 
 if(!"Smooth" %in% dir(path = "Plots")) {
   dir.create(path = "Plots/Smooth")
@@ -455,15 +506,23 @@ plot_smooths = function(info = info_1,font = 20, numbers = 20,min_date = min(cm_
         ggtitle(title[i]) +
         geom_hline(yintercept = 0,lty = 2) 
     }
-   
+    
     plots[[i]] = plot
   }
   
   return(plots)
 }
 
-# 5.1 Smooth Plots ----- 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#THIRD: Smooth plots (of non linear effects)
+
+#load package
 library(knitr)
+
+#load try model 1
 load("Prediction/models/try_model_1.RData")
 summary_1 = summary(try_model_1)
 
@@ -476,7 +535,9 @@ plots_1 = plot_smooths(info_1)
 
 for(i in 1:(length(plots_1)-2)) {
   ggsave2(plot = plots_1[[i]],filename = paste0("Plots/Smooth/Stage_1_",i,".pdf" ),width = 5,height = 5)
-  }
+}
+
+#load try model 2
 load("Prediction/models/try_model_2.RData")
 summary_2 = summary(try_model_2)
 
@@ -484,12 +545,14 @@ kable(round(summary_2$p.table, digits = 4), format = "latex")
 
 info_2 = plot(try_model_2, select = 0, n = 366)
 plots_2 = plot_smooths(info_2,coef_names = c("Month", "Time Since OS",
-                                   "Time Since NS", "Time Since SB",
-                                   "loc"))
+                                             "Time Since NS", "Time Since SB",
+                                             "loc"))
 for(i in 1:(length(plots_2)-1)) {
   ggsave2(plot = plots_2[[i]],filename = paste0("Plots/Smooth/Stage_2_",i,".pdf" ),width = 5,height = 5)
   
 }
+
+#load try model 3
 load("Prediction/models/try_model_3.RData")
 summary_3 = summary(try_model_3)
 
@@ -503,22 +566,29 @@ for(i in 1:(length(plots_3)-1)) {
   ggsave2(plot = plots_3[[i]],filename = paste0("Plots/Smooth/Stage_3_",i,".pdf" ),width = 5,height = 5)
   
 }
-# 5.2 Month Estimate Plots ----- 
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#FORTH: Month estimate plots
+
 font = 20
 font_main = 20
 font_sub = 20
+
 if(!"Month" %in% dir(path = "Plots")) {
   dir.create(path = "Plots/Month")
 }
 
-info_1 = summary(try_model_1)
+info_1 = summary(try_model_1) #for model 1
 plot_data = data.table(month = 2:12, 
                        coef = info_1$p.coeff[2:(2+10)], 
                        stderr = info_1$se[2:(2+10)], 
                        upper = info_1$p.coeff[2:(2+10)]+ qnorm(p  = 0.975)*info_1$se[2:(2+10)],
                        lower = info_1$p.coeff[2:(2+10)]- qnorm(p  = 0.975)*info_1$se[2:(2+10)])
 
-pdf("Plots/Month/monthly_stage_1.pdf", width = 5,height = 5)
+pdf("Plots/Month/monthly_stage_1.pdf", width = 5,height = 5) #save as pdf
+
 ggplot(data = plot_data,aes(x = factor(month),y = coef, ymin=upper, ymax = lower))+
   geom_pointrange(lwd = 0.8) +
   theme_pubr(base_size = font) +
@@ -532,14 +602,15 @@ ggplot(data = plot_data,aes(x = factor(month),y = coef, ymin=upper, ymax = lower
 
 dev.off()
 
-info_1 = summary(try_model_2)
+info_1 = summary(try_model_2) #for model 2
 plot_data = data.table(month = 2:12, 
                        coef = info_1$p.coeff[2:(2+10)], 
                        stderr = info_1$se[2:(2+10)], 
                        upper = info_1$p.coeff[2:(2+10)]+ qnorm(p  = 0.975)*info_1$se[2:(2+10)],
                        lower = info_1$p.coeff[2:(2+10)]- qnorm(p  = 0.975)*info_1$se[2:(2+10)])
 
-pdf("Plots/Month/monthly_stage_2.pdf", width = 5,height = 5)
+pdf("Plots/Month/monthly_stage_2.pdf", width = 5,height = 5) #save as pdf
+
 ggplot(data = plot_data,aes(x = factor(month),y = coef, ymin=upper, ymax = lower))+
   geom_pointrange(lwd = 0.8) +
   theme_pubr(base_size = font) +
@@ -552,14 +623,15 @@ ggplot(data = plot_data,aes(x = factor(month),y = coef, ymin=upper, ymax = lower
   geom_hline(yintercept = 0,lty = 2) 
 dev.off()
 
-info_1 = summary(try_model_3)
+info_1 = summary(try_model_3) #for model 3
 plot_data = data.table(month = 2:12, 
                        coef = info_1$p.coeff[2:(2+10)], 
                        stderr = info_1$se[2:(2+10)], 
                        upper = info_1$p.coeff[2:(2+10)]+ qnorm(p  = 0.975)*info_1$se[2:(2+10)],
                        lower = info_1$p.coeff[2:(2+10)]- qnorm(p  = 0.975)*info_1$se[2:(2+10)])
 
-pdf("Plots/Month/monthly_stage_3.pdf", width = 5,height = 5)
+pdf("Plots/Month/monthly_stage_3.pdf", width = 5,height = 5) #save as pdf
+
 ggplot(data = plot_data,aes(x = factor(month),y = coef, ymin=upper, ymax = lower))+
   geom_pointrange(lwd = 0.8) +
   theme_pubr(base_size = font) +
@@ -572,12 +644,20 @@ ggplot(data = plot_data,aes(x = factor(month),y = coef, ymin=upper, ymax = lower
   geom_hline(yintercept = 0,lty = 2) 
 dev.off()
 
-# 5.3 Spatial and random effect Plots ----- 
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#FIFTH: Spatial and random effect Plots 
+
+#load world data 
 world_data <- cshp(date=as.Date("2012-1-01"), useGW=TRUE)
 world_data = st_as_sf(world_data)
 
+#load data_c and data_pg
 load("Prediction/models/data_c.RData")
 load("Prediction/models/data_pg.RData")
+
+#modify in order to plot random and spatial effects
 country_results = results[,.(country_gwo = country_gwo_corr[1], 
                              country_id = country_id[1], 
                              country_name = country_name[1], 
@@ -588,7 +668,6 @@ sub_results = results[date == "2017-01-01"]
 country_data = sub_results[,.(observation = sum(observation),
                               prediction = sum(prediction)), 
                            by = .(country_name,country_gwo_corr,country_iso3_corr)]
-
 terms_model_1 = data.table(predict(try_model_1, type = "terms", newdata = data_c))
 terms_model_2 = data.table(predict(try_model_2, type = "terms", newdata = data_pg))
 data_pg$spatial_stage_2 = terms_model_2$`te(long,lat)`
@@ -611,11 +690,12 @@ lim_lat = c(-35,
 lim_lon = c(lon_lat_dt$min_lon[lon_lat_dt$country_name == "Senegal"], 
             lon_lat_dt$max_lon[lon_lat_dt$country_name == "Somalia"])
 
-  
-pdf("Plots/Smooth/random_spatial_effects.pdf")
+
+pdf("Plots/Smooth/random_spatial_effects.pdf") #save as pdf random spatial effects
+
 ggplot() + 
   theme_pubr() +
-  ggtitle("Random Effect Stage 1") +
+  ggtitle("Random Effect Stage 1") + #random effect stage 1
   geom_sf(data = map_data_1, aes(fill = random),col = "black") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(axis.ticks = element_blank(),
@@ -625,11 +705,11 @@ ggplot() +
   theme(legend.position="bottom") +
   coord_sf(xlim = lim_lon, ylim = lim_lat)+ 
   scale_fill_gradient2("",low = "#005fcc",mid = "grey80",high = "#ff0000")
-  
+
 
 ggplot() + 
   theme_pubr() +
-  ggtitle("Spatial Effect Stage 1") +
+  ggtitle("Spatial Effect Stage 1") + #spatial effect stage 1
   geom_sf(data = map_data_1, aes(fill = fixed),col = "black") +
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(axis.ticks = element_blank(),
@@ -643,7 +723,7 @@ ggplot() +
 
 ggplot() + 
   theme_pubr() +
-  ggtitle("Spatial Effect Stage 2") +
+  ggtitle("Spatial Effect Stage 2") + #spatial effect stage 2
   geom_tile(data =data_pg, aes(x = long, y = lat, fill = spatial_stage_2))+
   geom_sf(data = map_data_1, col = "black", alpha = 0.00001) +
   theme(plot.title = element_text(hjust = 0.5)) +
@@ -657,7 +737,7 @@ ggplot() +
 
 ggplot() + 
   theme_pubr() +
-  ggtitle("Spatial Effect Stage 3") +
+  ggtitle("Spatial Effect Stage 3") + #spatial effect stage 3
   geom_tile(data =data_pg, aes(x = long, y = lat, fill = spatial_stage_3))+
   geom_sf(data = map_data_1, col = "black", alpha = 0.00001) +
   theme(plot.title = element_text(hjust = 0.5)) +
@@ -671,14 +751,14 @@ ggplot() +
 
 dev.off()
 
-# 6 Real Forecasts ----
 
-# 6.1 Sub-maps  ----
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+
+#SIXTH: Real Forecasts
 
 dates = sort(unique(results_real_forecasts$date))
 
 for(tmp in 1:length(dates)){
-  # get a plot that shows the predictions on each stage separately 
   tmp_date = dates[tmp]
   sub_results = results_real_forecasts[date == tmp_date]
   
@@ -687,11 +767,6 @@ for(tmp in 1:length(dates)){
   micro_results = sub_results[(sub_results$country_gwo_corr %in% sub_countries ),]
   union_map_data_1 = st_union(sub_map_data_1)
   union_map_data_1 = st_difference(sub_map_data_1)
-  
-
-  
-  
-  
   
   ggplot() +
     theme_pubr() +
@@ -724,9 +799,14 @@ for(tmp in 1:length(dates)){
           width = 5.5,height = 5.5)
 }
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-# 6.2 Zoom Forecast Plots ----
+#SEVENTH: Zoom Forecast Plot
+
+#load package
 library(cowplot)
+
+#Start with: Real Forecasts (forecasts with MCW) - gen results_real_forecasts
 
 results_real_forecasts = rbindlist(lapply(data_files_real_forecasts, fread))
 results_real_forecasts$country_id = tmp_result$country_id[match(results_real_forecasts$pg_id,  tmp_result$pg_id)]
@@ -738,9 +818,11 @@ results_real_forecasts$pg_lat =  pgm_data$lat[match(results_real_forecasts$pg_id
 results_real_forecasts$error_ln = log1p(results_real_forecasts$observation) - log1p(results_real_forecasts$prediction)
 results_real_forecasts$country_iso3 = cm_data$country_iso3[match(results_real_forecasts$country_id,cm_data$country_id)]
 results_real_forecasts$country_gwo = pgm_data$country_gwo[match(results_real_forecasts$country_id,pgm_data$country_id)]
-# The missing gwo Numbers only belong to Sudan (which according to states::gwstates has the number 625)
+
+#Correct for gwo of Sudan
 results_real_forecasts[is.na(country_gwo), "country_gwo"] = 625
-# Some of the iso3 Codes seem to be wrong -> use the codes from states::gwstates 
+
+#Correct for iso3 code 
 results_real_forecasts$country_name_gwstates = states::gwstates$country_name[match(results_real_forecasts$country_name,states::gwstates$country_name)]
 results_real_forecasts$country_name_gwstates[results_real_forecasts$country_name == "Zimbabwe" ] = "Zimbabwe (Rhodesia)"
 results_real_forecasts$country_name_gwstates[results_real_forecasts$country_name == "Congo, DRC" ] = "Congo, Democratic Republic of (Zaire)"
@@ -752,16 +834,19 @@ results_real_forecasts$country_iso3_corr = states::gwstates$gwc[match(results_re
 results_real_forecasts$country_gwo_corr = states::gwstates$gwcode[match(results_real_forecasts$country_name_gwstates,states::gwstates$country_name)]
 
 dates = sort(unique(results_real_forecasts$date))
+
+#gen PG ID 1
 pg_ids_1 = c(149426,149427,149428,149429,149430, 148706,148707,148708,148709,148710, 147986,
              147987,147988,147989,147990, 147266,147267,147268,147269,147270, 146546,146547,146548,
              146549,146550)
 
+#gen PG ID 2
 pg_ids_2 = c(114918,114919,114920,114921,114922, 114198,114199,114200,114201,114202, 113478,
              113479,113480,113481,113482, 112758,112759,112760,112761,112762, 112038,112039,112040,
              112041,112042)
 
-# Get the map results only for mainland Africa (only lat between Senegal and Somalia 
-# and lon not lower than South Africa)
+#Zoom the map: Get the map results only for mainland Africa (only lat between Senegal and Somalia 
+#and lon not lower than South Africa)
 lon_lat_dt = sub_results[, .(max_lat = max(pg_lat), 
                              min_lat = min(pg_lat),
                              max_lon = max(pg_lon), 
