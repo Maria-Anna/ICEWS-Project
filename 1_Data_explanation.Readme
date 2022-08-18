@@ -1,4 +1,4 @@
-Here a brief overview of the Datasets:
+Here is a brief overview of the Datasets:
 
 ---------------------------------------------------------------------------------------------------------
 Raw Data:
@@ -6,7 +6,7 @@ Raw Data:
 
 events_africa.tsv : Cleaned ICEWS-Data with all Events in Africa from 1995-2020 *
 
-priogrid_cellshp: Shapefiles to create the 50x50km grid cells **
+priogrid_cellshp: Shapefiles to create the 50×50km grid cells **
 
 
 ---------------------------------------------------------------------------------------------------------
@@ -28,20 +28,20 @@ data_icews_cm.Rdata: events_africa.tsv + cm_data.csv : ICEWS with added structur
 
 data_icews_pgm: events_africa.tsv + priogrid_cellshp + cm_data.csv : ICEWS at prio grid level with structural variables
 
-data_escalation.csv: Agreggated ICEWS dataset according to Blair and Sambanis per country
+data_escalation.csv: Aggregated ICEWS dataset according to Blair and Sambanis per country
 
-data_escalation_prio.csv: data_escalation.csv +  priogrid_cellshp : Agreggated ICEWS dataset per grid cell
+data_escalation_prio.csv: data_escalation.csv +  priogrid_cellshp : Aggregated ICEWS dataset per grid cell
 
 
 ---------------------------------------------------------------------------------------------------------
 Data for Predictions: 
 
 
-cm_icews_data.csv:  cm_data.csv + data_escalation.csv : Structural and conflic Variables with aggregated Events at country level
+cm_icews_data.csv:  cm_data.csv + data_escalation.csv : Structural and conflict Variables with aggregated Events at country level
 
-pgm_icews_data.csv: pgm_data.Rdata + data_escalation.csv : Structural and conflic Variables with aggregated Events at prio grid level prio grids from pgm_data.Rdata are used
+pgm_icews_data.csv: pgm_data.Rdata + data_escalation.csv : Structural and conflict Variables with aggregated Events at prio grid level prio grids from pgm_data.Rdata are used
 
-pgm_icews_data_pg.csv: data_escalation_prio.csv + cm_data.csv : Structural and conflic Variables with aggregated Events at prio grid level prio grids from data_escalation_prio.csv are used
+pgm_icews_data_pg.csv: data_escalation_prio.csv + cm_data.csv : Structural and conflict Variables with aggregated Events at prio grid level prio grids from data_escalation_prio.csv are used
 
 
 
@@ -56,7 +56,7 @@ https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/28075
 https://grid.prio.org/#/extensions
 
 *** They are taken from: 
-"The role of gevernmental weapons producements in forecasting monthly fatalities in intrastate conflicts:
+"The role of governmental weapons procurements in forecasting monthly fatalities in intrastate conflicts:
 A semiparametric hierarchical hurdle model"  by C. Fritz, M. Mehl, P. W. Thurner, G. Kauermann
 
 **** Is taken from: 
