@@ -8,7 +8,17 @@ library(tidyr)
 library(tidyselect)
 library(tidyverse)
 
-#Set working directory
+rm(list=ls())
+
+
+#Assign path of events_africa Dataset
+path_events_africa<-"~/ICEWS-Project/Data/events_africa.tsv"
+
+#Assign path of the cm_data Dataset
+path_cm_data<-"~/ICEWS-Project/Data/cm_data.csv"
+
+#Assign path were generated Data should be saved
+path_data_icews_cm<- "~/ICEWS-Project/Data"
 
 #----------------------------------------------------------------------------------------------------------------------------------------------
 ###################################################
@@ -17,14 +27,10 @@ library(tidyverse)
 
 #Load ICEWS Events Africa data set
 #Remark: required is "make_events_africa.R"
-events_africa<- read.delim("~/events_africa.tsv")
+events_africa<- read.delim(path_events_africa)
 #Set date as date format
 events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
 
-#Append 2020 data set (month 5 to 8)
-data_2020<- read.csv("~/data_2020.csv")
-data_2020$Event.Date <- as.Date(data_2020$Event.Date, format="%Y-%m-%d")
-events_africa<-rbind(events_africa, data_2020)
 
 #Add variables: Year, Year-Month and Month
 events_africa$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
@@ -38,11 +44,11 @@ events_africa$ID<- cumsum(!duplicated(events_africa))
 
 #----------------------------------------------------------------------------------------------------------------------------------------------
 ###################################################
-#Load CM Data by Fritz et al. (2021)
+#Load cm_data by Fritz et al. (2021)
 ###################################################
 
-#Upload CM by Fritz et al. (2021)
-cm_data = fread("~/cm_data.csv")
+#Upload cm_data
+cm_data = fread(path_cm_data)
 
 #Keep per Country the Country ID
 country_code <-cm_data[,c(6:7)]
@@ -113,6 +119,7 @@ events_africa<-merge(events_africa,country_code, by.x = "Country", by.y="country
 #for Tanzania: till 1996-02 Country ID 236, from 1996-02 Country ID 242
 events_africa$country_id[events_africa$Year_month<"1996-02" & events_africa$Country=="Tanzania"]<- "236"
 events_africa$country_id[events_africa$Year_month>="1996-02" & events_africa$Country=="Tanzania"]<- "242"
+
 #for Sudan: till 1996-02 Country ID 236, from 1996-02 Country ID 242
 events_africa$country_id[events_africa$Year_month<"2011-07" & events_africa$Country=="Sudan"]<- "59"
 events_africa$country_id[events_africa$Year_month>"2011-07" & events_africa$Country=="Sudan"]<- "245"
@@ -121,7 +128,7 @@ events_africa$country_id[events_africa$Year_month>"2011-07" & events_africa$Coun
 #Month ID
 ##############
 
-#Generate Month Code list for Year-month
+#Generate month_code list for Year-month
 month_code<-cm_data[,c(1,10)] #keep for each year-month the month_id
 month_code<-month_code[!duplicated(month_code),] #drop duplicates
 month_code$date<-format(as.Date(month_code$date, format="%Y-%m-%d"),"%Y-%m")#change date format for merging
@@ -148,8 +155,8 @@ events_africa$key_cy[events_africa$Year_month=="2011-07" & events_africa$Country
 #Install package from github
 #library("remotes")
 #remotes::install_github("andybega/icews")
-#library(icews)
-#library(DBI)
+library(icews)
+library(DBI)
 
 #load CAMEO data set and keep relevant variables
 data("cameo_codes")
@@ -183,7 +190,7 @@ names(events_africa)[names(events_africa) == "lvl0"] <- "CAMEO_root"
 data_icews_cm<-events_africa
 
 #Save
-#write.csv(data_icews_cm, file = "data_icews_cm.csv", row.names = FALSE)
+write.csv(data_icews_cm, file = paste(path_data_icews_cm, "/data_icews_cm.csv", sep=""), row.names = FALSE)
 #save(data_icews_cm, file = "data_icews_cm.RData")
 
 
