@@ -10,6 +10,7 @@ library(tidyverse)
 
 rm(list=ls())
 
+
 #Assign path of events_africa Dataset
 path_events_africa<-"~/ICEWS-Project/Data/events_africa.csv"
 
@@ -129,7 +130,7 @@ month_code<-month_code[!duplicated(month_code),] #drop duplicates
 month_code$date<-format(as.Date(month_code$date, format="%Y-%m-%d"),"%Y-%m")#change date format for merging
 
 #Generate month ID
-events_africa<-merge(events_africa,month_code, by.x = "Year_month", by.y="date", sort=F)
+events_africa<-merge(events_africa, month_code, by.x = "Year_month", by.y="date", sort=F)
 
 ##############
 #Keys
@@ -186,6 +187,6 @@ data_icews_cm<-events_africa
 
 #Save
 write.csv(data_icews_cm, file = paste(path_data_icews_cm, "/data_icews_cm.csv", sep=""), row.names = FALSE)
-#save(data_icews_cm, file = "data_icews_cm.RData")
+
 
 
