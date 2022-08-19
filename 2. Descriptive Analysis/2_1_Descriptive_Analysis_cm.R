@@ -29,11 +29,6 @@ data_icews_cm$Event.Date <- as.Date(data_icews_cm$Event.Date, format="%Y-%m-%d")
 data<-data_icews_cm
 
 
-#Drop not correctly geocoded observations
-false_coded<-data %>% filter( Longitude < -50 | Longitude > 64 | Latitude> 40)
-data<- filter(data, !Event.ID %in% false_coded$Event.ID)
-
-
 #create African map
 states<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso (Upper Volta)", "Burundi","Cape Verde", "Cameroon","Central African Republic",
           "Chad", "Comoros","Congo", "Congo, Democratic Republic of (Zaire)","Cote D'Ivoire","Djibouti","Egypt","Equatorial Guinea","Eritrea","Ethiopia","Gabon","Gambia",

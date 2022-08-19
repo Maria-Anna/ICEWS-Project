@@ -24,13 +24,6 @@ data_icews_pgm<-readRDS(path_data_icews_pgm)
 #Path were the plots should be saved
 path<- "~/ICEWS-Project/2. Descriptive Analysis/Plots"
 
-#Drop False Coded
-false_coded<-data_icews_pgm %>% filter( Longitude < -50 | Longitude > 64 | Latitude> 40)
-data_icews_pgm<- filter(data_icews_pgm, !Event.ID %in% false_coded$Event.ID)
-
-#Drop Duplicates
-data_icews_pgm<-data_icews_pgm[!duplicated(data_icews_pgm),] 
-
 #Read Polygons
 prio_grid_polygons <- st_read(dsn = path_folder_cellshp, layer = "priogrid_cell", stringsAsFactors = F, quiet=T) %>% mutate(gid = as.character(gid))
 
@@ -124,29 +117,6 @@ count_events$rel<- count_events$n.x / count_events$n.y
 count_events_poly<-left_join(africa_polygons,count_events)
 count_events_poly[is.na(count_events_poly)] <- 0 #Assign 0 to NA
 
-#Plot all Events across all years
-#Relative Frequency within one state to make the Frequency comparable accross the states
-#For Absolute Frequency replace in line 128 fill=rel with fill=n.x
-ggplot()+
-  geom_sf(data = count_events_poly, aes(fill = rel),col = "transparent") +
-  geom_sf(data= map, col= "black", fill= NA)+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right" , 
-        legend.key.height = unit(10,"cm")) +
-  scale_fill_viridis(option = "D","Relative Frequency",discrete = F, direction=1, 
-                     breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
-
-ggsave(filename=paste("Relative_Prio_Map_Events_in_Africa",".png", sep=""), width=9, height = 9, path=path)
 
 #----------------------------------
 #Plot the relative Frequency of events accross all Years that are not NA, so here >0 because
@@ -279,6 +249,123 @@ ggsave(filename=paste("Relative_Prio_Events_in_",state,"_capital",".png", sep=""
 
   #Save plot
   ggsave(filename=paste("Relative_Prio_Map_Events_in_",state,".png", sep=""), width= 9, height = 9, path = path)
+
   
+  
+#-----------------------------------------------------------------------------------------------------------------
+#############################################
+############## Animation Plots  #############
+#############################################
+  
+#Count Events per git per country, per year and per gid
+count_events<-data_icews_pgm %>%
+    as.data.frame() %>%
+    group_by(gid, Country, year) %>%
+    count()
+  
+#Count Events per Country, per year
+  count_events_country<-data_icews_pgm %>%
+    as.data.frame() %>%
+    group_by( Country, year) %>%
+    count()
+  
+#Merge and Calculate relative Frequency
+  count_events<- count_events %>% left_join(count_events_country, by=c("Country", "year"))
+  count_events$rel<- count_events$n.x / count_events$n.y
+  
+  
+#Assign every Polygon to a relative Number
+count_events_poly<-left_join(africa_polygons,count_events)
+count_events_poly[is.na(count_events_poly)]<- 0 #Assign 0 to NA
+count_events_poly$year<-as.character(count_events_poly$year) #Year as Character  
+  
+
+#-----------------------------------
+#Plot the relative Frequency of events accross all Years that are not NA, so here >0 because
+#we replaced above the NAs with zero
+
+#Absolute Events Polygons where rel>0
+count_events_poly_0<-count_events_poly %>% filter(rel > 0)
+
+
+plot<-ggplot() + 
+  geom_sf(data = count_events_poly_0, aes(fill = rel),col = NA) +
+  geom_sf(data=map, col="black", fill= NA)+
+  xlab("Longitude")+ylab("Latitude")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        legend.key.size = unit(5, 'cm'),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black")) +
+  theme(legend.position="right",       
+        legend.key.height = unit(20,"cm")) +
+  scale_fill_gradient2("Relative Frequency",low="#91bfeb", mid="#91bfeb", high = "#ff000d", 
+                       breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(">0", 0.25, 0.5, 0.75, 1), 
+                       limits= c(0,1))+
+  guides(fill=guide_colorbar(title.vjust=2.5))+
+  theme_classic(base_size = 16)
+
+
+#Animate Plot
+plot_animation<-plot + transition_manual(year)+ labs(subtitle = "Year: {current_frame}")
+animate(plot_animation, nframes= length(unique(count_events_poly$year)), fps=1, height = 1172, width =1900,
+        #For Latex
+        #renderer = file_renderer( prefix = "Animation_Map_noNA", overwrite = TRUE)
+)
+
+
+#Save Plot
+anim_save("Animation_Map_noNA.gif", path=path)
+
+
+
+#--------------------------------------
+#Plot only for a specific state
+#For example only for Somalia
+
+#Filter State of Interest
+state<- "Somalia"
+
+#Make map for Single Country
+map_noth_east<-map_africa %>% filter(country_name %in% state)
+africa_polygons<-semi_join(prio_grid_polygons, map_noth_east)
+#Assign every Polygon a relative Number
+count_events_poly_state<-left_join(africa_polygons,count_events)
+count_events_poly_state[is.na(count_events_poly_state)] <- 0 #Assign 0 to NA
+count_events_poly_state$year<-as.character(count_events_poly_state$year) #Year as character
+
+#Ggplot for single Country with polygons
+plot<-ggplot() + 
+  geom_sf(data = count_events_poly_state, aes(fill = rel),col = "grey") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black")) +
+  theme(legend.position="right",       
+        legend.key.height = unit(10,"cm")) +
+  scale_fill_viridis(option = "D","Relative Frequency",discrete = F, direction=1, 
+                     breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
+                     limits= c(0,1))+
+  guides(fill=guide_colorbar(title.vjust=2.5))+
+  theme_classic(base_size = 16) 
+
+
+#Animate Plot
+plot.animation<-plot + transition_manual(year)+ labs(subtitle = "Year: {current_frame}")
+animate(plot_animation, nframes= length(unique(count_events_poly$year)), fps=1,
+        #For Latex
+        #renderer = file_renderer( prefix = "Animation_Map_Somalia", overwrite = TRUE)
+)
+
+
+
+#Save Plot
+anim_save(paste("Animation_map_Somalia",state,".gif",sep=""), path=path)
 
  

@@ -1,0 +1,13 @@
+Short Summary
+
+Descriptive analysis of the cameo code, over all countries and over all years. We are not interested in the frequency of the cameo codes, just in the change between two time periods. For this, we divide them
+into percentiles and check if they change the percentile over time. 
+
+---------------------------------------------------------------------------------------------------------
+Main questions:
+
+-If a Cameo Code e.g 18 is assigned to the 5th percentile in lets say in January 2005, is it more likely to stay in that percentile in February 2005? Or is it more likely that it changes the percentile? 
+Remaining in the same percentile would mean that the type of events are not changing much in the next months. So if there are conflicts, they are not going to pass fast, and if not they're not going to happen in near future. 
+- If the Cameo Code is changing the percentile, is it going to change to a nearby  percentile or not? So if it is in the 5th, is it more likely to change to the 4th or to the 1th ?
+-Is there a difference in the above outcomes if we split the cameo codes into hostile and non-hostile cameo codes?
+

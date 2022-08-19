@@ -1,4 +1,4 @@
-############################################################ THE CAMEO EVENT TRAP #################################################
+##############################################THE CAMEO EVENT TRAP#################################################
 
 #Load necessary packages
 library(ggplot2)
@@ -20,60 +20,29 @@ library(tidyselect)
 library(tidyverse)
 library(data.table)
 
-<<<<<<<< HEAD:2. Descriptive Analysis/2_2_The_transition_matrix_cm.R
+path_data_icews_cm<-"~/ICEWS-Project/Data/data_icews_cm.csv"
+path_plot<- "~/ICEWS-Project/2. Descriptive Analysis/Plots"
 
 
-========
-#Set working directory
-
-#--------------------------------------------------------------------------------------------------------------------------------------#
->>>>>>>> clara:2. Descriptive Analysis/CM/Event Transistion Probability/The_transition_matrix.R
 ###################################################
-#Prepare Data Set
+############ Prepare Dataset ######################
 ###################################################
-
-data_icews_cm<- fread("~/ICEWS-Project/Data/data_icews_cm.csv")
+data_icews_cm<- fread(path_data_icews_cm)
 
 data<-data_icews_cm
 
-<<<<<<<< HEAD:2. Descriptive Analysis/2_2_The_transition_matrix_cm.R
 #add variables
 data$Year<-format(as.Date(data$Event.Date, format="%Y-%m-%d"),"%Y") 
 data$Year_month<-format(as.Date(data$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
 data$Month<-as.numeric(format(as.Date(data$Event.Date, format="%Y-%m-%d"), "%m"))
 
-========
-#Add variables
-data$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y") 
-data$Year_month<-format(as.Date(data$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
-data$Month<-as.numeric(format(as.Date(data$Event.Date, format="%Y-%m-%d"), "%m"))
-
-#--------------------------------------------------------------------------------------------------------------------------------------#
-###################################################
-#Add Root CAMEO Code
-###################################################
-
-#Install package from github
-#library("remotes")
-#remotes::install_github("andybega/icews")
-#library(icews)
-#library(DBI)
-
-#Load CAMEO dataset and keep relevant variables
-data("cameo_codes")
-cameo_codes<-cameo_codes[,c("cameo_code","name","lvl0","lvl1")]
-
-#Merge with data by event text
-data_cameo<-merge(data,cameo_codes, by.x="Event.Text", by.y="name")
->>>>>>>> clara:2. Descriptive Analysis/CM/Event Transistion Probability/The_transition_matrix.R
 
 
-#--------------------------------------------------------------------------------------------------------------------------------------#
-###################################################
-#Generate Data for Trap Matrix
-###################################################
+#################################################################
+############ Generate Data for Trap Matrix ######################
+#################################################################
 
-#Create vectors:
+#####Create vectors:
 
 cameo_hostile<-c("11","12","17","18","19","20","13","14","15","16")
 cameo_peace<-c("1","2","3","4","5","6","7","8")
@@ -81,9 +50,8 @@ cameo_intensity_hostile <-c(seq(from=0,to=-10, by=-0.1))
 cameo_conflict<-c("18","19","20")
 
 
-#Create data sets for:
+#####Create datasets for:
 
-<<<<<<<< HEAD:2. Descriptive Analysis/2_2_The_transition_matrix_cm.R
 #hostile event
 data_cameo_hostile<-data%>%group_by(Year_month,Country,Year)%>%count(CAMEO_root %in% cameo_hostile)%>%as.data.frame()
 
@@ -95,20 +63,10 @@ data_cameo_intensity<-data%>%group_by(Year_month,Country,Year)%>%count(Intensity
 
 #events with conflict
 data_cameo_conflict<-data%>%group_by(Year_month,Country,Year)%>%count(CAMEO_root %in% cameo_conflict)%>%as.data.frame()
-========
-#Hostile events
-data_cameo_hostile<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0 %in% cameo_hostile)%>%as.data.frame()
 
-#Peaceful events
-data_cameo_peace<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0 %in% cameo_peace)%>%as.data.frame()
 
-#Hostile intensity events
-data_cameo_intensity<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(Intensity %in% cameo_intensity_hostile)%>%as.data.frame()
 
-#Events with conflict
-data_cameo_conflict<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0 %in% cameo_conflict)%>%as.data.frame()
->>>>>>>> clara:2. Descriptive Analysis/CM/Event Transistion Probability/The_transition_matrix.R
-
+####Change data format:
 
 ################
 ##hostile events:
@@ -116,20 +74,20 @@ data_cameo_conflict<-data_cameo%>%group_by(Year_month,Country,Year)%>%count(lvl0
 
 data_cameo_hostile<-data_cameo_hostile %>% pivot_wider(names_from="CAMEO_root %in% cameo_hostile", values_from="n")
 
-#Change NA to 0:
+#change NA to 0:
 data_cameo_hostile<-data_cameo_hostile %>%
   mutate_all(funs(ifelse(is.na(.), 0, .)))
 
-#Rename columns
+#rename columns
 names(data_cameo_hostile)[names(data_cameo_hostile) == "FALSE"] <- "n_non"
 names(data_cameo_hostile)[names(data_cameo_hostile) == "TRUE"] <- "n_hostile"
 
-#Create column with total number of events
+#create column with total number of events
 data_cameo_hostile<-data_cameo_hostile %>% 
   rowwise() %>% 
   mutate(n_total = sum(n_non, n_hostile, na.rm = TRUE))
 
-#Create column with relative number of hostile events
+#create column with relative number of hostile events
 data_cameo_hostile<-data_cameo_hostile %>% 
   rowwise() %>% 
   mutate(n_rel = n_hostile/n_total)
@@ -138,27 +96,23 @@ data_cameo_hostile<-data_cameo_hostile %>%
 ##peaceful events:
 ###############
 
-<<<<<<<< HEAD:2. Descriptive Analysis/2_2_The_transition_matrix_cm.R
 
 data_cameo_peace<-data_cameo_peace %>% pivot_wider(names_from="CAMEO_root %in% cameo_peace", values_from="n")
-========
-data_cameo_peace<-data_cameo_peace %>% pivot_wider(names_from="lvl0 %in% cameo_peace", values_from="n")
->>>>>>>> clara:2. Descriptive Analysis/CM/Event Transistion Probability/The_transition_matrix.R
 
-#Change NA to 0:
+#change NA to 0:
 data_cameo_peace<-data_cameo_peace %>%
   mutate_all(funs(ifelse(is.na(.), 0, .)))
 
-#Rename columns
+#rename columns
 names(data_cameo_peace)[names(data_cameo_peace) == "FALSE"] <- "n_non"
 names(data_cameo_peace)[names(data_cameo_peace) == "TRUE"] <- "n_peace"
 
-#Create column with total number of events
+#create column with total number of events
 data_cameo_peace<-data_cameo_peace %>% 
   rowwise() %>% 
   mutate(n_total = sum(n_non, n_peace, na.rm = TRUE))
 
-#Create column with relative number of hostile events
+#create column with relative number of hostile events
 data_cameo_peace<-data_cameo_peace %>% 
   rowwise() %>% 
   mutate(n_rel = n_peace/n_total)
@@ -167,22 +121,23 @@ data_cameo_peace<-data_cameo_peace %>%
 ##Hostile Intensity events:
 ########################
 
+
 data_cameo_intensity<-data_cameo_intensity %>% pivot_wider(names_from="Intensity %in% cameo_intensity_hostile", values_from="n")
 
-#Change NA to 0:
+#change NA to 0:
 data_cameo_intensity<-data_cameo_intensity %>%
   mutate_all(funs(ifelse(is.na(.), 0, .)))
 
-#Rename columns
+#rename columns
 names(data_cameo_intensity)[names(data_cameo_intensity) == "FALSE"] <- "n_non"
 names(data_cameo_intensity)[names(data_cameo_intensity) == "TRUE"] <- "n_intensity_hostile"
 
-#Create column with total number of events
+#create column with total number of events
 data_cameo_intensity<-data_cameo_intensity %>% 
   rowwise() %>% 
   mutate(n_total = sum(n_non, n_intensity_hostile, na.rm = TRUE))
 
-#Create column with relative number of hostile events
+#create column with relative number of hostile events
 data_cameo_intensity<-data_cameo_intensity %>% 
   rowwise() %>% 
   mutate(n_rel = n_intensity_hostile/n_total)
@@ -192,36 +147,32 @@ data_cameo_intensity<-data_cameo_intensity %>%
 ##conflict events:
 #################
 
-<<<<<<<< HEAD:2. Descriptive Analysis/2_2_The_transition_matrix_cm.R
 
 data_cameo_conflict<-data_cameo_conflict %>% pivot_wider(names_from="CAMEO_root %in% cameo_conflict", values_from="n")
-========
-data_cameo_conflict<-data_cameo_conflict %>% pivot_wider(names_from="lvl0 %in% cameo_conflict", values_from="n")
->>>>>>>> clara:2. Descriptive Analysis/CM/Event Transistion Probability/The_transition_matrix.R
 
-#Change NA to 0:
+#change NA to 0:
 data_cameo_conflict<-data_cameo_conflict %>%
   mutate_all(funs(ifelse(is.na(.), 0, .)))
 
-#Rename columns
+#rename columns
 names(data_cameo_conflict)[names(data_cameo_conflict) == "FALSE"] <- "n_non"
 names(data_cameo_conflict)[names(data_cameo_conflict) == "TRUE"] <- "n_conflict"
 
-#Create column with total number of events
+#create column with total number of events
 data_cameo_conflict<-data_cameo_conflict %>% 
   rowwise() %>% 
   mutate(n_total = sum(n_non, n_conflict, na.rm = TRUE))
 
-#Create column with relative number of hostile events
+#create column with relative number of hostile events
 data_cameo_conflict<-data_cameo_conflict %>% 
   rowwise() %>% 
   mutate(n_rel = n_conflict/n_total)
 
 
-#--------------------------------------------------------------------------------------------------------------------------------------#
-###################################################
-#The CAMEO Trap: Prob. Transition Matrix Part I
-###################################################
+#########################################################
+############ The Cameo Trap Matrix ######################
+########################################################
+
 
 ################
 ##hostile events:
@@ -351,10 +302,10 @@ data_cameo_conflict[is.na(data_cameo_conflict)]<-0
 data_cameo_conflict_tran<-subset(data_cameo_conflict,select = -c(Country))
 
 
-#--------------------------------------------------------------------------------------------------------------------------------------#
-###################################################
-#The CAMEO Trap: Prob. Transition Matrix Part II
-###################################################
+
+##########################################################
+############ The Probability Matrix ######################
+#########################################################
 
 ###Probability Transition Matrix
 #Explanation:
@@ -363,8 +314,8 @@ data_cameo_conflict_tran<-subset(data_cameo_conflict,select = -c(Country))
 #Transition Matrix: P
 #Pij contains the transition probability i->j (e.g the transition probability from Quintile 1 to 2)
 #Calculate as follows:
-#Count number of times 1 follows 1, 2 follows 1 and so on
-#Table with absolute numbers
+#Count numer of times 1 follows 1, 2 follows 1 and so on
+#Table with absoulte numbers
 #Divide each absolute number (for instance number of times 2 follows 1) by the row sum
 
 #Allows for First Order Transition Matrix (Markov Chain)
@@ -383,7 +334,7 @@ Markovmatrix <- function(X,l=1){
 }
 
 
-#Create probability table and convert into data frame
+#create probability table and convert into data frame
 
 #for hostile events
 prob_table_hostile= trans.matrix(as.matrix(data_cameo_hostile_tran))
@@ -398,12 +349,11 @@ prob_table_intensity<-as.data.frame(prob_table_intensity)
 prob_table_conflict= trans.matrix(as.matrix(data_cameo_conflict_tran))
 prob_table_conflict<-as.data.frame(prob_table_conflict)
 
+prob_table_hostile
 
-
-#--------------------------------------------------------------------------------------------------------------------------------------#
-###################################################
-#Plot the Transition Matrix
-###################################################
+#########################################################
+############ Plot Transition Matrix #####################
+########################################################
 
 #Assign saving path for Map plots
 path_plot<-"~/ICEWS-Project/2. Descriptive Analysis/Plots"

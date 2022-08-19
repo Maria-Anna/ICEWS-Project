@@ -1,0 +1,12 @@
+Short Summary: 
+
+Descriptive Analysis of the ICEWS on the grid cell level. We are not interested anymore in the frequency of the events that occour in a country, but in the frequency of the events that appear in each grid cell. A grid cell is a 50x50km area in Africa. The aim is to get more specific information about the area the events occur.
+
+----------------------------------------------------------------------------------------------------------
+Main questions:
+
+-How is the distribution of the events on the grid cell level? 
+Are they equally distributed, clustured or random between the cells?
+-Are there specific grid cells that contain much more events than others?
+-Comparison of the events that occur in the grid cell where the capital is located,and those in the other prio grid cells.
+-Do the frequency of the events change over time or are they mainly remaining the same? (Animation Plot)
