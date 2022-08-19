@@ -1,0 +1,17 @@
+Short Summary:
+
+Here we are going to make the descriptive analysis of the ICEWS data (data_icews_cm/events_africa) on the country level. This means that every event is assigned to a specific country. 
+
+---------------------------------------------------------------------------------------------------------
+The main questions: 
+
+-How many events are part of the data in how many cuntries?
+-Are the events unique, do occur duplicates or missings?
+-Where and when do events occur? Are they appear clustured or random? 
+-Are there huge differences in the frequency accross the years within a country?
+-Are there huge differences in the frequency between the countries?
+-What kind of CAMEO Codes appear most often?
+-To wich kind of event text are the CAMEO Codes related to?
+-How is the intensity of the events distributed?
+-What is the frequency of events with a high intensity compared to a low intensity?
+
