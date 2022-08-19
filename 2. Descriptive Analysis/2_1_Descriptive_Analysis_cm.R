@@ -78,7 +78,7 @@ stargazer(data_icews_cm, summary.stat = c("mean", "median", "min", "max", "sd", 
 
 #Generate table with missings for latex
 data_icews_cm_na <-as.data.frame(colSums(is.na(data_icews_cm)))
-#print(xtable(data_icews_cm_na, type = "latex"), file = paste(path_plot,"/missings_data_icews_cm.tex", sep=""))
+print(xtable(data_icews_cm_na, type = "latex"), file = paste(path_plot,"/missings_data_icews_cm.tex", sep=""))
 
 
 #Check for duplicates in data set
