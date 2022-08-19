@@ -5,9 +5,9 @@ library(plyr)
 library(dplyr)
 
 #Assign Path with folder containing all ICEWS Files 
-path<- "~/ICEWS-Project/Data/Datasets_ICEWS: Downloaded"
+path<- "~/ICEWS-Project/Data/Datasets_ICEWS_Downloaded"
 #Assign Path to save the created Data events_africa
-path_events_africa<- "~ICEWS-Project/Data"
+path_events_africa<- "~/ICEWS-Project/Data"
 #set Working Directory
 setwd(path)
 
