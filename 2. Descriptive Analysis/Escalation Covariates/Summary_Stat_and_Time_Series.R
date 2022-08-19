@@ -13,6 +13,8 @@ library(dplyr)
 library(xtable)
 library(stargazer)
 library(moments)
+library(ggplot2)
+library(ggcorrplot)
 
 #Set working directory
 
@@ -42,7 +44,7 @@ cm_data<- cm_data %>% dplyr::relocate( gov_reb_accommodations, gov_opp_accommoda
 #The Missings
 #################################
 
-#See unique country-months with missings
+#See unique country names
 country_names<-as.data.frame(unique(cm_data$country_name))
 
 #Generate data frame with missings
@@ -445,7 +447,17 @@ h<-ggplot(cm_egy, aes(year_month,gov_reb_nonviol_repression))+ geom_point()+ geo
 p<-grid.arrange(a,b,c,d, e, f,g,h,ncol=2,nrow=4)
 #ggsave(p,filename=paste("Egypt_Escalation_Time_Series",".png", sep=""))
 
+#-------------------------------------------------------------------------------------------------------------------------------------#
+#################################
+# Correlation Plot
+#################################
 
+#Plot correlation between escalation proxies
+corr_data<-cm_data[,30:39]
+cor<-round(cor(corr_data),3)
+head(cor)
+ggcorrplot(cor, hc.order = TRUE, type = "lower",
+           outline.col = "white")
 
 
 
