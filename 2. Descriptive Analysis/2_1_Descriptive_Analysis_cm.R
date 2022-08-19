@@ -69,7 +69,59 @@ colnames(average_events_by_country)[which(names(average_events_by_country) == "m
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------------
+#############################
+# Summary Statistics Overall
+############################
 
+stargazer(data_icews_cm, summary.stat = c("mean", "median", "min", "max", "sd", "p25", "p75"))
+
+
+#Generate table with missings for latex
+data_icews_cm_na <-as.data.frame(colSums(is.na(data_icews_cm)))
+#print(xtable(data_icews_cm_na, type = "latex"), file = paste(path_plot,"/missings_data_icews_cm.tex", sep=""))
+
+
+#Check for duplicates in data set
+
+#For all columns
+#0 duplicates
+sum(duplicated(data_icews_cm))
+
+#For Event.ID
+sum(duplicated(data_icews_cm$Event.ID))
+#Remark:
+#The Event.ID is a non-unique identifier --> the event ID can be repeated in the data set (See also ICEWS Coded Event Data Read Me)
+
+
+#For Story.ID
+table(duplicated(data_icews_cm$Story.ID))
+#Remark:
+#From the same event different information of a story can be extracted
+
+#Generate duplicate data set regarding: all columns
+duplicates_all <- data_icews_cm %>%
+  group_by(data_icews_cm[]) %>%
+  filter(n()>1)
+
+#Generate duplicate data set regarding: Event.ID
+duplicates_event_id <- data_icews_cm %>%
+  group_by(Event.ID) %>%
+  filter(n()>1)
+
+
+#Generate duplicate data set regarding Story.ID
+duplicates_story_id <- data_icews_cm %>%
+  group_by(Story.ID) %>%
+  filter(n()>1)
+
+
+#CAMEO Root Code Freq
+cameo_freq<-data %>% group_by(CAMEO_root,name) %>% count(sort=TRUE)
+
+#Export as latex document
+print(xtable(cameo_freq, type = "latex"), file = paste(path_plot,"/cameo_freq.tex", sep=""))
+
+#--------------------------------------------------------------------------------------------------------------
 ###############################
 ## Frequency Analysis #########
 ###############################
