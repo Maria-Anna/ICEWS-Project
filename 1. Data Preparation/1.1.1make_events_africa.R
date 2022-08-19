@@ -74,7 +74,9 @@ events_africa_total$Target.Country<-as.character(events_africa_total$Target.Coun
 #Keep only observations where Source.Country==Target.Country==Country
 events_africa<- subset(events_africa_total, events_africa_total$Country==events_africa_total$Source.Country & events_africa_total$Country==events_africa_total$Target.Country)
 
-
+#Drop False Coded
+false_coded<-events_africa%>% filter( Longitude < -50 | Longitude > 64 | Latitude> 40)
+events_africa<- filter(events_africa, !Event.ID %in% false_coded$Event.ID)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################################
 # Export Data
