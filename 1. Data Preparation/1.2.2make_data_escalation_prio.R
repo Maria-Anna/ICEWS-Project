@@ -4,7 +4,19 @@
 library(haven)
 library(dplyr)
 
-#Set working directory
+rm(list=ls())
+
+#Assign path for data_icews_pgm
+path_data_icews_pgm<-"~/ICEWS-Project/Data/data_icews_pgm"
+
+#Assign path for pgm_data
+path_pgm_data<-"~/ICEWS-Project/Data/pgm_data.Rdata"
+
+#Assign path for data with capitals from all african countries
+path_capital<-"~/ICEWS-Project/Data/capital.csv"
+
+#Assign path to save new data : pgm_icews_data_pg, data_escalation
+path_data_new<-"~/ICEWS-Project/Data"
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################
@@ -12,7 +24,7 @@ library(dplyr)
 ######################################
 
 #Load data set
-data_icews_pgm<-readRDS("data_icews_pgm")
+data_icews_pgm<-readRDS(path_data_icews_pgm)
 
 #Modify Variables
 data<-data_icews_pgm
@@ -286,36 +298,27 @@ data_sum <- data %>%
 
 #Step 3:
 #save as csv data and connect to data sets of choice at PGM level
-#write.csv(data_sum, file="data_escalation_prio.csv", row.names = F)
+write.csv(data_sum, file= paste(path_data_new, "/data_escalation_prio.csv", sep=""), row.names = F)
 
 #---------------------------------------------------------------------------------------------------------------------------
 ######################################################
 # Connect to CM and PGM Data Set by Fritz et al. (2021)
 ######################################################
 
-#Load CM data:
-cm_data = fread("cm_data.csv")
-
 #Load PGM data:
-load("/pgm_data.RData")
+load(path_pgm_data)
 
 
 #Change country names to uniform country names
-cm_data<- cm_data %>% mutate(country_name = replace(country_name, country_name ==   "The Gambia"  ,"Gambia"),
-                             country_name = replace(country_name, country_name ==   "Congo, DRC"  ,"Democratic Republic of Congo"),
-                             year_month   = format(as.Date(cm_data$date, format="%Y-%m-%d"),"%Y-%m"),
-                             key_cameo= paste(year, month, country_name, sep = "_"))
-
 pgm_data<- pgm_data %>% mutate(country_name = replace(country_name, country_name ==   "The Gambia"  ,"Gambia"),
                                country_name = replace(country_name, country_name ==   "Congo, DRC"  ,"Democratic Republic of Congo"),
                                year_month   = format(as.Date(pgm_data$date, format="%Y-%m-%d"),"%Y-%m"),
                                key_cameo= paste(year, month, country_name,  sep = "_"))
 
 
-#Drop all years in Fritz et al. (2021) data set that are not included in our data
 
+#Drop all years in Fritz et al. (2021) data set that are not included in our data
 #all below 1995-01
-cm_data<- cm_data %>% filter(year_month>="1995-01")
 pgm_data<- pgm_data %>% filter(year_month>="1995-01")
 
 
@@ -363,7 +366,7 @@ pgm_icews_data_pg<- left_join(pgm_data,data_sum, by="key_cameo")
 
 
 #Add Variable that indicates if PRIO grid in Capital or not
-capital<-fread("capital.csv")
+capital<-fread(path_capital)
 #Remark:
 #duplicates regarding capital city
 #Prio ID: 123511 - Brazzaville - Congo
@@ -382,7 +385,7 @@ pgm_icews_data_pg$capital_factor<-ifelse(!is.na(pgm_icews_data_pg$capname),1,0)
 # Export and Save Data Sets
 ######################################################
 
-#write.csv(pgm_icews_data_pg, file="pgm_icews_data_pg.csv", row.names = F)
+write.csv(pgm_icews_data_pg, file= paste(path_data_new, "pgm_icews_data_pg.csv", sep=""), row.names = F)
 
 
 
