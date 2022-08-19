@@ -4,7 +4,23 @@
 library(haven)
 library(dplyr)
 
-#Set working directory
+rm(list=ls())
+
+#Assign path for data_icews_cm
+path_data_icews_cm<-"~/ICEWS-Project/Data/data_icews_cm.csv"
+
+#Assign path for pgm_data
+path_cm_data<-"~/ICEWS-Project/Data/cm_data.csv" 
+
+#Assign path for pgm_data , data_escalation
+path_pgm_data<-"~/ICEWS-Project/Data/pgm_data.Rdata"
+
+
+  
+#Assign path to save new data : icews_data_cm and icews_data_pgm 
+path_data_new<-"~/ICEWS-Project/Data"
+
+
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################
@@ -12,7 +28,7 @@ library(dplyr)
 ######################################
 
 #Load data set
-load("~/data_icews_cm.RData")
+data_icews_cm<-read.csv(path_data_icews_cm)
 
 #Modify Variables
 data<-data_icews_cm
@@ -30,8 +46,10 @@ data<- data %>% mutate(Country = replace(Country, Country ==  "Congo, DRC", "Dem
 #Generate 10 variables that operationalize the process of conflict escalation and de-escalation
 
 #Step 0:
-#Req 1: List of CAMEO Codes for Categories LV, NR, D and A
-#Req 2: List of Sectors for Categories GOV, REG, OPP
+#Req 1: List of CAMEO Codes that represent low_level_violence (LV), non_violent_repression (NV),
+#       demand(D) and accommodations (AC)
+#Req 2: List of Source.Sectors and Target.Sectors that represent government (GOV), rebels (REB),
+#       opposition (OPP)
 
 
 low_level_violence<- c("145", "1451","1452","1453", "1454", "170", "180", "183", "171", "175", "186", "191","193")
@@ -160,8 +178,8 @@ rebels<-c("Radicals / Extremists / Fundamentalists","Organized Violent","Rebel",
 opposition<-c("Dissident","Protestors / Popular Opposition / Mobs","Exiles","Opposition Major Party (Out of Government)","Opposition Minor Party (Out of Government)","Opposition Provincial Party (Out of Government)","Opposition Municipal Party (Out of Government)","Banned Parties")
 
 #Step 1: 
-#Classify CAMEO into LV, NR, AC and D
-#Classify Sectors into GOV, REB and OPP
+#Classify CAMEO into LV, NR, AC and D categories 
+#Classify Sectors into GOV, REB and OPP categories
 
 data <- data %>% mutate(low_level_violence = case_when(CAMEO.Code %in% low_level_violence ~ 1,           
                                                        !CAMEO.Code %in% low_level_violence ~ 0),
@@ -232,7 +250,7 @@ data <- data %>%
 
 
 #Step 1.2:
-#Generate 10 Variables at CD Level
+#Generate 10 Variables at CM Level
 
 data<- data %>% mutate( gov_opp_accommodations     =      case_when(source_government == 1 & target_opposition == 1 &  accommodations == 1 ~ 1,
                                                                     TRUE ~ 0),
@@ -286,7 +304,7 @@ data_sum <- data %>%
 
 #Step 3:
 #save as csv data and connect to data sets of choice at CM level
-#write.csv(data_sum, file="data_escalation.csv", row.names = F)
+write.csv(data_sum, file= paste(path_data_new , "/data_escalation.csv", sep=""), row.names = F)
 
 #---------------------------------------------------------------------------------------------------------------------------
 ######################################################
@@ -294,10 +312,11 @@ data_sum <- data %>%
 ######################################################
 
 #Load CM data:
-cm_data = fread("cm_data.csv")
+cm_data<-read.csv(path_data_cm)
 
 #Load PGM data:
 load("/pgm_data.RData")
+
 
 
 #Change country names to uniform country names
@@ -399,8 +418,8 @@ pgm_icews_data<- left_join(pgm_data,data_sum, by="key_cameo")
 # Export and Save Data Sets
 ######################################################
 
-#write.csv(cm_icews_data, file="cm_icews_data.csv", row.names = F)
-#write.csv(pgm_icews_data, file="pgm_icews_data.csv", row.names = F)
+write.csv(cm_icews_data, file= paste(path_data_new, "/cm_icews_data.csv", sep=""), row.names = F)
+write.csv(pgm_icews_data, file= paste(path_data_new, "/pgm_icews_data.csv",sep= ""),  row.names = F)
 
 
 
