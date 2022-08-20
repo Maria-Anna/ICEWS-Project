@@ -6,7 +6,6 @@ library(dplyr)
 library(xtable)
 library(stargazer)
 library(moments)
-<<<<<<< HEAD
 library(gridExtra)
 library(ggplot2)
 library(tidyr)
@@ -14,10 +13,8 @@ library(viridis)
 library(cshapes)
 library(sf)
 library(corrplot)
-=======
 library(ggplot2)
 library(ggcorrplot)
->>>>>>> d55aa0b8975fff164e2adb61481768238d0fb900
 
 
 #Assign path
@@ -531,6 +528,16 @@ ggsave(filename = paste(path_plots,"/Map_escalation_variable.png", sep=""))
 # Correlation Plot 
 #####################################
 
+#Plot correlation between escalation proxies
 
-corrplot(cor(cm_data_sub), tl.col="black")
+#Round Correlation 
+cor<-round(cor(cm_data_sub),3)
 
+#Display Correlation Matrix
+head(cor)
+
+#Make Correlation Plot
+ggcorrplot(cor, hc.order = TRUE, type = "lower",
+           outline.col = "white")
+
+ggsave(filename = paste(path_plots,"/correlation_plot.png", sep=""))
