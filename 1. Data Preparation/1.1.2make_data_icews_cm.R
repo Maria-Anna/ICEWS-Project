@@ -12,7 +12,7 @@ rm(list=ls())
 
 
 #Assign path of events_africa Dataset
-path_events_africa<-"~/ICEWS-Project/Data/events_africa.tsv"
+path_events_africa<-"~/ICEWS-Project/Data/events_africa.csv"
 
 #Assign path of the cm_data Dataset
 path_cm_data<-"~/ICEWS-Project/Data/cm_data.csv"
@@ -27,7 +27,7 @@ path_data_icews_cm<- "~/ICEWS-Project/Data"
 
 #Load ICEWS Events Africa data set
 #Remark: required is "make_events_africa.R"
-events_africa<- read.delim(path_events_africa)
+events_africa<- read.csv(path_events_africa)
 #Set date as date format
 events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
 
@@ -37,10 +37,6 @@ events_africa$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),
 events_africa$Year_month<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
 events_africa$Month<-as.numeric(format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"), "%m"))
 
-
-#Uniquely identify observations
-#Remark: Event ID is NOT unique in the ICEWS data set
-events_africa$ID<- cumsum(!duplicated(events_africa))
 
 #----------------------------------------------------------------------------------------------------------------------------------------------
 ###################################################
@@ -134,7 +130,7 @@ month_code<-month_code[!duplicated(month_code),] #drop duplicates
 month_code$date<-format(as.Date(month_code$date, format="%Y-%m-%d"),"%Y-%m")#change date format for merging
 
 #Generate month ID
-events_africa<-merge(events_africa,month_code, by.x = "Year_month", by.y="date", sort=F)
+events_africa<-merge(events_africa, month_code, by.x = "Year_month", by.y="date", sort=F)
 
 ##############
 #Keys
@@ -191,6 +187,6 @@ data_icews_cm<-events_africa
 
 #Save
 write.csv(data_icews_cm, file = paste(path_data_icews_cm, "/data_icews_cm.csv", sep=""), row.names = FALSE)
-#save(data_icews_cm, file = "data_icews_cm.RData")
+
 
 

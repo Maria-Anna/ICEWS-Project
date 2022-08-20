@@ -70,11 +70,6 @@ duplicates_prio<-duplicates_prio %>% group_by(ID) %>% summarise(n())
 summary(duplicates_prio)
 #Findings: 3 duplicates by ID, one coordinate is assigned to 4 different PRIO grid cells
 
-#Drop duplicates
-#Coordinate is on edge of four PRIO grids, with equal distance to all of the four grid cells
-#Just keep one of the four randomly
-data_icews_pgm<-data_icews_pgm[!duplicated(data_icews_pgm$ID),] 
-
 
 #----------------------------------------------------------------------------------------------------------------------------------------------
 ###################################################
@@ -83,7 +78,6 @@ data_icews_pgm<-data_icews_pgm[!duplicated(data_icews_pgm$ID),]
 
 
 #Save
-#write.csv(data_icews_pgm, file = "~/data_icews_pgm.csv", row.names = FALSE)
 write_rds(data_icews_pgm, file=paste(path_data_icews_pgm, "/data_icews_pgm", sep=""))
 
 

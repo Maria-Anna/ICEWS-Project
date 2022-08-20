@@ -28,6 +28,17 @@ path<- "~/ICEWS-Project/2. Descriptive Analysis/Plots"
 prio_grid_polygons <- st_read(dsn = path_folder_cellshp, layer = "priogrid_cell", stringsAsFactors = F, quiet=T) %>% mutate(gid = as.character(gid))
 
 
+#Drop duplicates
+#Coordinate is on edge of four PRIO grids, with equal distance to all of the four grid cells
+#Just keep one of the four randomly
+data_icews_pgm<-data_icews_pgm[!duplicated(data_icews_pgm$ID),] 
+
+
+#Drop False Coded
+false_coded<-data_icews_pgm%>% filter( Longitude < -50 | Longitude > 64 | Latitude> 40)
+data_icews_pgm<- filter(data_icews_pgm, !Event.ID %in% false_coded$Event.ID)
+
+
 #rm(folder_cellshp, false_coded)
 
 #--------------------------------------------------------------------------------------------------------

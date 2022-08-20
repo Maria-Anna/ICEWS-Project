@@ -5,9 +5,9 @@ library(plyr)
 library(dplyr)
 
 #Assign Path with folder containing all ICEWS Files 
-path<- "~/ICEWS-Project/Data/Datasets_ICEWS: Downloaded"
+path<- "~/ICEWS-Project/Data/Datasets_ICEWS_Downloaded"
 #Assign Path to save the created Data events_africa
-path_events_africa<- "~ICEWS-Project/Data"
+path_events_africa<- "~/ICEWS-Project/Data"
 #set Working Directory
 setwd(path)
 
@@ -74,9 +74,9 @@ events_africa_total$Target.Country<-as.character(events_africa_total$Target.Coun
 #Keep only observations where Source.Country==Target.Country==Country
 events_africa<- subset(events_africa_total, events_africa_total$Country==events_africa_total$Source.Country & events_africa_total$Country==events_africa_total$Target.Country)
 
-#Drop False Coded
-false_coded<-events_africa%>% filter( Longitude < -50 | Longitude > 64 | Latitude> 40)
-events_africa<- filter(events_africa, !Event.ID %in% false_coded$Event.ID)
+#Keep only observations till 31-08-2020
+events_africa<- events_africa %>% filter(Event.Date < "2020-09-01")
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------
 ######################################################
 # Export Data
@@ -85,7 +85,6 @@ events_africa<- filter(events_africa, !Event.ID %in% false_coded$Event.ID)
 #Save data set as csv
 #Remark: relevant data set for future analysis
 write.csv(events_africa, file= paste(path_events_africa, "/events_africa.csv", sep=""), row.names = FALSE)
-
 
 
 
