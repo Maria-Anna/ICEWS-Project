@@ -361,7 +361,7 @@ pgm_data<-pgm_data %>% select(c("key_cameo",
 
 
 
-#Merge two data sets: pgm_data (28 columns) and data_sum (11 columns) by key_cameo
+#Merge two data sets: pgm_data and data_sum by key_cameo
 pgm_icews_data_pg<- left_join(pgm_data,data_sum, by="key_cameo")
 
 
