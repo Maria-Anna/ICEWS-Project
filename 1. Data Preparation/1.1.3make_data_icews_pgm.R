@@ -7,6 +7,7 @@ library(data.table)
 library(tidyr)
 library(tidyselect)
 library(tidyverse)
+library(readr)
 
 
 rm(list=ls())
@@ -49,26 +50,6 @@ data_icews_pgm<- data_icews_pgm[,!(names(data_icews_pgm) %in% c("geometry"))]
 #Remove non-necessary data sets
 #rm(data_icews_cm)
 #rm(prio)
-
-#----------------------------------------------------------------------------------------------------------------------------------------------
-###################################################
-# Prio Grid Validation
-###################################################
-
-#Check for missings of Prio ID
-sum(is.na(data_icews_pgm$gid))
-#Findings:
-#0 missings
-
-#Check for duplicates in ID
-duplicates_prio<- data_icews_pgm[duplicated(data_icews_pgm$ID),]
-#Findings: 330231 duplicates
-#Remark: Coordinate is on edge of four PRIO grids
-
-#Check for duplicates by grouped ID
-duplicates_prio<-duplicates_prio %>% group_by(ID) %>% summarise(n())
-summary(duplicates_prio)
-#Findings: 3 duplicates by ID, one coordinate is assigned to 4 different PRIO grid cells
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------
