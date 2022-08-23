@@ -15,12 +15,16 @@ library(gganimate)
 library(gifski)
 library(transformr)
 
+
+rm(list=ls())
+
 #Assign Path
 path_data_icews_pgm<-"~/ICEWS-Project/Data/data_icews_pgm"
 path_folder_cellshp<-"~/ICEWS-Project/Data/priogrid_cellshp"
 
 #Read ICEWS
 data_icews_pgm<-readRDS(path_data_icews_pgm)
+
 #Path were the plots should be saved
 path<- "~/ICEWS-Project/2. Descriptive Analysis/Plots"
 
@@ -35,8 +39,9 @@ data_icews_pgm<-data_icews_pgm[!duplicated(data_icews_pgm$ID),]
 
 
 #Drop False Coded
-false_coded<-data_icews_pgm%>% filter( Longitude < -50 | Longitude > 64 | Latitude> 40)
+false_coded<-data_icews_pgm%>% filter(Longitude < -50 | Longitude > 64 | Latitude> 40)
 data_icews_pgm<- filter(data_icews_pgm, !Event.ID %in% false_coded$Event.ID)
+
 
 
 #rm(folder_cellshp, false_coded)
@@ -124,6 +129,8 @@ count_events_country<-data_icews_pgm %>%
 count_events<- count_events %>% left_join(count_events_country, by="Country")
 count_events$rel<- count_events$n.x / count_events$n.y
 
+
+
 #Assign every Polygon to a relative Number
 count_events_poly<-left_join(africa_polygons,count_events)
 count_events_poly[is.na(count_events_poly)] <- 0 #Assign 0 to NA
@@ -163,6 +170,8 @@ ggsave(filename=paste("Relative_Prio_Map_Events_noNA",".png", sep=""), width= 9,
 
 
 #rm(count_events_country, count_events_poly, count_events_poly_0, count_events)
+
+
 #-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ###############################################
 ########### Capital Analysis Somalia  #########
@@ -234,9 +243,9 @@ ggsave(filename=paste("Relative_Prio_Events_in_",state,"_capital",".png", sep=""
 
 #Make map for Single Country
   map_noth_east<-map_africa %>% filter(country_name == state)
-  africa_polygons<-semi_join(prio_grid_polygons, map_noth_east)
+  country_polygons<-semi_join(prio_grid_polygons, map_noth_east)
 #Assign every Polygon a relative Number
-  count_events_poly<-left_join(africa_polygons,count_events)
+  count_events_poly<-left_join(country_polygons,count_events)
   count_events_poly[is.na(count_events_poly)] <- 0 #Assign 0 to NA
   
   
@@ -284,7 +293,27 @@ count_events<-data_icews_pgm %>%
   count_events<- count_events %>% left_join(count_events_country, by=c("Country", "year"))
   count_events$rel<- count_events$n.x / count_events$n.y
   
+
+  #Make a data set such that every gid is assigned to every possible year
+  #we do this because otherwise the animated plot has breaks. For the years that 
+  #is no data available we assign them to a relative frequency of 0
   
+  #Data frame with all gids that are part of the african map
+  gid<-data.frame(gid=africa_polygons$gid)
+  #Data frame with all years that appear in the icews dataset
+  year<-data.frame(year=seq(1995, 2021, by=1))
+  #Evers gid appears 27 times, so for each available year
+  data<-gid %>% merge(year)
+  
+  #Join the above created dataframe with the counts per year dataframe
+  count_events<-data %>% left_join(count_events, by=c("gid","year"))
+  
+  #The borders of some Countries changend over time, so some grid ids appear more than 27 times
+  #Drop the wrong grids
+  count_events<-count_events[!duplicated(count_events[c(1,2)]),]  
+  
+  
+    
 #Assign every Polygon to a relative Number
 count_events_poly<-left_join(africa_polygons,count_events)
 count_events_poly[is.na(count_events_poly)]<- 0 #Assign 0 to NA
@@ -337,16 +366,19 @@ anim_save("Animation_Map_noNA.gif", path=path)
 #Plot only for a specific state
 #For example only for Somalia
 
+
 #Filter State of Interest
 state<- "Somalia"
 
 #Make map for Single Country
 map_noth_east<-map_africa %>% filter(country_name %in% state)
-africa_polygons<-semi_join(prio_grid_polygons, map_noth_east)
+country_polygons<-semi_join(prio_grid_polygons, map_noth_east)
+
 #Assign every Polygon a relative Number
-count_events_poly_state<-left_join(africa_polygons,count_events)
+count_events_poly_state<-left_join(country_polygons,count_events)
 count_events_poly_state[is.na(count_events_poly_state)] <- 0 #Assign 0 to NA
 count_events_poly_state$year<-as.character(count_events_poly_state$year) #Year as character
+
 
 #Ggplot for single Country with polygons
 plot<-ggplot() + 
@@ -368,7 +400,7 @@ plot<-ggplot() +
 
 
 #Animate Plot
-plot.animation<-plot + transition_manual(year)+ labs(subtitle = "Year: {current_frame}")
+plot_animation<-plot + transition_manual(year)+ labs(subtitle = "Year: {current_frame}")
 animate(plot_animation, nframes= length(unique(count_events_poly$year)), fps=1,
         #For Latex
         #renderer = file_renderer( prefix = "Animation_Map_Somalia", overwrite = TRUE)

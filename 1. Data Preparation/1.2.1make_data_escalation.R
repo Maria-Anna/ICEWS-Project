@@ -10,7 +10,7 @@ rm(list=ls())
 path_data_icews_cm<-"~/ICEWS-Project/Data/data_icews_cm.csv"
 
 #Assign path for pgm_data
-path_cm_data<-"~/ICEWS-Project/Data/cm_data.csv" 
+path_data_cm<-"~/ICEWS-Project/Data/cm_data.csv" 
 
 #Assign path for pgm_data , data_escalation
 path_pgm_data<-"~/ICEWS-Project/Data/pgm_data.Rdata"
@@ -315,7 +315,7 @@ write.csv(data_sum, file= paste(path_data_new , "/data_escalation.csv", sep=""),
 cm_data<-read.csv(path_data_cm)
 
 #Load PGM data:
-load("/pgm_data.RData")
+load(path_pgm_data)
 
 
 

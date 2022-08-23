@@ -37,7 +37,7 @@ events_africa$Year<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),
 events_africa$Year_month<-format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"),"%Y-%m") 
 events_africa$Month<-as.numeric(format(as.Date(events_africa$Event.Date, format="%Y-%m-%d"), "%m"))
 
-
+events_africa$ID<- cumsum(!duplicated(events_africa))
 #----------------------------------------------------------------------------------------------------------------------------------------------
 ###################################################
 #Load cm_data by Fritz et al. (2021)

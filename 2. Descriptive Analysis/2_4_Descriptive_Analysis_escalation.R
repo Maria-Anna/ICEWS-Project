@@ -22,7 +22,6 @@ path_cm_icews_data<-"~/ICEWS-Project/Data/cm_icews_data.csv"
 
 path_plots<- "~/ICEWS-Project/2. Descriptive Analysis/Plots"
 
-
 #-------------------------------------------------------------------------------------------------------------------------------------#
 ########################
 #Data Preparation

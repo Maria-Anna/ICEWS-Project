@@ -1,4 +1,4 @@
-################################################################ ESTIMATE MODELS WITH MCW and ICEWS ####################################################################
+################################################################ ESTIMATE MODELS WITH MCW and ICEWS: CM and PGM ####################################################################
 
 #Remark: Fritz et al. (2021) estimation model with MCW, with data from 1995-01-01 till 2020-08-01 and ICEWS escalation variables
 # + NAs are replaced by 0
@@ -14,25 +14,35 @@ library(pryr)
 library(DEoptim)
 library(dplyr)
 
+rm(list=ls())
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ##################
 #Data Preparation
 ##################
 
-#Set working directory
+#Assign paths
+path_cm_icews_data<-"~/ICEWS-Project/Data/cm_icews_data.csv"
+path_pgm_icews_data<-"~/ICEWS-Project/Data/pgm_icews_data_pg.csv"
+
+#Assing Folder for Predictions
+path_prediction<-"~/ICEWS-Project/3. Model/Predictions/Prediction_ICEWS_CM_PGM_CAP_DIST"
 
 #Run helper functions script
-rm(list=ls())
-source('helper_functions.R')
+source('~/ICEWS-Project/3. Model/helper_functions.R')
 
 #Load data sets
+cm_data = fread(path_cm_icews_data)
+pgm_data = fread(path_pgm_icews_data)
 
-cm_data = fread("cm_icews_data.csv")
-pgm_data = fread("pgm_icews_data.csv")
 
 #Replace NA with 0 (missing events on country-month level are interpreted as 0 events)
 cm_data[is.na(cm_data),]<-0
 pgm_data[is.na(pgm_data),]<-0
+
+#Change column name
+names(pgm_data)[47]<-paste("cap_fac")
+pgm_data$cap_fac<-as.factor(pgm_data$cap_fac)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ############################################
@@ -69,7 +79,7 @@ pgm_data$country_id = tmp_data$country_id[match(pgm_data$country_name,tmp_data$c
 #PART I: PREDICTION
 
 #Create directory for the predictions 
-dir.create(path = "Prediction_ICEWS_Low")
+dir.create(path = path_prediction)
 
 #set time
 time_beginning = Sys.time()
@@ -124,10 +134,10 @@ for(i in 1:length(dates)){
                         s(name_fac, bs="re") +
                         #log1p(reb_gov_demands) +
                         #log1p(opp_gov_demands) +
-                        #log1p(gov_opp_accommodations) +
-                        #log1p(gov_reb_accommodations) +
-                        #log1p(gov_opp_nonviol_repression) +
-                        #log1p(gov_reb_nonviol_repression) +
+                        log1p(gov_opp_accommodations) +
+                        log1p(gov_reb_accommodations) +
+                        log1p(gov_opp_nonviol_repression) +
+                        log1p(gov_reb_nonviol_repression) +
                         log1p(reb_gov_low_level) +
                         log1p(opp_gov_low_level) + 
                         log1p(gov_reb_low_level) +
@@ -155,17 +165,17 @@ for(i in 1:length(dates)){
                        log(milit_exp) +
                        pgd_capdist*log1p(mcw_receiver_rolling)+ #new included interaction
                        pgd_capdist*log1p(mcw_receiver_acute) + #new included interaction
-                       te(long, lat), #+
-                     #log1p(reb_gov_demands) +
-                     #log1p(opp_gov_demands) +
-                     #log1p(gov_opp_accommodations) +
-                     #log1p(gov_reb_accommodations) +
-                     #log1p(gov_opp_nonviol_repression) +
-                     #log1p(gov_reb_nonviol_repression) +
-                     log1p(reb_gov_low_level) +
-                     log1p(opp_gov_low_level) + 
-                     log1p(gov_reb_low_level) +
-                     log1p(gov_opp_low_level) ,
+                       te(long, lat) +
+                       #log1p(reb_gov_demands) +
+                       #log1p(opp_gov_demands) +
+                       log1p(gov_opp_accommodations)*pgd_capdist +
+                       log1p(gov_reb_accommodations)*pgd_capdist +
+                       log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                       log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                       log1p(reb_gov_low_level)*pgd_capdist +
+                       log1p(opp_gov_low_level)*pgd_capdist + 
+                       log1p(gov_reb_low_level)*pgd_capdist +
+                       log1p(gov_opp_low_level)*pgd_capdist ,
                      data  = all_data$train_data_stage_2 ,family = binomial(), #data set used: date target (upshifted date by lag s) goes from 2003-12-01 till 2016-10-01 (t-s-1, 2017-01-01 -3 = 2016-10-01)
                      discrete = T,nthreads = 20,use.chol = T)
     
@@ -188,17 +198,17 @@ for(i in 1:length(dates)){
                         log(milit_exp) +
                         pgd_capdist*log1p(mcw_receiver_rolling)+
                         pgd_capdist* log1p(mcw_receiver_acute) +
-                        te(long, lat), #+
-                      #log1p(reb_gov_demands) +
-                      #log1p(opp_gov_demands) +
-                      #log1p(gov_opp_accommodations) +
-                      #log1p(gov_reb_accommodations) +
-                      #log1p(gov_opp_nonviol_repression) +
-                      #log1p(gov_reb_nonviol_repression) +
-                      log1p(reb_gov_low_level) +
-                      log1p(opp_gov_low_level) + 
-                      log1p(gov_reb_low_level) +
-                      log1p(gov_opp_low_level) ,
+                        te(long, lat) +
+                        #log1p(reb_gov_demands) +
+                        #log1p(opp_gov_demands) +
+                        log1p(gov_opp_accommodations)*pgd_capdist +
+                        log1p(gov_reb_accommodations)*pgd_capdist +
+                        log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                        log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                        log1p(reb_gov_low_level)*pgd_capdist +
+                        log1p(opp_gov_low_level)*pgd_capdist + 
+                        log1p(gov_reb_low_level)*pgd_capdist +
+                        log1p(gov_opp_low_level)*pgd_capdist ,
                       data  = all_data$train_data_stage_3 ,family = ztpoisson(),#data set used: date target (upshifted date by lag s) goes from 2003-12-01 till 2016-10-01 (t-s-1, 2017-01-01 -3 = 2016-10-01)
                       discrete = T, nthreads = 20,use.chol = T)
     
@@ -249,7 +259,7 @@ for(i in 1:length(dates)){
     }
     
     
-    date_change = paste0("Prediction_ICEWS_Low/final_treshold", gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+    date_change = paste0(path_prediction, "/final_treshold", gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv", sep="" )
     
     writeLines(paste0("Found Tresholds are ", paste(round(alt_optimal_thresholds, digits = 3),collapse = " "), 
                       " and ",paste(round(optimal_thresholds, digits = 3),collapse = " "),"\n"))
@@ -280,10 +290,10 @@ for(i in 1:length(dates)){
                         s(name_fac, bs="re") +
                         #log1p(reb_gov_demands) +
                         #log1p(opp_gov_demands) +
-                        #log1p(gov_opp_accommodations) +
-                        #log1p(gov_reb_accommodations) +
-                        #log1p(gov_opp_nonviol_repression) +
-                        #log1p(gov_reb_nonviol_repression) +
+                        log1p(gov_opp_accommodations) +
+                        log1p(gov_reb_accommodations) +
+                        log1p(gov_opp_nonviol_repression) +
+                        log1p(gov_reb_nonviol_repression) +
                         log1p(reb_gov_low_level) +
                         log1p(opp_gov_low_level) + 
                         log1p(gov_reb_low_level) +
@@ -308,17 +318,17 @@ for(i in 1:length(dates)){
                        log(milit_exp) +
                        pgd_capdist*log1p(mcw_receiver_rolling)+
                        pgd_capdist*log1p(mcw_receiver_acute) +
-                       te(long, lat), #+
-                     #log1p(reb_gov_demands) +
-                     #log1p(opp_gov_demands) +
-                     #log1p(gov_opp_accommodations) +
-                     #log1p(gov_reb_accommodations) +
-                     #log1p(gov_opp_nonviol_repression) +
-                     #log1p(gov_reb_nonviol_repression) +
-                     log1p(reb_gov_low_level) +
-                     log1p(opp_gov_low_level) + 
-                     log1p(gov_reb_low_level) +
-                     log1p(gov_opp_low_level) , 
+                       te(long, lat) +
+                       #log1p(reb_gov_demands) +
+                       #log1p(opp_gov_demands) +
+                       log1p(gov_opp_accommodations)*pgd_capdist +
+                       log1p(gov_reb_accommodations)*pgd_capdist +
+                       log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                       log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                       log1p(reb_gov_low_level)*pgd_capdist +
+                       log1p(opp_gov_low_level)*pgd_capdist + 
+                       log1p(gov_reb_low_level)*pgd_capdist +
+                       log1p(gov_opp_low_level)*pgd_capdist , 
                      data  = all_data$train_data_stage_2 ,family = binomial(),
                      discrete = T,nthreads = 20,use.chol = T)
     
@@ -337,17 +347,17 @@ for(i in 1:length(dates)){
                         log(milit_exp) +
                         pgd_capdist*log1p(mcw_receiver_rolling)+
                         pgd_capdist* log1p(mcw_receiver_acute) +
-                        te(long, lat), #+
-                      #log1p(reb_gov_demands) +
-                      #log1p(opp_gov_demands) +
-                      #log1p(gov_opp_accommodations) +
-                      #log1p(gov_reb_accommodations) +
-                      #log1p(gov_opp_nonviol_repression) +
-                      #log1p(gov_reb_nonviol_repression) +
-                      log1p(reb_gov_low_level) +
-                      log1p(opp_gov_low_level) + 
-                      log1p(gov_reb_low_level) +
-                      log1p(gov_opp_low_level) ,
+                        te(long, lat) +
+                        #log1p(reb_gov_demands) +
+                        #log1p(opp_gov_demands) +
+                        log1p(gov_opp_accommodations)*pgd_capdist +
+                        log1p(gov_reb_accommodations)*pgd_capdist +
+                        log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                        log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                        log1p(reb_gov_low_level)*pgd_capdist +
+                        log1p(opp_gov_low_level)*pgd_capdist + 
+                        log1p(gov_reb_low_level)*pgd_capdist +
+                        log1p(gov_opp_low_level)*pgd_capdist ,
                       data  = all_data$train_data_stage_3 ,family = ztpoisson(),
                       discrete = T, nthreads = 20,use.chol = T)
     
@@ -410,7 +420,7 @@ for(i in 1:length(dates)){
       all_data$pgm_data_comp$pred_stage_3[is.na(all_data$pgm_data_comp$pred_final_untuned)] 
     
     
-    date_change = paste0("Prediction_ICEWS_Low/with_mcw_result_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+    date_change = paste0(path_prediction, "/with_mcw_result_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv", sep="" )
     
     #STEP 5.4: save results
     
@@ -492,8 +502,7 @@ for(i in 1:length(dates)){
 time_beginning = Sys.time()
 
 #set relevant lags (dates do not need to be set anymore): lags between 2 and 7 months
-
-s_values = 2:7
+s_values = 2
 
 ###############################################################################################
 
@@ -533,10 +542,10 @@ for(s in s_values) {
                       s(name_fac, bs="re") +
                       #log1p(reb_gov_demands) +
                       #log1p(opp_gov_demands) +
-                      #log1p(gov_opp_accommodations) +
-                      #log1p(gov_reb_accommodations) +
-                      #log1p(gov_opp_nonviol_repression) +
-                      #log1p(gov_reb_nonviol_repression) +
+                      log1p(gov_opp_accommodations) +
+                      log1p(gov_reb_accommodations) +
+                      log1p(gov_opp_nonviol_repression) +
+                      log1p(gov_reb_nonviol_repression) +
                       log1p(reb_gov_low_level) +
                       log1p(opp_gov_low_level) + 
                       log1p(gov_reb_low_level) +
@@ -565,14 +574,14 @@ for(s in s_values) {
                      te(long, lat) +
                      #log1p(reb_gov_demands) +
                      #log1p(opp_gov_demands) +
-                     #log1p(gov_opp_accommodations) +
-                     #log1p(gov_reb_accommodations) +
-                     #log1p(gov_opp_nonviol_repression) +
-                     #log1p(gov_reb_nonviol_repression) +
-                     log1p(reb_gov_low_level) +
-                     log1p(opp_gov_low_level) + 
-                     log1p(gov_reb_low_level) +
-                     log1p(gov_opp_low_level) , data  = all_data$train_data_stage_2 ,family = binomial(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
+                     log1p(gov_opp_accommodations)*pgd_capdist +
+                     log1p(gov_reb_accommodations)*pgd_capdist +
+                     log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                     log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                     log1p(reb_gov_low_level)*pgd_capdist +
+                     log1p(opp_gov_low_level)*pgd_capdist + 
+                     log1p(gov_reb_low_level)*pgd_capdist +
+                     log1p(gov_opp_low_level)*pgd_capdist , data  = all_data$train_data_stage_2 ,family = binomial(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
                    discrete = T,nthreads = 20,use.chol = T)
   
   
@@ -594,14 +603,14 @@ for(s in s_values) {
                       te(long, lat) +
                       #log1p(reb_gov_demands) +
                       #log1p(opp_gov_demands) +
-                      #log1p(gov_opp_accommodations) +
-                      #log1p(gov_reb_accommodations) +
-                      #log1p(gov_opp_nonviol_repression) +
-                      #log1p(gov_reb_nonviol_repression) +
-                      log1p(reb_gov_low_level) +
-                      log1p(opp_gov_low_level) + 
-                      log1p(gov_reb_low_level) +
-                      log1p(gov_opp_low_level) , data  = all_data$train_data_stage_3 ,family = ztpoisson(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
+                      log1p(gov_opp_accommodations)*pgd_capdist +
+                      log1p(gov_reb_accommodations)*pgd_capdist +
+                      log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                      log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                      log1p(reb_gov_low_level)*pgd_capdist +
+                      log1p(opp_gov_low_level)*pgd_capdist + 
+                      log1p(gov_reb_low_level)*pgd_capdist +
+                      log1p(gov_opp_low_level)*pgd_capdist , data  = all_data$train_data_stage_3 ,family = ztpoisson(), #the data set used includes observations till date target 2020-07-01 (date 2020-05-01)
                     discrete = T, nthreads = 20,use.chol = T)
   
   class(try_model_1)[1] = "gam"
@@ -675,10 +684,10 @@ for(s in s_values) {
                       s(name_fac, bs="re") +
                       #log1p(reb_gov_demands) +
                       #log1p(opp_gov_demands) +
-                      #log1p(gov_opp_accommodations) +
-                      #log1p(gov_reb_accommodations) +
-                      #log1p(gov_opp_nonviol_repression) +
-                      #log1p(gov_reb_nonviol_repression) +
+                      log1p(gov_opp_accommodations) +
+                      log1p(gov_reb_accommodations) +
+                      log1p(gov_opp_nonviol_repression) +
+                      log1p(gov_reb_nonviol_repression) +
                       log1p(reb_gov_low_level) +
                       log1p(opp_gov_low_level) + 
                       log1p(gov_reb_low_level) +
@@ -705,14 +714,14 @@ for(s in s_values) {
                      te(long, lat) +
                      #log1p(reb_gov_demands) +
                      #log1p(opp_gov_demands) +
-                     #log1p(gov_opp_accommodations) +
-                     #log1p(gov_reb_accommodations) +
-                     #log1p(gov_opp_nonviol_repression) +
-                     #log1p(gov_reb_nonviol_repression) +
-                     log1p(reb_gov_low_level) +
-                     log1p(opp_gov_low_level) + 
-                     log1p(gov_reb_low_level) +
-                     log1p(gov_opp_low_level) ,data  = all_data$train_data_stage_2 ,family = binomial(),
+                     log1p(gov_opp_accommodations)*pgd_capdist +
+                     log1p(gov_reb_accommodations)*pgd_capdist +
+                     log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                     log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                     log1p(reb_gov_low_level)*pgd_capdist +
+                     log1p(opp_gov_low_level)*pgd_capdist + 
+                     log1p(gov_reb_low_level)*pgd_capdist +
+                     log1p(gov_opp_low_level)*pgd_capdist ,data  = all_data$train_data_stage_2 ,family = binomial(),
                    discrete = T,nthreads = 20,use.chol = T)
   
   
@@ -734,14 +743,14 @@ for(s in s_values) {
                       te(long, lat) +
                       #log1p(reb_gov_demands) +
                       #log1p(opp_gov_demands) +
-                      #log1p(gov_opp_accommodations) +
-                      #log1p(gov_reb_accommodations) +
-                      #log1p(gov_opp_nonviol_repression) +
-                      #log1p(gov_reb_nonviol_repression) +
-                      log1p(reb_gov_low_level) +
-                      log1p(opp_gov_low_level) + 
-                      log1p(gov_reb_low_level) +
-                      log1p(gov_opp_low_level) , data  = all_data$train_data_stage_3 ,family = ztpoisson(),
+                      log1p(gov_opp_accommodations)*pgd_capdist +
+                      log1p(gov_reb_accommodations)*pgd_capdist +
+                      log1p(gov_opp_nonviol_repression)*pgd_capdist +
+                      log1p(gov_reb_nonviol_repression)*pgd_capdist +
+                      log1p(reb_gov_low_level)*pgd_capdist +
+                      log1p(opp_gov_low_level)*pgd_capdist + 
+                      log1p(gov_reb_low_level)*pgd_capdist +
+                      log1p(gov_opp_low_level)*pgd_capdist , data  = all_data$train_data_stage_3 ,family = ztpoisson(),
                     discrete = T, nthreads = 20,use.chol = T)
   
   
@@ -800,7 +809,7 @@ for(s in s_values) {
     all_data$pgm_data_comp$pred_stage_3[is.na(all_data$pgm_data_comp$pred_final_untuned)] 
   
   
-  date_change = paste0("Prediction_ICEWS_Low/real_mcw_forecast_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+  date_change = paste0(path_prediction, "/real_mcw_forecast_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" , sep="")
   
   #save predictions
   result = data.table(date = tmp_date, 
@@ -829,23 +838,24 @@ for(s in s_values) {
   gc(full = T)
   # save the models for s = 2 
   if(s == 2){
-    save(try_model_1,file =  "Prediction_ICEWS_Low/models/try_model_1_s2.RData")
-    save(try_model_2,file =  "Prediction_ICEWS_Low/models/try_model_2_s2.RData")
-    save(try_model_3,file =  "Prediction_ICEWS_Low/models/try_model_3_s2.RData")
+    save(try_model_1,file =  paste(path_prediction,"/models/try_model_1_s2.RData", sep=""))
+    save(try_model_2,file =  paste(path_prediction,"/models/try_model_2_s2.RData", sep=""))
+    save(try_model_3,file =  paste(path_prediction,"/models/try_model_3_s2.RData", sep=""))
     data_pg = all_data$pgm_data_comp
-    save(data_pg, file = "Prediction_ICEWS_Low/models/data_pg_s2.RData")
+    save(data_pg, file = paste(path_prediction,"/models/data_pg_s2.RData", sep=""))
     data_c = all_data$cm_data_comp
-    save(data_c, file = "Prediction_ICEWS_Low/models/data_c_s2.RData")
+    save(data_c, file = paste(path_prediction,"/models/data_c_s2.RData", sep=""))
   }
   if(s == 7){
-    save(try_model_1,file =  "Prediction_ICEWS_Low/models/try_model_1_s7.RData")
-    save(try_model_2,file =  "Prediction_ICEWS_Low/models/try_model_2_s7.RData")
-    save(try_model_3,file =  "Prediction_ICEWS_Low/models/try_model_3_s7.RData")
+    save(try_model_1,file =  paste(path_prediction,"/models/try_model_1_s7.RData", sep=""))
+    save(try_model_2,file =  paste(path_prediction,"/models/try_model_2_s7.RData", sep=""))
+    save(try_model_3,file =  paste(path_prediction,"/models/try_model_3_s7.RData", sep=""))
     data_pg = all_data$pgm_data_comp
-    save(data_pg, file = "Prediction_ICEWS_Low/models/data_pg_s7.RData")
+    save(data_pg, file = paste(path_prediction,"/models/data_pg_s7.RData",sep=""))
     data_c = all_data$cm_data_comp
-    save(data_c, file = "Prediction_ICEWS_Low/models/data_c_s7.RData")
+    save(data_c, file = paste(path_prediction,"/models/data_c_s7.RData", sep=""))
   }
+  
   rm(try_model_1, try_model_2, try_model_3,result,all_data)
   
 }

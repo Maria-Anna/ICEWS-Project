@@ -1,0 +1,85 @@
+Models: 
+Short Summary: 
+
+Semiparametrical hierarchical model, with tree stages. The first stage takes always a data frame that is at the country month (cm) level. The second and third stage take always data frame that is at the prio grid cell month (pgm) level. The aim of the model is to predict the number of fatalities in a state based conflict (future_ged_dummy_sb).
+
+This model was presented in the paper of Fritz et.al. in 2021 
+Our aim is to include the escalation variables, that we generated in the previuous steps and are motivated by the paper of Blair and Sambanis. The main question is how much information can provide these variables when it comes to predict the number of fatalities in a state based conflict (future_ged_dummy_sb). All Variables were included with their logarithmic value plus one (log1p).
+For a quick reminder of the variables take a look at make_data_escalation.Readme
+
+---------------------------------------------------------------------------------------------------------
+CM Level:
+
+Datasets: 
+stage 1: cm_icews_data.csv
+stage 2 and 3: pgm_icews_data.csv
+
+Models: 
+
+esc: 
+All logarithmic variables are included linear in the model, in all stages without any interactions. 
+Prediction in:  Prediction_ICEWS
+
+esc_int_capdist: 
+All logarithmic variables are interacted with pgd_capdist, the Distance of a grid cell to the capital,  in the 2. and 3. stage.
+Prediction in : Prediction_ICEWS_cm_cap
+
+only_low: 
+Only logarithmic low-level-violence Variables are included in the model without interactions. 
+Prediction in : Prediction_ICEWS_Low
+
+esc_no_dem: 
+Demands Variables are excluded from the model. All other variables are included linear, without interactions
+
+aggreg_2: 
+Both data sets are aggregated over 2 months. The idea is that the effect of the escalation variables is visible after 2 months + current lag. 
+
+aggreg3:
+Both data sets are aggregated over 3 months. The idea is that the effect of the escalation variables is visible after 3 months + current lag. 
+
+---------------------------------------------------------------------------------------------------------
+CM and PGM Level: 
+
+Datasets: 
+stage 1: cm_icews_data.csv
+stage 2 and 3: pgm_icews_data_pg.csv
+
+Models: 
+
+model_cm_pgm_capfac: 
+All logarithmic variables are included linear in the model, in all stages without any interactions. 
+Predictions in : Prediction_ICEWS_CM_PGM_NO_INT
+
+model_cm_pgm_cap_dist :
+All logarithmic variables are interacted with pgd_capdist, the Distance of a grid cell to the capital,  in the 2. and 3. stage. 
+Predictions in:  Prediction_ICEWS_CM_PGM_CAP_DIST
+
+cm_pgm_cap_fac: 
+All logarithmic variables are interacted with cap_fac, in the 2. and 3. stage. cap_fac is  a boolian variable for the presents of the capital in the prio grid cell.
+Predictions in: Prediction_ICEWS_CM_PGM_NO_INT
+
+---------------------------------------------------------------------------------------------------------
+Fritz_et_al_2021:
+
+To compare the performance of the above models with the benchmark, the model presented in Fritz et. al. We need sometimes to have the same time periods. 
+
+Datasets: 
+stage 1: cm_data.csv
+stage 2 and 3: pgm_data.Rdata
+
+Models: 
+
+estimate_models: 
+Model as it was provided. 
+Predictions in: Prediction
+
+estimate_models_filtered: 
+The time frame need to be from 1995 to 2020. Filter the two datasets, to match the requiered time frame. 
+Predictions in: Prediction_filtered
+
+estimate_models_filtered_window_2: 
+Dataframes are aggregated over 2 months +lag
+
+estimate_models_filtered_window_3: 
+Dataframes are aggregated over 3 months +lag
+

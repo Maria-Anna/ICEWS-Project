@@ -12,21 +12,29 @@ library(lubridate)
 library(pryr)
 library(DEoptim)
 library(dplyr)
+rm(list=ls())
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ##################
 #Data Preparation
 ##################
 
-#Set working directory
+#Assign paths
+path_cm_data<-"~/ICEWS-Project/Data/cm_data.csv"
+path_pgm_data<-"~/ICEWS-Project/Data/pgm_data.Rdata"
+
+#Assign Folder for Predictions
+path_prediction<-"~/ICEWS-Project/3. Model/Predictions/Prediction"
+
 
 #Run helper functions script
-rm(list=ls())
-source('helper_functions.R')
+source('~/ICEWS-Project/3. Model/helper_functions.R')
+
 
 #Load data sets
-cm_data = fread("cm_data.csv")
-load("pgm_data.RData")
+cm_data = fread(path_cm_data)
+load(path_pgm_data)
+
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ############################################
@@ -63,7 +71,7 @@ pgm_data$country_id = tmp_data$country_id[match(pgm_data$country_name,tmp_data$c
 #PART I: PREDICTION
 
 #Create directory for the predictions 
-dir.create(path = "Prediction")
+dir.create(path = path_prediction)
 
 #set time
 time_beginning = Sys.time()
@@ -212,7 +220,7 @@ for(i in 1:length(dates)){
     }
     
     
-    date_change = paste0("Prediction/final_treshold", gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+    date_change = paste0(path_prediction, "/final_treshold", gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
     
     writeLines(paste0("Found Tresholds are ", paste(round(alt_optimal_thresholds, digits = 3),collapse = " "), 
                       " and ",paste(round(optimal_thresholds, digits = 3),collapse = " "),"\n"))
@@ -342,7 +350,7 @@ for(i in 1:length(dates)){
       all_data$pgm_data_comp$pred_stage_3[is.na(all_data$pgm_data_comp$pred_final_untuned)] 
     
     
-    date_change = paste0("Prediction/with_mcw_result_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+    date_change = paste0(path_prediction, "/with_mcw_result_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
     
     #STEP 5.4: save results
     
@@ -673,7 +681,7 @@ for(s in s_values) {
     all_data$pgm_data_comp$pred_stage_3[is.na(all_data$pgm_data_comp$pred_final_untuned)] 
   
   
-  date_change = paste0("Prediction/real_mcw_forecast_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
+  date_change = paste0(path_prediction, "/real_mcw_forecast_t_",gsub(pattern = "-",replacement = "_",x = tmp_date), "_s_",s,".csv" )
   
   #save predictions
   result = data.table(date = tmp_date, 
@@ -702,16 +710,18 @@ for(s in s_values) {
   gc(full = T)
   # save the models for s = 2 
   if(s == 2){
-    save(try_model_1,file =  "Prediction/models/try_model_1.RData")
-    save(try_model_2,file =  "Prediction/models/try_model_2.RData")
-    save(try_model_3,file =  "Prediction/models/try_model_3.RData")
+    save(try_model_1,file =  paste0(path_prediction, "/models/try_model_1.RData"))
+    save(try_model_2,file =  paste0(path_prediction,"/models/try_model_2.RData"))
+    save(try_model_3,file =  paste0(path_prediction,"/models/try_model_3.RData"))
     data_pg = all_data$pgm_data_comp
-    save(data_pg, file = "Prediction/models/data_pg.RData")
+    save(data_pg, file = paste0(path_prediction,"/models/data_pg.RData"))
     data_c = all_data$cm_data_comp
-    save(data_c, file = "Prediction/models/data_c.RData")
+    save(data_c, file = paste0(path_prediction,"/models/data_c.RData"))
   }
   
   rm(try_model_1, try_model_2, try_model_3,result,all_data)
   
 }
+
+
 
