@@ -1,0 +1,14 @@
+Short Summary:
+
+Descriptive analysis of the generated escalation variables. There are 10 Variables that are likely to have an effect on the prediction of fatalities in a state based conflict. We visualise here these variables that we generated in before in make_data_escalation.R 
+
+-----------------------------------------------------------------------------------------------------------
+Main questions: 
+
+-In how many cases, do we have missings?
+-What is the media, the averange, the minimum and the maximum for every variable?
+-What is the skewness of the variables?
+-How are they distributed?
+-How do the variables change over time and is there any visual relation to state based conflicts? 
+-Are the variables correlated?
+-How are they spread geographically across africa?

@@ -6,8 +6,6 @@ library(dplyr)
 library(lubridate)
 library(gridExtra)
 library(grid)
-library(rnaturalearth)
-library(rnaturalearthdata)
 library(sf)
 library(ggpmisc)
 library(geometry)
@@ -15,6 +13,9 @@ library(cowplot)
 library(gridBase)
 library(gridGraphics)
 library(data.table)
+library(cshapes)
+library(stargazer)
+library(xtable)
 
 #Assign paths
 path_data_icews_cm<-"~/ICEWS-Project/Data/data_icews_cm.csv"
@@ -73,7 +74,7 @@ stargazer(data_icews_cm, summary.stat = c("mean", "median", "min", "max", "sd", 
 
 #Generate table with missings for latex
 data_icews_cm_na <-as.data.frame(colSums(is.na(data_icews_cm)))
-print(xtable(data_icews_cm_na, type = "latex"), file = paste(path_plot,"/missings_data_icews_cm.tex", sep=""))
+#print(xtable(data_icews_cm_na, type = "latex"), file = paste(path_plots,"/missings_data_icews_cm.tex", sep=""))
 
 
 #Check for duplicates in data set
@@ -111,10 +112,10 @@ duplicates_story_id <- data_icews_cm %>%
 
 
 #CAMEO Root Code Freq
-cameo_freq<-data %>% group_by(CAMEO_root,name) %>% count(sort=TRUE)
+cameo_freq<-data %>% group_by(CAMEO_root) %>% count(sort=TRUE)
 
 #Export as latex document
-print(xtable(cameo_freq, type = "latex"), file = paste(path_plot,"/cameo_freq.tex", sep=""))
+#print(xtable(cameo_freq, type = "latex"), file = paste(path_plots,"/cameo_freq.tex", sep=""))
 
 #--------------------------------------------------------------------------------------------------------------
 ###############################
@@ -350,11 +351,7 @@ cameo_freq %>% filter(Country== country &CAMEO_root==cameo) %>%
     labs(fill="Cameo Code 18")+
     ggtitle(paste("Frequencies of Cameo Code 18 in",country))+
     theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-          panel.background = element_blank(),
-          axis.line = element_line(colour = "black"),
-          axis.title.x = element_text(hjust=0.5, size=16),
-          axis.title.y= element_text(hjust=0.5,size=16),
-          axis.text = element_text(size=12,colour = "black"))
+          panel.background = element_blank())
   
 ggsave(filename=paste("Cameo_Code",cameo, country,".png", sep=""), path=path_plots, width = 15, height = 9) 
   
