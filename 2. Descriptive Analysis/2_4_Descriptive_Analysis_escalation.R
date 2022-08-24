@@ -61,7 +61,10 @@ missings_cm<-as.data.frame(table(sort((cm_data_icews_na$country_name))))
 
 #Generate table with country and missing months (for latex)
 missings_cm<-missings_cm[order(missings_cm$Freq),]
-print(xtable(missings_cm, type = "latex"), file = "missings_cm.tex")
+missings_cm
+
+#Save as lateX
+#print(xtable(missings_cm, type = "latex"), file = "missings_cm.tex")
 
 #Generate Plot with missings by country
 missings_cm$Freq<-missings_cm$Freq/12
