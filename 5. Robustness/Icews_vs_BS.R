@@ -7,19 +7,24 @@ library(ggplot2)
 library(gridExtra)
 library(data.table)
 
-#Set working directory
+#Set paths
+path_data_escalation<- "~/ICEWS-Project/Data/data_escalation.csv"
+path_data_BlairSambanis<-"~/ICEWS-Project/Data/cm_data_BlairSambanis.csv"
+path_data_icews_cm<-"~/ICEWS-Project/Data/data_icews_cm.csv"
 
+#Set path for Plots
+path_plots<- "~/ICEWS-Project/5. Robustness/Plots/"
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ############################################
 #Load Data Sets
 ###########################################
 
 #By Blair and Samabanis (2020)
-X1mo_data <-read_dta("1mo_data.dta")
+X1mo_data <-read.csv(path_data_BlairSambanis)
 
 #Escalation Data on CM level
-data_sum<-fread("data_escalation.csv")
-data<-fread("data_icews_cm.csv")
+data_sum<-fread(path_data_escalation)
+data<-fread(path_data_icews_cm)
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,7 +81,7 @@ data_diff<-data_diff[order(data_diff$key_cameo),]
 
 
 #Generate difference between data sets
-diff<- data.frame(idx = seq(1,817, by= 1),
+diff<- data.frame(idx = seq(1,792, by= 1),
                   key_cameo=data_diff$key_cameo,
                   gov_opp_accommodations= (data_diff$gov_opp_accommodations - X1_diff$gov_opp_accommodations),
                   gov_opp_low_level= (data_diff$gov_opp_low_level - X1_diff$gov_opp_low_level),
@@ -212,22 +217,22 @@ p9<-ggplot(diff, aes(idx,gov_reb_low_level))+geom_point()+
 #Grid arrange plots
 
 #demands
-ggsave(p,filename="opp_gov_demands.png")
-ggsave(p1,filename="reb_gov_demands.png")
+ggsave(p,filename=paste0(path_plots, "opp_gov_demands.png"))
+ggsave(p1,filename=paste0(path_plots,"reb_gov_demands.png"))
 
 #accommodation
-ggsave(p2,filename="gov_opp_acc.png")
-ggsave(p3,filename="gov_reb_acc.png")
+ggsave(p2,filename=paste0(path_plots,"gov_opp_acc.png"))
+ggsave(p3,filename=paste0(path_plots,"gov_reb_acc.png"))
 
 #non-violent
-ggsave(p4,filename="gov_opp_non.png")
-ggsave(p5,filename="gov_reb_non.png")
+ggsave(p4,filename=paste0(path_plots,"gov_opp_non.png"))
+ggsave(p5,filename=paste0(path_plots,"gov_reb_non.png"))
 
 #low-level violence
-ggsave(p6,filename="opp_gov_low.png")
-ggsave(p7,filename="reb_gov_low.png")
-ggsave(p8,filename="gov_opp_low.png")
-ggsave(p9,filename="gov_reb_low.png")
+ggsave(p6,filename=paste0(path_plots,"opp_gov_low.png"))
+ggsave(p7,filename=paste0(path_plots,"reb_gov_low.png"))
+ggsave(p8,filename=paste0(path_plots,"gov_opp_low.png"))
+ggsave(p9,filename=paste0(path_plots,"gov_reb_low.png"))
 
 
 
