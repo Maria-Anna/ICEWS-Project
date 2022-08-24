@@ -1,0 +1,61 @@
+Short Summary:
+
+This R-file aggregated the data_icews_cm data to data_escalation. The events are categorized and are summed up into 10 new variables. These variables are then added to the cm_data and the pgm_data. 
+
+
+Generation of 3 new datasets
+data_escalation: aggregated data_icews_cm
+cm_icews_data: data_escalation + cm_data
+pgm_icews_data: data_escalation + pgm_data
+
+---------------------------------------------------------------------------------------------------------
+Variable Explanation: 
+
+
+gov_opp_accommodations: An event that is considerend as accomodative is initiated from the government and targeting the opposition
+
+gov_opp_low_level:          An event that involves low level violence is initiated from the government                               and targeting the opposition
+gov_opp_nonviol_repression: An event that is considerend as an nonviolent repression is initiated from                               the government and is targeting the opposition
+opp_gov_demands:            The opposition is damanding something from the government. 
+opp_gov_low_level:          An event that involves low level violence is initiated from the opposition                               and is targeting the government.
+gov_reb_accommodations:     An event that is considerend as accomodative is initiated from the government                             and targeting the rebels
+gov_reb_low_level:          An event that involves low level violence is initiated from the government                               and targeting the rebels
+gov_reb_nonviol_repression: An event that is considerend as an nonviolent repression is initiated from                               the government and is targeting the rebels
+reb_gov_demands:            The rebels is damanding something from the government.  
+reb_gov_low_level:          An event that involves low level violence is initiated from the rebels and is                             targeting the government.
+key_cameo:                  Unique identifier of the aggregated events composed of year_month_country e.g                             1995_01_Somalia         
+
+
+---------------
+country_id: Every country has its own country_id e.g.: Somalia has the ID 120
+month_id: Every Year_month has its own month_id e.g.: 1995-01 is assigned the ID 121
+key_cm: Composed of Year and country_id e.g.: 1990_120, for Year 1990 and country_id 120 (Somalia)
+key_cy: Composed  of month_id and country_id e.g.: 121_120, for month_id 121 (1995-01) and country_id 120
+country_name: Name of the Country 
+country_id: Every Country has an ID
+country_iso3: Every Country has an iso3 ID
+name_fac: Country factor variable. Random Effekt
+ged_dummy_sb: Boolean for presence of state-based conflict 
+ged_best_sb: Number of fatalities in state-based conflict 
+ged_dummy_ns: Boolean for presence of non-state conflict 
+ged_best_ns: Number of fatalities in non-state conflict 
+ged_dummy_os: Boolean for presence of one-side violence 
+ged_best_os: Number of fatalities in one-side violence 
+time_since_ged_dummy_os: Months passed since last one-side violence fatality. 
+time_since_ged_dummy_ns:Months passed since last non-stateconflict  fatality. 
+time_since_ged_dummy_sb:Months passed since last state-based fatality. 
+fvp_population200: The total population in a given country-year.
+fvp_gdp200:The GDP in a given country-year
+polity:Polity IV Index.The 21-point scale of the ”Polity Score” ranges from 10 monarchy to +10 democracy
+milit_exp:Annual military expenditure
+mcw_receiver_rolling:Trend Indicator Values for long-term import of MCW (major conventional weapons)
+mcw_receiver_acute: Trend Indicator Values for short-term import of MCW (major conventional weapons)
+avr_lon: averange longitude
+avr_lat: averange latitude
+
+pg_id: ID of the prio grid 
+key_pm:Composed of Year and pg_id
+key_py:Composed  of month_id and pg_id
+pgd_nlights_calib_mean:Average calibrated nighttime lights per prio grid-Year.
+pgd_imr_mean:Average Infant Mortality Rate per prio grid-Year.
+pgd_capdist: Distance to the capital for each prio grid.

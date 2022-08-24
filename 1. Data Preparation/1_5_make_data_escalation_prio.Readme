@@ -1,0 +1,16 @@
+Short Summary:
+
+This R-file aggregated the data_icews_cm data to data_escalation. The events are categorized and are summed up into 10 new variables. These variables are then added to the the pgm_data.The main difference is here, that we are not adding the aggregated variables to the grid cells of the pgm_data. We are adding the pgm_data to the prio grid cells of the new generated data. So the prio grid cells from the ICEWS are used and not the grid cells of the pgm_data. 
+
+
+Generation of 2 new datasets
+data_escalation_prio: aggregated data_icews_pgm
+pgm_icews_data_pg: data_escalation_prio + pgm_data
+
+---------------------------------------------------------------------------------------------------------
+Variable Explanation
+
+pgm_icews_data_pg contains all the Variables from pgm_icews_data. Take a look at the Readme of make_data_escalation for a more detail explanation. 
+
+New Variable: 
+capital_factor: Boolean Variable taking into account if a grid cell contains the capital of a country.
