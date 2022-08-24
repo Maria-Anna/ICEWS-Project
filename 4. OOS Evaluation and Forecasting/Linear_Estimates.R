@@ -5,12 +5,17 @@ library(gtools)
 library(knitr)
 library(xtable)
 
+rm(list=ls())
+
 #Set working directory
 path_predictions<- "~/ICEWS-Project/3. Model/Predictions/"
 
 
 #------------------------------------------------------------------------------------------------------------------------------------------------#
 #For all ICEWS Variables
+#ESC Model
+#All logarithmic variables are included linear in the model, in all stages without any interactions. 
+
 #Lag: s=2
 
 #load Models

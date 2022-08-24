@@ -48,7 +48,7 @@ stage 2 and 3: pgm_icews_data_pg.csv
 
 Models: 
 
-model_cm_pgm_int_capfac: 
+cm_pgm_no_int:  
 All logarithmic variables are included linear in the model, in all stages without any interactions. 
 Predictions in : Prediction_ICEWS_CM_PGM_NO_INT
 
@@ -56,7 +56,7 @@ model_cm_pgm_cap_dist :
 All logarithmic variables are interacted with pgd_capdist, the Distance of a grid cell to the capital,  in the 2. and 3. stage. 
 Predictions in:  Prediction_ICEWS_CM_PGM_CAP_DIST
 
-cm_pgm_no_int: 
+model_cm_pgm_int_capfac:
 All logarithmic variables are interacted with cap_fac, in the 2. and 3. stage. cap_fac is  a boolian variable for the presents of the capital in the prio grid cell.
 Predictions in: Prediction_ICEWS_CM_PGM
 
