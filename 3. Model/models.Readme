@@ -30,13 +30,15 @@ Prediction in : Prediction_ICEWS_Low
 
 esc_no_dem: 
 Demands Variables are excluded from the model. All other variables are included linear, without interactions
+Prediction in :Prediction_ICEWS_Esc
 
 aggreg_2: 
 Both data sets are aggregated over 2 months. The idea is that the effect of the escalation variables is visible after 2 months + current lag. 
+Prediction in : Prediction_ICEWS_Aggr_2_months
 
 aggreg3:
 Both data sets are aggregated over 3 months. The idea is that the effect of the escalation variables is visible after 3 months + current lag. 
-
+Prediction in : Prediction_ICEWS_Aggr
 ---------------------------------------------------------------------------------------------------------
 CM and PGM Level: 
 
@@ -46,7 +48,7 @@ stage 2 and 3: pgm_icews_data_pg.csv
 
 Models: 
 
-model_cm_pgm_capfac: 
+model_cm_pgm_int_capfac: 
 All logarithmic variables are included linear in the model, in all stages without any interactions. 
 Predictions in : Prediction_ICEWS_CM_PGM_NO_INT
 
@@ -54,9 +56,9 @@ model_cm_pgm_cap_dist :
 All logarithmic variables are interacted with pgd_capdist, the Distance of a grid cell to the capital,  in the 2. and 3. stage. 
 Predictions in:  Prediction_ICEWS_CM_PGM_CAP_DIST
 
-cm_pgm_cap_fac: 
+cm_pgm_no_int: 
 All logarithmic variables are interacted with cap_fac, in the 2. and 3. stage. cap_fac is  a boolian variable for the presents of the capital in the prio grid cell.
-Predictions in: Prediction_ICEWS_CM_PGM_NO_INT
+Predictions in: Prediction_ICEWS_CM_PGM
 
 ---------------------------------------------------------------------------------------------------------
 Fritz_et_al_2021:
@@ -77,9 +79,11 @@ estimate_models_filtered:
 The time frame need to be from 1995 to 2020. Filter the two datasets, to match the requiered time frame. 
 Predictions in: Prediction_filtered
 
+
 estimate_models_filtered_window_2: 
 Dataframes are aggregated over 2 months +lag
+Predictions in: Prediction_filtered_window_2
 
 estimate_models_filtered_window_3: 
 Dataframes are aggregated over 3 months +lag
-
+Predictions in: Prediction_filtered_window
