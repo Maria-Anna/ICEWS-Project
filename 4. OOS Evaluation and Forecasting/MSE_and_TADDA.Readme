@@ -1,0 +1,4 @@
+Short Summary: 
+
+Evaluation of the models. For all models the MSE and the TADDA is calculated, over all predictions windows and for every lag. As we want to compare our models with the benchmark model from Fritz et. al. we also need to calculate the MSE and the TADDA for this model. To make it comparable we have tree benchmark models. All models except the ones with the aggregation schould be compared to the filtered benchmark model. Filtered means, that the same time period as in the icews models is used for the predictions. The aggregation models schould be compared with the aggregation Benchmark models. 
+
