@@ -386,7 +386,7 @@ pgm_icews_data_pg$capital_factor<-ifelse(!is.na(pgm_icews_data_pg$capname),1,0)
 # Export and Save Data Sets
 ######################################################
 
-write.csv(pgm_icews_data_pg, file= paste(path_data_new, "pgm_icews_data_pg.csv", sep=""), row.names = F)
+write.csv(pgm_icews_data_pg, file= paste(path_data_new, "/pgm_icews_data_pg.csv", sep=""), row.names = F)
 
 
 
