@@ -57,6 +57,7 @@ data_sum_not_in_BS<- data_sum_filtered %>% anti_join(X1mo_data_check, by=escalat
 
 #Data set with all observations that are in ICEWS and in Blair and Sambanis (2020)
 data_sum_in_BS<- data_sum_filtered %>% semi_join(X1mo_data_check, by=escalation_variables)
+data_sum_in_BS<- inner_join(data_sum_filtered,X1mo_data_check, by=escalation_variables)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ###############################################

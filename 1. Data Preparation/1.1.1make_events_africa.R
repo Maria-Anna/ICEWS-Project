@@ -71,8 +71,12 @@ events_africa_total$Country<-as.character(events_africa_total$Country)
 events_africa_total$Source.Country<-as.character(events_africa_total$Source.Country)
 events_africa_total$Target.Country<-as.character(events_africa_total$Target.Country)
 
+
 #Keep only observations where Source.Country==Target.Country==Country
 events_africa<- subset(events_africa_total, events_africa_total$Country==events_africa_total$Source.Country & events_africa_total$Country==events_africa_total$Target.Country)
+
+#Change Event.Date Format
+events_africa$Event.Date <- as.Date(events_africa$Event.Date, format="%Y-%m-%d")
 
 #Keep only observations till 31-08-2020
 events_africa<- events_africa %>% filter(Event.Date < "2020-09-01")
@@ -84,7 +88,7 @@ events_africa<- events_africa %>% filter(Event.Date < "2020-09-01")
 
 #Save data set as csv
 #Remark: relevant data set for future analysis
-write.csv(events_africa, file= paste(path_events_africa, "/events_africa.csv", sep=""), row.names = FALSE)
+write.csv(events_africa, file= paste(path_events_africa, "events_africa.csv", sep=""), row.names = FALSE)
 
 
 

@@ -313,7 +313,7 @@ load(path_pgm_data)
 pgm_data<- pgm_data %>% mutate(country_name = replace(country_name, country_name ==   "The Gambia"  ,"Gambia"),
                                country_name = replace(country_name, country_name ==   "Congo, DRC"  ,"Democratic Republic of Congo"),
                                year_month   = format(as.Date(pgm_data$date, format="%Y-%m-%d"),"%Y-%m"),
-                               key_cameo= paste(year, month, country_name,  sep = "_"))
+                               key_cameo= paste(year, month, pg_id,  sep = "_"))
 
 
 
