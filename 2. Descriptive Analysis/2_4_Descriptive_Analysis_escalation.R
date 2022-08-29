@@ -288,7 +288,7 @@ ggsave(p, filename = paste(path_plots, "/dynamic_burundi.png", sep=""), width = 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ##############################
-#Time Series: Egypt 2001-2012
+#Time Series: Egypt 2013-2016
 ##############################
 
 #Plot for each escalation covariate the Evolution of the absolute frequency event number over the months
@@ -430,14 +430,19 @@ ggsave(p,filename=paste(path_plots, "/Egypt_Escalation_Time_Series.png", sep="")
 #Plot correlation between escalation proxies
 
 #Round Correlation 
+cm_data[is.na(cm_data),]<-0
+cm_data_sub<-cm_data[,30:39]
 cor<-round(cor(cm_data_sub),3)
 
 #Display Correlation Matrix
 head(cor)
 
-#Make Correlation Plot
-ggcorrplot(cor, hc.order = TRUE, type = "lower",
-           outline.col = "white")
+#Correlation Plot
+corrplot(cor,tl.col = "black")
+
+
+#Save Plot
+ggsave(filename=paste(path_plots, "/corrplot.png", sep=""))
 
 #-------------------------------------------------------------------------------------------------------------
 ######################################
@@ -447,7 +452,25 @@ ggcorrplot(cor, hc.order = TRUE, type = "lower",
 #Summarize the events for each variable in each country
 count_events_country<-cm_data %>%
   as.data.frame() %>%
+  filter(year %in% c("2013", "2014","2015"))%>%
   group_by(country_name) %>%
+  summarise(gov_opp_low_level_sum = sum(gov_opp_low_level), 
+            reb_gov_demands_sum= sum(reb_gov_demands),
+            opp_gov_demands_sum= sum(opp_gov_demands),
+            gov_opp_accommodations_sum = sum(gov_opp_accommodations),
+            gov_reb_accommodations_sum = sum(gov_reb_accommodations),
+            gov_opp_nonviol_repression_sum = sum(gov_opp_nonviol_repression),
+            gov_reb_nonviol_repression_sum = sum(gov_reb_nonviol_repression),
+            reb_gov_low_level_sum = sum(reb_gov_low_level),
+            opp_gov_low_level_sum = sum(opp_gov_low_level),
+            gov_reb_low_level_sum = sum(gov_reb_low_level))
+
+
+
+count_events_country_year<-cm_data %>%
+  as.data.frame() %>%
+  filter(year %in% c("2013", "2014","2015"))%>%
+  group_by(country_name, year) %>%
   summarise(gov_opp_low_level = sum(gov_opp_low_level), 
             reb_gov_demands= sum(reb_gov_demands),
             opp_gov_demands= sum(opp_gov_demands),
@@ -459,17 +482,18 @@ count_events_country<-cm_data %>%
             opp_gov_low_level = sum(opp_gov_low_level),
             gov_reb_low_level = sum(gov_reb_low_level))
 
-
 #Summarize all Events across all Variables in each country
-count_events_country$n<-rowSums(count_events_country[,2:11])
+count_events_country_year<-count_events_country %>% select(country_name,gov_opp_low_level_sum) %>% right_join(count_events_country_year, by="country_name")
 
 #sum<-t(rbind("sum",  as.data.frame(colSums(count_events_country[,2:12]))))
 #count_events_country<-rbind(count_events_country, sum[,1:12])
 
 #Make Dataframe with the Relative Frequency
 count_events_country_rel<- data.frame(
-  country_name= count_events_country$country_name,
-  gov_opp_low_level = count_events_country$gov_opp_low_level/count_events_country$n,
+  country_name= count_events_country_year$country_name,
+  year=count_events_country_year$year,
+  gov_opp_low_level = count_events_country_year$gov_opp_low_level/count_events_country_year$gov_opp_low_level_sum)
+
   reb_gov_demands= count_events_country$reb_gov_demands/count_events_country$n,
   opp_gov_demands= count_events_country$opp_gov_demands/count_events_country$n,
   gov_opp_accommodations = count_events_country$gov_opp_accommodations/count_events_country$n,
@@ -504,14 +528,15 @@ africa<- africa %>%
          country_name = replace(country_name, country_name ==  "The Gambia", "Gambia"),
          country_name = replace(country_name, country_name ==  "Zimbabwe (Rhodesia)", "Zimbabwe"))
 
-
+africa<- africa %>% filter(country_name %in% c("Eritrea","Ethiopia","Somalia","Kenya", "Uganda","South Sudan"))
 #Join Data with relative Frequency and African Map
-data<- left_join(africa, count_events_country_rel)
+data<- left_join(africa, count_events_country_year)
 
 #We can do the plot with all Variables, change fill= reb_gov_low_level
 #GGPLOT
-a<- ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= gov_opp_accommodations))+
+
+ggplot(filter(data,year=="2013"))+
+  geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
   xlab("Longitude")+ylab("Latitude")+
   theme(plot.title = element_text(hjust = 0.5)) +
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
@@ -523,8 +548,7 @@ a<- ggplot(filter(data))+
         axis.text = element_text(size=12,colour = "black")) +
   theme(legend.position="right",       
         legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
+  scale_fill_viridis(option = "D", discrete = F, direction=1)+
   guides(fill=guide_colorbar(title.vjust=2.5))+
   theme_classic(base_size = 16)
 
