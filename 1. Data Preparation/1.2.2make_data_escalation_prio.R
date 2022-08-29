@@ -3,6 +3,7 @@
 #Load necessary packages
 library(haven)
 library(dplyr)
+library(data.table)
 
 rm(list=ls())
 
