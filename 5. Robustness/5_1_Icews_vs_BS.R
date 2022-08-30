@@ -36,6 +36,8 @@ data<-fread(path_data_icews_cm)
 data<- data %>% mutate(Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"),
                              Country = replace(Country, Country ==   "Congo, DRC"  ,"Democratic Republic of Congo"))
 
+X1mo_data<- X1mo_data %>% mutate(country_name = replace(country_name,country_name ==   "Congo-Brazzaville"  ,"Congo"))
+
 #Filter BS (2020) data set
 X1mo_data_check<-X1mo_data %>% select(year, month,country_name, gov_opp_accommodations, gov_opp_low_level, gov_opp_nonviol_repression, opp_gov_demands, opp_gov_low_level,gov_reb_accommodations, gov_reb_low_level, gov_reb_nonviol_repression, reb_gov_demands, reb_gov_low_level ) %>%
   filter(country_name %in%  levels(factor(data$Country))) %>%
@@ -81,7 +83,7 @@ data_diff<-data_diff[order(data_diff$key_cameo),]
 
 
 #Generate difference between data sets
-diff<- data.frame(idx = seq(1,792, by= 1),
+diff<- data.frame(idx = seq(1,817, by= 1),
                   key_cameo=data_diff$key_cameo,
                   gov_opp_accommodations= (data_diff$gov_opp_accommodations - X1_diff$gov_opp_accommodations),
                   gov_opp_low_level= (data_diff$gov_opp_low_level - X1_diff$gov_opp_low_level),
@@ -100,7 +102,7 @@ diff<- data.frame(idx = seq(1,792, by= 1),
 p<-ggplot(diff, aes(idx,opp_gov_demands))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
-  ylab("Event Number Difference") + xlab("Index") + 
+  ylab("Event Number Difference") + xlab("Index") 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -124,6 +126,7 @@ p1<-ggplot(diff, aes(idx,reb_gov_demands))+geom_point()+
 p2<-ggplot(diff, aes(idx,gov_opp_accommodations))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
+  ggtitle("Gov-Opp Accommodation")+
   ylab("Event Number Difference") + xlab("Index") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -135,6 +138,7 @@ p2<-ggplot(diff, aes(idx,gov_opp_accommodations))+geom_point()+
 p3<-ggplot(diff, aes(idx,gov_reb_accommodations))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
+  ggtitle("Gov-Reb Accommodation")+
   ylab("Event Number Difference") + xlab("Index") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -148,6 +152,7 @@ p3<-ggplot(diff, aes(idx,gov_reb_accommodations))+geom_point()+
 p4<-ggplot(diff, aes(idx,gov_opp_nonviol_repression))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
+  ggtitle("Gov-Opp Non-Violent Repression")+
   ylab("Event Number Difference") + xlab("Index") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -159,6 +164,7 @@ p4<-ggplot(diff, aes(idx,gov_opp_nonviol_repression))+geom_point()+
 p5<-ggplot(diff, aes(idx,gov_reb_nonviol_repression))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
+  ggtitle("Gov-Reb Non-Violent Repression")+
   ylab("Event Number Difference") + xlab("Index") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -173,6 +179,7 @@ p6<-ggplot(diff, aes(idx,opp_gov_low_level))+geom_point()+
   scale_y_continuous(limits = c(-100, 100), breaks = seq(-100,100,10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
   ylab("Event Number Difference") + xlab("Index") + 
+  ggtitle("Opp-Gov Low Level Violence")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -183,6 +190,7 @@ p6<-ggplot(diff, aes(idx,opp_gov_low_level))+geom_point()+
 p7<-ggplot(diff, aes(idx,reb_gov_low_level))+geom_point()+
   scale_y_continuous(limits = c(-100, 100), breaks = seq(-100,100,10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
+  ggtitle("Reb-Gov Low Level Violence")+
   ylab("Event Number Difference") + xlab("Index") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -194,6 +202,7 @@ p7<-ggplot(diff, aes(idx,reb_gov_low_level))+geom_point()+
 p8<-ggplot(diff, aes(idx,gov_opp_low_level))+geom_point()+
   scale_y_continuous(limits = c(-100, 100), breaks = seq(-100,100,10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
+  ggtitle("Gov-Opp Low Level Violence")+
   ylab("Event Number Difference") + xlab("Index") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -205,6 +214,7 @@ p8<-ggplot(diff, aes(idx,gov_opp_low_level))+geom_point()+
 p9<-ggplot(diff, aes(idx,gov_reb_low_level))+geom_point()+
   scale_y_continuous(limits = c(-100, 100), breaks = seq(-100,100,10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
+  ggtitle("Gov-Reb Low Level Violence")+
   ylab("Event Number Difference") + xlab("Index") + 
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -215,7 +225,7 @@ p9<-ggplot(diff, aes(idx,gov_reb_low_level))+geom_point()+
 
 
 #Grid arrange plots
-
+p<- grid.arrange(p2,p3,p4, p5, p6, p7, p8, p9, ncol=4, nrow=2)
 #demands
 ggsave(p,filename=paste0(path_plots, "opp_gov_demands.png"))
 ggsave(p1,filename=paste0(path_plots,"reb_gov_demands.png"))
@@ -233,7 +243,3 @@ ggsave(p6,filename=paste0(path_plots,"opp_gov_low.png"))
 ggsave(p7,filename=paste0(path_plots,"reb_gov_low.png"))
 ggsave(p8,filename=paste0(path_plots,"gov_opp_low.png"))
 ggsave(p9,filename=paste0(path_plots,"gov_reb_low.png"))
-
-
-
-
