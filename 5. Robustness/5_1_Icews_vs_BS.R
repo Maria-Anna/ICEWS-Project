@@ -227,19 +227,5 @@ p9<-ggplot(diff, aes(idx,gov_reb_low_level))+geom_point()+
 #Grid arrange plots
 p<- grid.arrange(p2,p3,p4, p5, p6, p7, p8, p9, ncol=4, nrow=2)
 #demands
-ggsave(p,filename=paste0(path_plots, "opp_gov_demands.png"))
-ggsave(p1,filename=paste0(path_plots,"reb_gov_demands.png"))
+ggsave(p,filename=paste0(path_plots, "diff_escalation.png"))
 
-#accommodation
-ggsave(p2,filename=paste0(path_plots,"gov_opp_acc.png"))
-ggsave(p3,filename=paste0(path_plots,"gov_reb_acc.png"))
-
-#non-violent
-ggsave(p4,filename=paste0(path_plots,"gov_opp_non.png"))
-ggsave(p5,filename=paste0(path_plots,"gov_reb_non.png"))
-
-#low-level violence
-ggsave(p6,filename=paste0(path_plots,"opp_gov_low.png"))
-ggsave(p7,filename=paste0(path_plots,"reb_gov_low.png"))
-ggsave(p8,filename=paste0(path_plots,"gov_opp_low.png"))
-ggsave(p9,filename=paste0(path_plots,"gov_reb_low.png"))
