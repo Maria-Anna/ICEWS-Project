@@ -19,7 +19,7 @@ path_plots<- "~/ICEWS-Project/5. Robustness/Plots/"
 #Load Data Sets
 ###########################################
 
-#By Blair and Samabanis (2020)
+#By Blair and Sambanis (2020)
 X1mo_data <-read.csv(path_data_BlairSambanis)
 
 #Escalation Data on CM level
@@ -36,7 +36,7 @@ data<-fread(path_data_icews_cm)
 data<- data %>% mutate(Country = replace(Country, Country ==   "The Gambia"  ,"Gambia"),
                              Country = replace(Country, Country ==   "Congo, DRC"  ,"Democratic Republic of Congo"))
 
-X1mo_data<- X1mo_data %>% mutate(country_name = replace(country_name,country_name ==   "Congo-Brazzaville"  ,"Congo"))
+X1mo_data<- X1mo_data %>% mutate(country_name = replace(country_name,country_name =="Congo-Brazzaville","Congo"))
 
 #Filter BS (2020) data set
 X1mo_data_check<-X1mo_data %>% select(year, month,country_name, gov_opp_accommodations, gov_opp_low_level, gov_opp_nonviol_repression, opp_gov_demands, opp_gov_low_level,gov_reb_accommodations, gov_reb_low_level, gov_reb_nonviol_repression, reb_gov_demands, reb_gov_low_level ) %>%
@@ -78,10 +78,12 @@ X1_diff<- X1mo_data_check %>% filter(key_cameo %in% data_sum_not_in_BS$key_cameo
 #Keep relevant columns
 X1_diff<-X1_diff[,4:14]
 
+#Set both data sets as data frame to generate difference
+X1_diff<-as.data.frame(X1_diff)
+data_diff<-as.data.frame(data_diff)
 #Order both data sets by key_cameo
 X1_diff<-X1_diff[order(X1_diff$key_cameo),]
 data_diff<-data_diff[order(data_diff$key_cameo),]
-
 
 #Generate difference between data sets
 diff<- data.frame(idx = seq(1,817, by= 1),
@@ -103,7 +105,7 @@ diff<- data.frame(idx = seq(1,817, by= 1),
 p<-ggplot(diff, aes(idx,opp_gov_demands))+geom_point()+
   scale_y_continuous(limits = c(-10, 10), breaks = c(-10:10))+
   scale_x_continuous(limits = c(0, 828), breaks =seq(0,828,100))+
-  ylab("Event Number Difference") + xlab("Index") 
+  ylab("Event Number Difference") + xlab("Index") +
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -227,6 +229,8 @@ p9<-ggplot(diff, aes(idx,gov_reb_low_level))+geom_point()+
 
 #Grid arrange plots
 p<- grid.arrange(p2,p3,p4, p5, p6, p7, p8, p9, ncol=4, nrow=2)
+
 #demands
-ggsave(p,filename=paste0(path_plots, "diff_escalation.png"))
+ggsave(p,filename=paste0(path_plots, "diff_escalation.png"), width = 15, height = 10 )
+
 
