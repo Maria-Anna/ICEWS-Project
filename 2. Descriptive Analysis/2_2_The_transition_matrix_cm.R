@@ -46,7 +46,7 @@ data$Month<-as.numeric(format(as.Date(data$Event.Date, format="%Y-%m-%d"), "%m")
 
 cameo_hostile<-c("11","12","17","18","19","20","13","14","15","16")
 cameo_peace<-c("1","2","3","4","5","6","7","8")
-cameo_intensity_hostile <-c(seq(from=0,to=-10, by=-0.1))
+cameo_intensity_hostile <-c(seq(from=-0.1,to=-10, by=-0.1))
 cameo_conflict<-c("18","19","20")
 
 
@@ -369,7 +369,8 @@ ggplot(prob_table_hostile, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black"))
+        axis.text = element_text(size=12,colour = "black"))+
+  theme_classic(base_size = 16)
 
 ggsave(filename="Cameo_Event_Hostile.png", path=path_plot, width =10, height = 7 )
 
@@ -385,7 +386,8 @@ ggplot(prob_table_peace, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black"))
+        axis.text = element_text(size=12,colour = "black"))+
+        theme_classic(base_size = 16)
 
 ggsave(filename = "Cameo_Event_Peace.png", path= path_plot,width =10, height = 7 )
 
@@ -393,7 +395,6 @@ ggsave(filename = "Cameo_Event_Peace.png", path= path_plot,width =10, height = 7
 ggplot(prob_table_intensity, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
   stat_summary_2d(bins = 20, color = "white", fun = mean) +  
   scale_fill_gradient(low="#56B1F7", high="#132B43")+
-  ggtitle("The Cameo Event Trap: Hostile Events by Intensity")+
   xlab("Relative Number of Hostile Events Quintile in T+1")+ylab("Relative Number of Hostile Events Quintile in T")+
   labs(fill='Probability')+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
@@ -401,7 +402,8 @@ ggplot(prob_table_intensity, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black"))
+        axis.text = element_text(size=16,colour = "black"))+
+        theme_classic(base_size = 16)
 
 ggsave(filename="Cameo_Event_Intensity.png", path = path_plot,width =10, height = 7)
 
@@ -417,7 +419,8 @@ ggplot(prob_table_conflict, aes(x = Var2, y = Var1, z = as.numeric(Freq))) +
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black"))
+        axis.text = element_text(size=12,colour = "black"))+
+  theme_classic(base_size = 16)
 
 ggsave(filename = "Cameo_Event_Conflict.png", path = path_plot,width =10, height = 7)
 

@@ -26,7 +26,7 @@ path_cm_icews_data<-"~/ICEWS-Project/Data/cm_icews_data.csv"
 path_pgm_icews_data<-"~/ICEWS-Project/Data/pgm_icews_data_pg.csv"
 
 #Assign Folder for Predictions
-path_prediction<-"~/ICEWS-Project/3. Model/Predictions/Prediction_ICEWS_CM_PGM_NO_INT"
+path_prediction<-"~/ICEWS-Project/3. Model/Predictions/Prediction_ICEWS_CM_PGM"
 
 #Run helper functions script
 source('~/ICEWS-Project/3. Model/helper_functions.R')

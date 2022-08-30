@@ -47,21 +47,14 @@ library(stargazer)
 library(moments)
 library(expss)
 library(imputeTS)
-
+library(ggpmisc)
+library(gridGraphics)
+library(gridBase)
 
 Animation:
 library(gganimate)
 library(gifski)
 library(transformr)
-
-
-
-Überprüfe ob die noch gebraucht werden
-library(rnaturalearth)
-library(rnaturalearthdata)
-library(ggpmisc)
-library(gridGraphics)
-library(gridBase)
 
 ---------------------------------------------------------------------------------------------------------
 Prediction and Models

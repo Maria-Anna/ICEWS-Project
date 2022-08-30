@@ -69,44 +69,37 @@ colnames(average_events_by_country)[which(names(average_events_by_country) == "m
 # Summary Statistics Overall
 ############################
 
-stargazer(data_icews_cm, summary.stat = c("mean", "median", "min", "max", "sd", "p25", "p75"))
+stargazer(data, summary.stat = c("mean", "median", "min", "max", "sd", "p25", "p75"))
 
 
 #Generate table with missings for latex
-data_icews_cm_na <-as.data.frame(colSums(is.na(data_icews_cm)))
+data_icews_cm_na <-as.data.frame(colSums(is.na(data)))
 #print(xtable(data_icews_cm_na, type = "latex"), file = paste(path_plots,"/missings_data_icews_cm.tex", sep=""))
 
 
 #Check for duplicates in data set
 
-#For all columns
-#0 duplicates
-sum(duplicated(data_icews_cm))
 
 #For Event.ID
-sum(duplicated(data_icews_cm$Event.ID))
+sum(duplicated(data$Event.ID))
 #Remark:
 #The Event.ID is a non-unique identifier --> the event ID can be repeated in the data set (See also ICEWS Coded Event Data Read Me)
 
 
 #For Story.ID
-table(duplicated(data_icews_cm$Story.ID))
+table(duplicated(data$Story.ID))
 #Remark:
 #From the same event different information of a story can be extracted
 
-#Generate duplicate data set regarding: all columns
-duplicates_all <- data_icews_cm %>%
-  group_by(data_icews_cm[]) %>%
-  filter(n()>1)
 
 #Generate duplicate data set regarding: Event.ID
-duplicates_event_id <- data_icews_cm %>%
+duplicates_event_id <- data %>%
   group_by(Event.ID) %>%
   filter(n()>1)
 
 
 #Generate duplicate data set regarding Story.ID
-duplicates_story_id <- data_icews_cm %>%
+duplicates_story_id <- data %>%
   group_by(Story.ID) %>%
   filter(n()>1)
 
@@ -216,28 +209,6 @@ ggplot(events_country, aes(y=dif, x=year))+geom_col()+
 
 ggsave("Difference_of_Events_over_Time.png", path= path_plots, width = 15, height = 9) 
 
-
-#------------------------
-#Map with all events that took place in a specific year
-
-#Define year of interest
-#For a Plot over all years replace  filter(data, year==Year) in line 123 with data
-Year<-2019
-
-#Map where the Longitude and Latitude of every event in a specific year is plotted 
-ggplot(data=africa) + 
-    geom_sf(col = "black", alpha = 0.00001) + 
-    geom_point(data= filter(data, year==Year) , aes(x = Longitude, y = Latitude), col = "black", size=0.5, fill=20) + 
-    xlab("Latitude") + ylab("Longitude") + 
-    ggtitle(paste("Number of events on the African continent in",Year))+
-    theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-          panel.background = element_blank(),
-          axis.line = element_line(colour = "black"),
-          axis.title.x = element_text(hjust=0.5, size=16),
-          axis.title.y= element_text(hjust=0.5,size=16),
-          axis.text = element_text(size=12,colour = "black"))
-  
-ggsave(filename=paste("Events in Africa_",Year,".png", sep=""), path=path_plots, width = 9, height = 9) 
 
 #------------------------
 #Map with Bins
