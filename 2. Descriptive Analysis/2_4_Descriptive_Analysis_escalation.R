@@ -14,7 +14,6 @@ library(cshapes)
 library(sf)
 library(corrplot)
 library(ggplot2)
-library(ggcorrplot)
 
 
 #Assign path
@@ -71,7 +70,7 @@ missings_cm$Freq<-missings_cm$Freq/12
 missings_cm%>%arrange(Freq)%>%mutate(Var1=factor(Var1,levels = Var1))%>%
   ggplot(aes(x=Freq, y=Var1)) +
   geom_point(size=1)+
-  ylab(label="Country")+xlab(label="Average Event Number between 1995-2020")+
+  ylab(label="Country")+xlab(label="Average Number of Missing Events  between 1995-2020")+
   scale_color_manual(values = c(median= "red"), labels="Median")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
@@ -201,11 +200,9 @@ h<-cm_data%>% filter(gov_reb_nonviol_repression>"0") %>% ggplot(aes(gov_reb_nonv
 
 #All Plots in one 
 p<-grid.arrange(a,b,c,d,e,f,g,h,ncol=2,nrow=4)
-#Display Plots
-p
 
 #Save Plot
-ggsave(p,filename=paste(path_plots, "/Freq_Events_Esc.png", sep=""))
+ggsave(p,filename=paste(path_plots, "/Freq_Events_Esc.png", sep=""), height = 9, width = 15)
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
@@ -449,27 +446,8 @@ ggsave(filename=paste(path_plots, "/corrplot.png", sep=""))
 # Map for Variables
 ######################################
 
-#Summarize the events for each variable in each country
 count_events_country<-cm_data %>%
-  as.data.frame() %>%
-  filter(year %in% c("2013", "2014","2015"))%>%
-  group_by(country_name) %>%
-  summarise(gov_opp_low_level_sum = sum(gov_opp_low_level), 
-            reb_gov_demands_sum= sum(reb_gov_demands),
-            opp_gov_demands_sum= sum(opp_gov_demands),
-            gov_opp_accommodations_sum = sum(gov_opp_accommodations),
-            gov_reb_accommodations_sum = sum(gov_reb_accommodations),
-            gov_opp_nonviol_repression_sum = sum(gov_opp_nonviol_repression),
-            gov_reb_nonviol_repression_sum = sum(gov_reb_nonviol_repression),
-            reb_gov_low_level_sum = sum(reb_gov_low_level),
-            opp_gov_low_level_sum = sum(opp_gov_low_level),
-            gov_reb_low_level_sum = sum(gov_reb_low_level))
-
-
-
-count_events_country_year<-cm_data %>%
-  as.data.frame() %>%
-  filter(year %in% c("2013", "2014","2015"))%>%
+  as.data.frame()%>%
   group_by(country_name, year) %>%
   summarise(gov_opp_low_level = sum(gov_opp_low_level), 
             reb_gov_demands= sum(reb_gov_demands),
@@ -483,28 +461,9 @@ count_events_country_year<-cm_data %>%
             gov_reb_low_level = sum(gov_reb_low_level))
 
 #Summarize all Events across all Variables in each country
-count_events_country_year<-count_events_country %>% select(country_name,gov_opp_low_level_sum) %>% right_join(count_events_country_year, by="country_name")
-
-#sum<-t(rbind("sum",  as.data.frame(colSums(count_events_country[,2:12]))))
-#count_events_country<-rbind(count_events_country, sum[,1:12])
-
-#Make Dataframe with the Relative Frequency
-count_events_country_rel<- data.frame(
-  country_name= count_events_country_year$country_name,
-  year=count_events_country_year$year,
-  gov_opp_low_level = count_events_country_year$gov_opp_low_level/count_events_country_year$gov_opp_low_level_sum)
-
-  reb_gov_demands= count_events_country$reb_gov_demands/count_events_country$n,
-  opp_gov_demands= count_events_country$opp_gov_demands/count_events_country$n,
-  gov_opp_accommodations = count_events_country$gov_opp_accommodations/count_events_country$n,
-  gov_reb_accommodations =  count_events_country$gov_reb_accommodations/count_events_country$n,
-  gov_opp_nonviol_repression = count_events_country$gov_opp_nonviol_repression/count_events_country$n,
-  gov_reb_nonviol_repression = count_events_country$gov_reb_nonviol_repression/count_events_country$n,
-  reb_gov_low_level = count_events_country$reb_gov_low_level/count_events_country$n,
-  opp_gov_low_level = count_events_country$opp_gov_low_level/count_events_country$n,
-  gov_reb_low_level = count_events_country$gov_reb_low_level/count_events_country$n)
-
-
+#count_events_country<-count_events_country %>% select(country_name,gov_opp_low_level_sum) %>% right_join(count_events_country_year, by="country_name")
+sudan<-data.frame(country_name= c("South Sudan", "South Sudan", "South Sudan"), year= c(2006, 2007, 2008), gov_opp_low_level=c(0,0,0))
+count_events_country<-rbind(count_events_country, sudan)
 
 
 #create African map
@@ -530,15 +489,14 @@ africa<- africa %>%
 
 africa<- africa %>% filter(country_name %in% c("Eritrea","Ethiopia","Somalia","Kenya", "Uganda","South Sudan"))
 #Join Data with relative Frequency and African Map
-data<- left_join(africa, count_events_country_year)
+data<- left_join(africa, count_events_country)
 
 #We can do the plot with all Variables, change fill= reb_gov_low_level
 #GGPLOT
 
-ggplot(filter(data,year=="2013"))+
+a<-ggplot(filter(data,year == "2006"))+
   geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
   xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -548,15 +506,16 @@ ggplot(filter(data,year=="2013"))+
         axis.text = element_text(size=12,colour = "black")) +
   theme(legend.position="right",       
         legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1)+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
+  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0,30,60,90,120), labels=c(0,30,60,90,120), 
+                     limits= c(0,130))+
+  theme_classic(base_size = 16)+
+  labs( title="Gov-Opp Low Level Violence", fill= "Event Number")
 
 
-b<- ggplot(filter(data))+
+
+b<-ggplot(filter(data,year=="2007"))+
   geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
   xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -566,15 +525,14 @@ b<- ggplot(filter(data))+
         axis.text = element_text(size=12,colour = "black")) +
   theme(legend.position="right",       
         legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
+  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0,30,60,90,120), labels=c(0,30,60,90,120), 
+                     limits= c(0,130))+
+  theme_classic(base_size = 16)+
+  labs( title="Gov-Opp Low Level Violence", fill= "Event Number")
 
-c<- ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= reb_gov_demands))+
+c<-ggplot(filter(data,year=="2008"))+
+  geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
   xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -584,141 +542,22 @@ c<- ggplot(filter(data))+
         axis.text = element_text(size=12,colour = "black")) +
   theme(legend.position="right",       
         legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
+  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0,30,60,90,120), labels=c(0,30,60,90,120), 
+                     limits= c(0,130))+
+  theme_classic(base_size = 16)+
+  labs( title="Gov-Opp Low Level Violence", fill= "Event Number")
 
 
-d<-ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= opp_gov_demands))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
-
-e<-ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= gov_reb_accommodations))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
-
-f<-ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= gov_opp_nonviol_repression))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
+plot_animation<-a + transition_manual(year)+ labs(subtitle = "Year: {current_frame}")
+animate(plot_animation, nframes= length(unique(count_events_poly$year)), fps=1, height = 1172, width =1900,
+        #For Latex
+        #renderer = file_renderer( prefix = "Animation_Map_noNA", overwrite = TRUE)
+)
 
 
-g<-ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= gov_reb_nonviol_repression))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
 
-h<-ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= reb_gov_low_level))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
 
-i<-ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= opp_gov_low_level))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
 
-j<-ggplot(filter(data))+
-  geom_sf(aes(group=country_name, fill= gov_reb_low_level))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(hjust = 0.5)) +
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0, 0.25, 0.5, 0.75, 1), labels=c(0, 0.25, 0.5, 0.75, 1), 
-                     limits= c(0,1))+
-  guides(fill=guide_colorbar(title.vjust=2.5))+
-  theme_classic(base_size = 16)
-
-p<-grid.arrange(a,b,c,d, e, f,g,h,i, j, ncol=2,nrow=5)
-q<-grid.arrange(a,b, e, f,g,h,i, j, ncol=2,nrow=4)
 
 ggsave(p,filename = paste(path_plots,"/Map_escalation_variable.png", sep=""), height= 20, width = 20)
 ggsave(q,filename = paste(path_plots,"/Map_escalation_variable_nodemands.png", sep=""), height= 20, width = 20)
