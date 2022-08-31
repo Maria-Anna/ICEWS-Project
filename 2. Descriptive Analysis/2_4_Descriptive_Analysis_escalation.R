@@ -14,7 +14,9 @@ library(cshapes)
 library(sf)
 library(corrplot)
 library(ggplot2)
-
+library(gganimate)
+library(gifski)
+library(transformr)
 
 #Assign path
 path_cm_icews_data<-"~/ICEWS-Project/Data/cm_icews_data.csv"
@@ -493,8 +495,7 @@ data<- left_join(africa, count_events_country)
 
 #We can do the plot with all Variables, change fill= reb_gov_low_level
 #GGPLOT
-
-a<-ggplot(filter(data,year == "2006"))+
+a<-ggplot(filter(data,year %in% c("2006", "2007", "2008")))+
   geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
   xlab("Longitude")+ylab("Latitude")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
@@ -513,43 +514,11 @@ a<-ggplot(filter(data,year == "2006"))+
 
 
 
-b<-ggplot(filter(data,year=="2007"))+
-  geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0,30,60,90,120), labels=c(0,30,60,90,120), 
-                     limits= c(0,130))+
-  theme_classic(base_size = 16)+
-  labs( title="Gov-Opp Low Level Violence", fill= "Event Number")
-
-c<-ggplot(filter(data,year=="2008"))+
-  geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
-  xlab("Longitude")+ylab("Latitude")+
-  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
-        panel.background = element_blank(),
-        axis.line = element_line(colour = "black"),
-        legend.key.size = unit(5, 'cm'),
-        axis.title.x = element_text(hjust=0.5, size=16),
-        axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black")) +
-  theme(legend.position="right",       
-        legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0,30,60,90,120), labels=c(0,30,60,90,120), 
-                     limits= c(0,130))+
-  theme_classic(base_size = 16)+
-  labs( title="Gov-Opp Low Level Violence", fill= "Event Number")
 
 
+#Animate Plot
 plot_animation<-a + transition_manual(year)+ labs(subtitle = "Year: {current_frame}")
-animate(plot_animation, nframes= length(unique(count_events_poly$year)), fps=1, height = 1172, width =1900,
+animate(plot_animation, nframes= 3, fps=1, height = 1172, width =1900,
         #For Latex
         #renderer = file_renderer( prefix = "Animation_Map_noNA", overwrite = TRUE)
 )
@@ -557,8 +526,8 @@ animate(plot_animation, nframes= length(unique(count_events_poly$year)), fps=1, 
 
 
 
+#Save Plot
+anim_save("Animation_escalation.gif",sep="", path=path_plots)
 
 
-ggsave(p,filename = paste(path_plots,"/Map_escalation_variable.png", sep=""), height= 20, width = 20)
-ggsave(q,filename = paste(path_plots,"/Map_escalation_variable_nodemands.png", sep=""), height= 20, width = 20)
 
