@@ -147,7 +147,7 @@ count_events_poly_0<-count_events_poly %>% filter(rel > 0)
 #For Absoliute Frequency replace fill= rel with fill= n.x in line 149
 #To display the border of the grids replace col= "transparent" with col="grey" in line 149
 ggplot() + 
-  geom_sf(data = count_events_poly_0, aes(fill = rel),col = NA) +
+  geom_sf(data = count_events_poly_0, aes(fill = rel),col = "transparent") +
   geom_sf(data=map, col="black", fill= NA)+
   xlab("Longitude")+ylab("Latitude")+
   theme(plot.title = element_text(hjust = 0.5)) +
@@ -197,19 +197,19 @@ capital<- capital %>%
 state<- "Somalia"
 
 #If interested in the events that took place in that specific state in a specific year
-#Year<-2019
+Year<-2019
 
 #Count Events per git per country
   count_events<-data_icews_pgm %>%
     as.data.frame() %>%
-    #filter(year== Year)%>%
+    filter(year== Year)%>%
     group_by(gid, Country) %>%
     count()
   
 #Count Events per Country
   count_events_country<-data_icews_pgm %>%
     as.data.frame() %>%
-    #filter(year== Year)%>%
+    filter(year== Year)%>%
     group_by( Country) %>%
     count()
   
@@ -223,17 +223,20 @@ capital_new<- capital %>% filter(country_name  == state)
 
 
 #ggplot Barplot
-count_events %>% filter(Country== state ) %>%
-  ggplot(aes(y=gid, x=rel, fill=factor(ifelse(gid== capital_new$gid ,capital_new$capname,"Other")))) +
+count_events %>% filter(Country== state) %>%
+  ggplot(aes(y=gid, x=rel, fill=factor(ifelse(gid== capital_new$gid, "Mogadishu","Other")))) +
   geom_bar(stat="identity") +
-  scale_fill_manual(name = capital_new$country_name, values=c("#440154", "darkgrey")) +
-  ylab("Prio Grid") + xlab("Relative Frequency")+
+  scale_fill_manual(name = "Somalia", values=c("#440154", "darkgrey")) +
+  ylab("Prio Grid ID") + xlab("Relative Frequency")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black"))
+        axis.text = element_text(size=12,colour = "black")) +
+  theme(legend.position=c(0.9, 0.9),
+        legend.text=element_text(size=16),
+        legend.title =element_text(size=16) )
 
 #Save plot
 ggsave(filename=paste("Relative_Prio_Events_in_",state,"_capital",".png", sep=""), width= 30, height = 25, path=path)
