@@ -16,6 +16,7 @@ library(data.table)
 library(cshapes)
 library(stargazer)
 library(xtable)
+library(stringr)
 
 #Assign paths
 path_data_icews_cm<-"~/ICEWS-Project/Data/data_icews_cm.csv"
@@ -117,12 +118,11 @@ cameo_freq<-data %>% group_by(CAMEO_root) %>% count(sort=TRUE)
 
 #Lineplot: Evolution Plot
 
-#Evolution of number of events for every year 1995-2021 and across all countries
+#Evolution of number of events for every year 1995-2020 and across all countries
 #Lineplot with Number of events for each year
 counts_events_by_year%>%
   ggplot(aes(year,n,group=1))+ geom_point()+ geom_line()+
   xlab("Year")+ ylab("Number of Events")+
-  ggtitle("Evolution of Event Numbers Across Time")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
@@ -130,7 +130,7 @@ counts_events_by_year%>%
         axis.title.y= element_text(hjust=0.5,size=16),
         axis.text = element_text(size=12,colour = "black"))
 
-ggsave("Evolution_Events.png", path=path_plots, width = 15, heigh=9)
+ggsave("Evolution_Events.png", path=path_plots, width = 15, height=9)
 
 
 #--------------------------
@@ -160,7 +160,7 @@ counts_events_by_country %>%
         axis.title.y= element_text(hjust=0.5,size=16),
         axis.text = element_text(size=12,colour = "black"))
 
-ggsave(filename="Evolution_Events_Country.png", width = 15, heigh=9, path=path_plots) 
+ggsave(filename="Evolution_Events_Country.png", width = 15, height=9, path=path_plots) 
 
 
 #---------------------
@@ -169,18 +169,21 @@ ggsave(filename="Evolution_Events_Country.png", width = 15, heigh=9, path=path_p
 
 #Average Frequency of observations for every country accross all years 1995-2021
 average_events_by_country%>%arrange(mean)%>%mutate(Country=factor(Country,levels = Country))%>%
-  ggplot(aes(x=mean, y=Country)) +
+  ggplot(aes(y=Country, x=mean)) +
   geom_point(size=1)+
-  geom_vline(aes(xintercept =average_median,color="median"),linetype="dotted")+
-  ggtitle("Average Number of Events between 1995 and 2021")+
-  ylab(label="Country")+xlab(label="Average Number of Events between the Years")+
-  scale_color_manual(name = "Average Median Number of Events", values = c(median= "red"))+
+  geom_vline(aes(xintercept =average_median,color="Median"),linetype="dotted",size=0.8)+
+  ylab(label="Country")+xlab(label="Average Event Number between 1995 and 2020")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black"))
+        axis.text = element_text(size=12,colour = "black"),
+        legend.position=c(.9,.75)) +
+  theme(legend.title=element_blank(),
+        legend.text=element_text(size=16),
+        legend.key.size=unit(1.5,"lines"))+
+  scale_x_continuous( breaks = c(0,1000,2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000))
 
 ggsave("Average_Number_Events.png", path= path_plots, width = 15, height = 9) 
 
@@ -381,9 +384,33 @@ data%>%filter(Country==country & year==Year)%>%
 
 ggsave(filename=paste("Intensity_of_Events_in_",country, Year,".png", sep=""), path=path_plots, width = 15, heigh=9) 
 
+#CAMEO Root Frequency Table
+library("remotes")
+remotes::install_github("andybega/icews")
+library(icews)
+library(DBI)
+data("cameo_codes")
+cameo_codes<-cameo_codes[,c("cameo_code","name","lvl0","lvl1")]
+cameo_codes<- cameo_codes %>% filter(cameo_code=="01" |cameo_code=="02"| cameo_code=="03"| cameo_code=="04"| cameo_code=="05"| cameo_code=="06"| cameo_code=="07"| cameo_code=="08"| cameo_code=="09"| cameo_code=="10" |
+                                       cameo_code=="11"| cameo_code=="12"| cameo_code=="13"| cameo_code=="14"| cameo_code=="15"| cameo_code=="16"| cameo_code=="17" | cameo_code=="18" | cameo_code=="19" | cameo_code=="20")
+data<-merge(data,cameo_codes, by.x="CAMEO_root", by.y="lvl0")
 
+#generate CAMEO freq table
+cameo_freq<-data %>% group_by(CAMEO_root,name) %>% count(sort=TRUE)
 
+#change capital letters to small letters
+cameo_freq$name<-tolower(cameo_freq$name)
+cameo_freq$name<-str_to_title(cameo_freq$name)
 
+#save table
+print(xtable(cameo_freq, type = "latex"), file = "cameo_freq.tex",include.rownames=FALSE)
 
+#Intensity Frequency Table
+int_freq<-data %>% group_by(Intensity) %>% count(sort=TRUE)
+bins<-c(-10,-0.1,0,0.1,10)
+str(int_freq$Intensity)
+int_freq$Intensity<- cut(int_freq$Intensity, breaks = bins,include.lowest = T)
+int_freq_sum <- int_freq %>% group_by(Intensity) %>% summarise(Frequency = sum(n))
+print(xtable(int_freq_sum, type = "latex"), file = "int_freq.tex")
 
 
