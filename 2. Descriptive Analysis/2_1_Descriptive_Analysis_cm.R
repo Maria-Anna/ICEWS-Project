@@ -261,7 +261,7 @@ p<-data%>%filter(Country==country & year==2016) %>% ggplot(aes(x=as.character(CA
     geom_bar(stat = "count",fill="darkblue")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
-    scale_y_continuous(expand = c(0, 0), limits = c(0,NA))+
+    scale_y_continuous(expand = c(0, 0), limits = c(0,800), breaks=seq(0,800,100))+
     scale_x_discrete(breaks=1:20,limits=factor(1:20))+
     ggtitle(paste(country,year[1]))+
     theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
@@ -276,7 +276,7 @@ q<-data%>%filter(Country==country & year==2017) %>%ggplot(aes(x=as.character(CAM
     geom_bar(stat="count",fill="darkblue")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
-    scale_y_continuous(expand = c(0, 0), limits = c(0, NA))+
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 800), breaks=seq(0,800,100))+
     scale_x_discrete(breaks=1:20,limits=factor(1:20))+
     ggtitle(paste(country,year[2]))+
     theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
@@ -291,7 +291,7 @@ d<-data%>%filter(Country==country & year==2018) %>%ggplot(aes(x=as.character(CAM
     geom_bar(stat="count",fill="darkblue")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
-    scale_y_continuous(expand = c(0, 0), limits = c(0, NA))+
+    scale_y_continuous(expand = c(0, 0), limits = c(0, 800), breaks=seq(0,800,100))+
     scale_x_discrete(breaks=1:20,limits=factor(1:20))+
     ggtitle(paste(country,year[3]))+
     theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
@@ -300,7 +300,7 @@ d<-data%>%filter(Country==country & year==2018) %>%ggplot(aes(x=as.character(CAM
           axis.title.x = element_text(hjust=0.5, size=16),
           axis.title.y= element_text(hjust=0.5,size=16),
           axis.text = element_text(size=12,colour = "black"))
-q          
+          
 plot_grid(p,q,d,ncol = 3, align="hv")
 
 ggsave(filename=paste("Root_Cameo_Code_Evolution_Absolute_",country,".png", sep=""), path=path_plots, width = 15, heigh=9) 

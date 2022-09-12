@@ -72,9 +72,12 @@ missings_cm$Freq<-missings_cm$Freq/12
 missings_cm%>%arrange(Freq)%>%mutate(Var1=factor(Var1,levels = Var1))%>%
   ggplot(aes(x=Freq, y=Var1)) +
   geom_point(size=1)+
-  ylab(label="Country")+xlab(label="Average Number of Missing Events  between 1995-2020")+
+  ylab(label="Country")+xlab(label="Years")+
   scale_color_manual(values = c(median= "red"), labels="Median")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.grid.major.y = element_line(colour = "grey"),
+        panel.grid.major.x = element_line(colour = "grey"),
+        panel.grid.minor.x = element_blank(),
         panel.background = element_blank(),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
@@ -86,7 +89,7 @@ missings_cm%>%arrange(Freq)%>%mutate(Var1=factor(Var1,levels = Var1))%>%
         legend.background = element_blank(),
         legend.text=element_text(size=12))
 
-ggsave(filename=paste(path_plots, "/Freq_Events_Esc.png", sep=""), height = 9, width = 15)
+ggsave(filename=paste(path_plots, "/Missings_Esc.png", sep=""), height = 9, width = 15)
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------#
@@ -436,12 +439,37 @@ cor<-round(cor(cm_data_sub),3)
 #Display Correlation Matrix
 head(cor)
 
+#Set variable names
+rownames(cor)<-c("Gov-Opp AC",
+                  "Gov-Opp LV",
+                  "Gov-Opp NR",
+                  "Opp-Gov D",
+                  "Opp-Gov LV",
+                  "Gov-Reb AC",
+                  "Gov-Reb LV",
+                  "Gov-Reb NR",
+                  "Reb-Gov D",
+                  "Reb-Gov LV")
+colnames(cor)<-c("Gov-Opp AC",
+                 "Gov-Opp LV",
+                 "Gov-Opp NR",
+                 "Opp-Gov D",
+                 "Opp-Gov LV",
+                 "Gov-Reb AC",
+                 "Gov-Reb LV",
+                 "Gov-Reb NR",
+                 "Reb-Gov D",
+                 "Reb-Gov LV")
+
+
 #Correlation Plot
-corrplot(cor,tl.col = "black")
+corrplot(cor, tl.col = "black")
+corr<-{corrplot(cor, tl.col = "black"); recordPlot()
+}
 
 
 #Save Plot
-ggsave(filename=paste(path_plots, "/corrplot.png", sep=""))
+ggsave(plot = replayPlot(corr), filename=paste(path_plots, "/corrplot.png", sep=""))
 
 #-------------------------------------------------------------------------------------------------------------
 ######################################
