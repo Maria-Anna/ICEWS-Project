@@ -257,7 +257,7 @@ year<-c(2018, 2019, 2020)
 # in lines  177, 192, 2017 
 
 #Barplot for first year
-p<-data%>%filter(Country==country & year==year[1]) %>% ggplot(aes(x=as.character(CAMEO_root)))+
+p<-data%>%filter(Country==country & year==2016) %>% ggplot(aes(x=as.character(CAMEO_root)))+
     geom_bar(stat = "count",fill="darkblue")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
@@ -272,7 +272,7 @@ p<-data%>%filter(Country==country & year==year[1]) %>% ggplot(aes(x=as.character
           axis.text = element_text(size=12,colour = "black"))
 
 #Barplot for second year  
-q<-data%>%filter(Country==country & year==year[2]) %>%ggplot(aes(x=as.character(CAMEO_root)))+
+q<-data%>%filter(Country==country & year==2017) %>%ggplot(aes(x=as.character(CAMEO_root)))+
     geom_bar(stat="count",fill="darkblue")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
@@ -287,7 +287,7 @@ q<-data%>%filter(Country==country & year==year[2]) %>%ggplot(aes(x=as.character(
           axis.text = element_text(size=12,colour = "black"))
 
 #Barolot for third year  
-d<-data%>%filter(Country==country & year==year[3]) %>%ggplot(aes(x=as.character(CAMEO_root)))+
+d<-data%>%filter(Country==country & year==2018) %>%ggplot(aes(x=as.character(CAMEO_root)))+
     geom_bar(stat="count",fill="darkblue")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
@@ -300,7 +300,7 @@ d<-data%>%filter(Country==country & year==year[3]) %>%ggplot(aes(x=as.character(
           axis.title.x = element_text(hjust=0.5, size=16),
           axis.title.y= element_text(hjust=0.5,size=16),
           axis.text = element_text(size=12,colour = "black"))
-          
+q          
 plot_grid(p,q,d,ncol = 3, align="hv")
 
 ggsave(filename=paste("Root_Cameo_Code_Evolution_Absolute_",country,".png", sep=""), path=path_plots, width = 15, heigh=9) 
