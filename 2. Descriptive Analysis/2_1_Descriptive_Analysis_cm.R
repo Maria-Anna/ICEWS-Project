@@ -122,8 +122,13 @@ cameo_freq<-data %>% group_by(CAMEO_root) %>% count(sort=TRUE)
 #Lineplot with Number of events for each year
 counts_events_by_year%>%
   ggplot(aes(year,n,group=1))+ geom_point()+ geom_line()+
+  stat_peaks(colour = "#440154", shape=1, size=6) +
   xlab("Year")+ ylab("Number of Events")+
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 125000),breaks=seq(0,120000,30000), labels = seq(0,120000,30000))+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.grid.major.y = element_line(colour = "grey"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
@@ -171,20 +176,25 @@ ggsave(filename="Evolution_Events_Country.png", width = 15, height=9, path=path_
 average_events_by_country%>%arrange(mean)%>%mutate(Country=factor(Country,levels = Country))%>%
   ggplot(aes(y=Country, x=mean)) +
   geom_point(size=1)+
-  geom_vline(aes(xintercept =average_median,color="Median"),linetype="dotted",size=0.8)+
+  geom_vline(aes(xintercept =average_median,color="Average Median"),size=0.5)+
   ylab(label="Country")+xlab(label="Average Event Number between 1995 and 2020")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.grid.major.y = element_line(colour = "lightgrey"),
+        panel.grid.major.x = element_line(colour = "lightgrey"),
+        panel.grid.minor.x = element_blank(),
         panel.background = element_blank(),
         axis.line = element_line(colour = "black"),
         axis.title.x = element_text(hjust=0.5, size=16),
         axis.title.y= element_text(hjust=0.5,size=16),
-        axis.text = element_text(size=12,colour = "black"),
-        legend.position=c(.9,.75)) +
-  theme(legend.title=element_blank(),
+        axis.text = element_text(size=12,colour = "black")
+        ) +
+  theme(legend.position = c(.9,.1),
+        legend.title=element_blank(),
         legend.text=element_text(size=16),
         legend.key.size=unit(1.5,"lines"))+
-  scale_x_continuous( breaks = c(0,1000,2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000))
-
+  scale_x_continuous( breaks = c(0,1000,2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000,13000))+
+  scale_color_manual(values="#440154")
+  
 ggsave("Average_Number_Events.png", path= path_plots, width = 15, height = 9) 
 
 #-----------------------
