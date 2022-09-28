@@ -19,9 +19,9 @@ path_predictions<- "~/ICEWS-Project/3. Model/Predictions/"
 #Lag: s=2
 
 #load Models
-load(paste0(path_predictions, "Prediction_ICEWS/models/try_model_1_s2.RData"))
-load(paste0(path_predictions, "Prediction_ICEWS/models/try_model_2_s2.RData"))
-load(paste0(path_predictions, "Prediction_ICEWSmodels/try_model_3_s2.RData"))
+load(paste0(path_predictions, "Prediction_ICEWS/models/try_model_1.RData"))
+load(paste0(path_predictions, "Prediction_ICEWS/models/try_model_2.RData"))
+load(paste0(path_predictions, "Prediction_ICEWS/models/try_model_3.RData"))
 
 #Estimates for all three stages
 summary_1 = summary(try_model_1)
@@ -41,9 +41,9 @@ summary_3
 #Lag: s=7
 
 #load Models
-load(paste0(path_predictions,"Prediction_ICEWS/models/try_model_1_s7.RData"))
-load(paste0(path_predictions,"Prediction_ICEWS/models/try_model_2_s7.RData"))
-load(paste0(path_predictions,"Prediction_ICEWS/models/try_model_3_s7.RData"))
+load(paste0(path_predictions,"Prediction_ICEWS/models_7/try_model_1.RData"))
+load(paste0(path_predictions,"Prediction_ICEWS/models_7/try_model_2.RData"))
+load(paste0(path_predictions,"Prediction_ICEWS/models_7/try_model_3.RData"))
 
 
 #Estimates for all tree stages

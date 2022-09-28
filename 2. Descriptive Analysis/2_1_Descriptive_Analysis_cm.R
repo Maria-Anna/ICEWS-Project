@@ -77,7 +77,6 @@ stargazer(data, summary.stat = c("mean", "median", "min", "max", "sd", "p25", "p
 data_icews_cm_na <-as.data.frame(colSums(is.na(data)))
 #print(xtable(data_icews_cm_na, type = "latex"), file = paste(path_plots,"/missings_data_icews_cm.tex", sep=""))
 
-
 #Check for duplicates in data set
 
 
@@ -259,7 +258,7 @@ ggsave(filename=paste("Event_Density_Africa_",Year,".png", sep=""),path= path_pl
 #Define Country of Interest
 country<-"Somalia"
 #Define tree years to compare the Cameo Codes between them
-year<-c(2018, 2019, 2020)
+year<-c(2005, 2006, 2007)
 
 #Create 3 Barplots with the Absolute Frequency of the cameo codes for 3 years in a specific Country
 #For the relative Frequency 
@@ -267,8 +266,8 @@ year<-c(2018, 2019, 2020)
 # in lines  177, 192, 2017 
 
 #Barplot for first year
-p<-data%>%filter(Country==country & year==2016) %>% ggplot(aes(x=as.character(CAMEO_root)))+
-    geom_bar(stat = "count",fill="darkblue")+
+p<-data%>%filter(Country=="Somalia" & year==2005) %>% ggplot(aes(x=as.character(CAMEO_root)))+
+    geom_bar(stat = "count",fill="#440154")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
     scale_y_continuous(expand = c(0, 0), limits = c(0,800), breaks=seq(0,800,100))+
@@ -280,10 +279,10 @@ p<-data%>%filter(Country==country & year==2016) %>% ggplot(aes(x=as.character(CA
           axis.title.x = element_text(hjust=0.5, size=16),
           axis.title.y= element_text(hjust=0.5,size=16),
           axis.text = element_text(size=12,colour = "black"))
-
+p
 #Barplot for second year  
-q<-data%>%filter(Country==country & year==2017) %>%ggplot(aes(x=as.character(CAMEO_root)))+
-    geom_bar(stat="count",fill="darkblue")+
+q<-data%>%filter(Country=="Somalia" & year==2006) %>%ggplot(aes(x=as.character(CAMEO_root)))+
+    geom_bar(stat="count",fill="#440154")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
     scale_y_continuous(expand = c(0, 0), limits = c(0, 800), breaks=seq(0,800,100))+
@@ -297,8 +296,8 @@ q<-data%>%filter(Country==country & year==2017) %>%ggplot(aes(x=as.character(CAM
           axis.text = element_text(size=12,colour = "black"))
 
 #Barolot for third year  
-d<-data%>%filter(Country==country & year==2018) %>%ggplot(aes(x=as.character(CAMEO_root)))+
-    geom_bar(stat="count",fill="darkblue")+
+d<-data%>%filter(Country=="Somalia" & year==2007) %>%ggplot(aes(x=as.character(CAMEO_root)))+
+    geom_bar(stat="count",fill="#440154")+
     xlab("Root Cameo Code")+ ylab("Absolute Frequency")+
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5))+
     scale_y_continuous(expand = c(0, 0), limits = c(0, 800), breaks=seq(0,800,100))+

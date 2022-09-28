@@ -477,8 +477,7 @@ ggsave(plot = replayPlot(corr), filename=paste(path_plots, "/corrplot.png", sep=
 ######################################
 
 count_events_country<-cm_data %>%
-  as.data.frame()%>%
-  group_by(country_name, year) %>%
+  group_by(country_name, year_month) %>%
   summarise(gov_opp_low_level = sum(gov_opp_low_level), 
             reb_gov_demands= sum(reb_gov_demands),
             opp_gov_demands= sum(opp_gov_demands),
@@ -492,9 +491,9 @@ count_events_country<-cm_data %>%
 
 #Summarize all Events across all Variables in each country
 #count_events_country<-count_events_country %>% select(country_name,gov_opp_low_level_sum) %>% right_join(count_events_country_year, by="country_name")
-sudan<-data.frame(country_name= c("South Sudan", "South Sudan", "South Sudan"), year= c(2006, 2007, 2008), gov_opp_low_level=c(0,0,0))
+sudan<-data.frame(country_name= c("South Sudan", "South Sudan", "South Sudan"), year_month= c(2007-11, 2007-12, 2008-01), gov_opp_low_level=c(0,0,0))
 count_events_country<-rbind(count_events_country, sudan)
-
+count_events_country<-as.data.frame(count_events_country)
 
 #create African map
 states<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso (Upper Volta)", "Burundi","Cape Verde", "Cameroon","Central African Republic",
@@ -519,11 +518,14 @@ africa<- africa %>%
 
 africa<- africa %>% filter(country_name %in% c("Eritrea","Ethiopia","Somalia","Kenya", "Uganda","South Sudan"))
 #Join Data with relative Frequency and African Map
+sudan<-data.frame(country_name= c("South Sudan", "South Sudan", "South Sudan"), year= c(2006, 2007, 2008), gov_opp_low_level=c(0,0,0))
+count_events_country<-rbind(count_events_country, sudan)
+
 data<- left_join(africa, count_events_country)
 
 #We can do the plot with all Variables, change fill= reb_gov_low_level
 #GGPLOT
-a<-ggplot(filter(data,year %in% c("2006", "2007", "2008")))+
+a<-ggplot(filter(data,year_month=="2007-11"))+
   geom_sf(aes(group=country_name, fill= gov_opp_low_level))+
   xlab("Longitude")+ylab("Latitude")+
   theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
@@ -535,12 +537,10 @@ a<-ggplot(filter(data,year %in% c("2006", "2007", "2008")))+
         axis.text = element_text(size=12,colour = "black")) +
   theme(legend.position="right",       
         legend.key.height = unit(20,"cm")) +
-  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(0,30,60,90,120), labels=c(0,30,60,90,120), 
-                     limits= c(0,130))+
+  scale_fill_viridis(option = "D", discrete = F, direction=1, breaks= c(1,20,40,60,80,90), labels=c(1,20,40,60,80,90), 
+                     limits= c(1,90))+
   theme_classic(base_size = 16)+
   labs( title="Gov-Opp Low Level Violence", fill= "Event Number")
-
-
 
 
 
@@ -556,6 +556,39 @@ animate(plot_animation, nframes= 3, fps=1, height = 1172, width =1900,
 
 #Save Plot
 anim_save("Animation_escalation.gif",sep="", path=path_plots)
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+##############################
+#Time Series: Egypt 2013-2016
+##############################
+
+#Plot for each escalation covariate the Evolution of the absolute frequency event number over the months
+#lines indicate whether a state-based fatality in CM happened or not
+
+#Choose a Country
+country<- "Kenya"
+
+year_months<-c("2007-11","2007-12","2008-01")
+cm_ken<-cm_data %>% filter(country_name== country,year_month %in% year_months)
+
+#Plot for reb_gov_low_level
+a<-ggplot(cm_ken, aes(year_month,gov_opp_low_level))+ geom_point()+ geom_line(aes(group=1))+
+  geom_vline(aes(xintercept = year_month), data = ~ filter(cm_data,country_name=="Kenya",year %in% (year_months),ged_dummy_sb=="TRUE"),linetype="dotted")+
+  xlab("Year-Month")+ ylab("Event Frequency")+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme(plot.title = element_text(color = "black", size=14, hjust=0.5),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.title.x = element_text(hjust=0.5, size=16),
+        axis.title.y= element_text(hjust=0.5,size=16),
+        axis.text = element_text(size=12,colour = "black")) 
+
+ggsave(a,filename=paste(path_plots, "Kenya_Escalation_Time_Series.png", sep=""))
+
+
+
 
 
 
