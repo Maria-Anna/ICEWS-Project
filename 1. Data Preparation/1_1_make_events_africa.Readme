@@ -1,7 +1,7 @@
 Short Summary: 
 
-In this file we read the icews Data from the Folder Datasets_ICEWS: Downloaded 
-We keep only the observations in Africa, and save this in the new generated Dataset events_africa.tsv 
+In this file we read the ICEWS data from the Folder Datasets_ICEWS_Downloaded: Downloaded 
+We keep only the observations in Africa, and save this in the new generated data set events_africa.tsv 
 For the Year 2017 there is a Typo in the Cameo.Code which is corrected. 
 
 ---------------------------------------------------------------------------------------------------------
@@ -9,16 +9,16 @@ Variable Explanation:
 
 Event.ID: Unique identifier of the events within the years. Between the years, they are not unique.
 Event.Date: Date the Event took place. Format: 2003-06-27
-Source.Name: Name of the party who initiated the event. e.g. Lord’s Resistance Army
+Source.Name: Name of the agent or actor who initiated the event. e.g. Lord’s Resistance Army
 Source.Sectors: Sector of the initiator. e.g. Dissident,Insurgents
-Source.Country: Country of the initiator. e.g. Ugand
+Source.Country: Country of the initiator. e.g. Uganda
 Event.Text: Short explanation of the event. e.g. Abduct, hijack, or take hostage
-CAMEO.Code: Nominal scale to categorize the events. e.g. 181
-Intensity: Ordinal scale to categorize the intensity of the events. e.g. -9
-Target.Name: Name of the party who received the event. e.g. Children (Uganda)
+CAMEO.Code: Code Number that comes with the Event.Text e.g. 181
+Intensity: Scale from -10 to 10, used to categorize the intensity of the events. e.g. -9
+Target.Name: Name of the agent or actor to which the event was targeted to. e.g. Children (Uganda)
 Target.Sectors: Sector of the recipient. e.g. Social,General Population / Civilian / Social
 Target.Country: Country of the recipient: e.g. Uganda
-Story.ID: Identifier of the newspaper the information was extracted. 
+Story.ID: Identifier of the newspaper the event information was extracted. 
 Sentence.Number: 3
 Publisher: Name of the publisher of the newspaper. 
 City: City the event occurred.
@@ -28,4 +28,4 @@ Country: Country the event occurred.
 Latitude: Latitude of the event. *
 Longitude: Latitude of the event. *
 
-* If city is available, then Longitude and the Latitude from the city is taken. If Province is available, then the Longitude and Latitude from the biggest city, in the province is taken. If country is available, then the Longitude and Latitude from the biggest city, in the country is taken. 
+* Longitude and Latitude of most specific administrative division known for the event. If city is available, then Longitude and the Latitude from the city is taken. If Province is available, then the Longitude and Latitude from the capital city, in the province is taken. If country is available, then the Longitude and Latitude from the capital city, in the country is taken. 

@@ -16,7 +16,6 @@ path_data_cm<-"~/ICEWS-Project/Data/cm_data.csv"
 path_pgm_data<-"~/ICEWS-Project/Data/pgm_data.Rdata"
 
 
-  
 #Assign path to save new data : icews_data_cm and icews_data_pgm 
 path_data_new<-"~/ICEWS-Project/Data"
 
@@ -316,7 +315,6 @@ cm_data<-read.csv(path_data_cm)
 
 #Load PGM data:
 load(path_pgm_data)
-
 
 
 #Change country names to uniform country names

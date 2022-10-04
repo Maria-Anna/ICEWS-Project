@@ -17,7 +17,7 @@ rm(list=ls())
 path_data_icews_cm<- "~/ICEWS-Project/Data/data_icews_cm.csv"
 
 #Assign path with folder containing Shapefiles for the Prio Grid cells
-#PRIO shape files can be found: https://grid.prio.org/#/extensions  Source: Tollefsen et al. (2012)
+#PRIO shape files can be found: https://grid.prio.org/#/extensions, Source: Tollefsen et al. (2012)
 path_priogrid<-"~/ICEWS-Project/Data/priogrid_cellshp"
 
 #Assign path were to save new created data: data_icews_pgm.csv

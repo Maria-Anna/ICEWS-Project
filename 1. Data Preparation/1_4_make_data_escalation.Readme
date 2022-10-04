@@ -12,7 +12,7 @@ pgm_icews_data: data_escalation + pgm_data
 Variable Explanation: 
 
 
-gov_opp_accommodations: An event that is considerend as accomodative is initiated from the government and targeting the opposition
+gov_opp_accommodations: An event that is considerend as accmomodative is initiated from the government and targeting the opposition
 
 gov_opp_low_level:          An event that involves low level violence is initiated from the government                               and targeting the opposition
 gov_opp_nonviol_repression: An event that is considerend as an nonviolent repression is initiated from                               the government and is targeting the opposition
@@ -34,7 +34,7 @@ key_cy: Composed  of month_id and country_id e.g.: 121_120, for month_id 121 (19
 country_name: Name of the Country 
 country_id: Every Country has an ID
 country_iso3: Every Country has an iso3 ID
-name_fac: Country factor variable. Random Effekt
+name_fac: Country factor variable. Random Effect
 ged_dummy_sb: Boolean for presence of state-based conflict 
 ged_best_sb: Number of fatalities in state-based conflict 
 ged_dummy_ns: Boolean for presence of non-state conflict 
@@ -50,12 +50,12 @@ polity:Polity IV Index.The 21-point scale of the ”Polity Score” ranges from 
 milit_exp:Annual military expenditure
 mcw_receiver_rolling:Trend Indicator Values for long-term import of MCW (major conventional weapons)
 mcw_receiver_acute: Trend Indicator Values for short-term import of MCW (major conventional weapons)
-avr_lon: averange longitude
-avr_lat: averange latitude
+avr_lon: average longitude
+avr_lat: average latitude
 
 pg_id: ID of the prio grid 
-key_pm:Composed of Year and pg_id
-key_py:Composed  of month_id and pg_id
+key_py:Composed of Year and pg_id
+key_pm:Composed  of month_id and pg_id
 pgd_nlights_calib_mean:Average calibrated nighttime lights per prio grid-Year.
 pgd_imr_mean:Average Infant Mortality Rate per prio grid-Year.
 pgd_capdist: Distance to the capital for each prio grid.

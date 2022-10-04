@@ -26,10 +26,10 @@ list_all_ICEWS = lapply(c(names_files_tab, names_files_tsv), read.delim, quote="
 
 
 #Read 2017 file 
-#Remark: Read 2017 again because there is an coding errors. We need to correct that
+#Remark: Read 2017 again because there are coding errors. Errors must be corrected
 data<-read.delim("Events.2017.20201119.tab",na.strings=c("NULL","NA"))
 
-#Convert Factor to character
+#Convert factor to character
 data$CAMEO.Code<- as.character(data$CAMEO.Code)
 
 #Hardcode CAMEO.Code "13y" to "137"
@@ -57,10 +57,8 @@ states_africa<-c("Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Buru
 
 
 
-
-
 #Relevant for project: Events with Source.Country, Target.Country and Country == Africa and Source.Country==Target.Country==Country
-#List with datasets that occur in Africa so  Source.Country, Target.Country and Country equals to Africa
+#List with data sets that occur in Africa so  Source.Country, Target.Country and Country equals to Africa
 list_africa_total<-lapply(list_all_ICEWS, function(x) dplyr::filter(x, Country %in% states_africa & Source.Country %in% states_africa & Target.Country %in% states_africa))
 
 #Generate data set from list

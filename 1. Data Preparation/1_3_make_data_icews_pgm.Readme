@@ -2,8 +2,7 @@ Short Summary:
 
 In this file, the ICEWS Data (events_africa) with the structural and conflict variables from Fritz et al.
 (data_cm) is brought to the prio grid cell level. For this, the shapefiles priogrid_cellshp are used. 
-Instead of having events for each country, we now have events for each grid cell.  A grid cell is representing an 50×50km area in Africa.  
-
+Instead of having events for each country, we now have events for each grid cell. 
 
 ---------------------------------------------------------------------------------------------------------
 Variable Explanation: 
@@ -13,7 +12,7 @@ This Dataset contains all Variables from data_icews_cm. For the explanation of t
 
 New Variables:
 
-gid: Grid cell identifier, a unique id code for each cell in the grid.
+gid: Grid cell identifier, a unique Prio Grid Cell identifier
 xcoord: Longitude coordinate for the centroid of the grid cell.
 ycoord: Latitude coordinate for the centroid of the grid cell.
 col:    Number for the grid cell. Column 1 is the westernmost column in the grid, between 180 and 179.5 decimal degrees W. With one column per half degree, there are 720 columns in PRIO-GRID.
