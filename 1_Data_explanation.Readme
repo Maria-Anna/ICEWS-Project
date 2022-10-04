@@ -1,21 +1,21 @@
-Here is a brief overview of the Datasets:
+Here is a brief overview of the datasets:
 
 ---------------------------------------------------------------------------------------------------------
 Raw Data:
  
 
-events_africa.tsv : Cleaned ICEWS-Data with all Events in Africa from 1995-2020 *
+events_africa.tsv: Cleaned ICEWS-Data with all Events in Africa from 1995-2020 *
 
 priogrid_cellshp: Shapefiles to create the 50×50km grid cells **
 
 
 ---------------------------------------------------------------------------------------------------------
-Helpfull Datasets:
+Helpfull and Needed Datasets:
 
 
-cm_data.csv: Dataset with structural variables and variables containing the conflicts per country ***
+cm_data.csv: Dataset with structural variables and variables containing the number of fatalities resulting from state-based conflicts per country and month***
 
-pgm_data.Rdata: Dataset with structural variables and variables containing the conflicts per grid-cell***
+pgm_data.Rdata: Dataset with structural variables and variables containing the number of fatalities resulting from state-based conflicts per prio grid and month***
 
 cm_data_BlairSambanis: Dataset with aggregated ICEWS. Only used for robustness check. ****
 
@@ -24,24 +24,24 @@ cm_data_BlairSambanis: Dataset with aggregated ICEWS. Only used for robustness c
 Data for Descriptives: 
 
 
-data_icews_cm.Rdata: events_africa.tsv + cm_data.csv : ICEWS with added structural variables
+data_icews_cm.Rdata: events_africa.tsv + cm_data.csv : ICEWS at country month level with added structural variables and further identifiers
 
-data_icews_pgm: events_africa.tsv + priogrid_cellshp + cm_data.csv : ICEWS at prio grid level with structural variables
+data_icews_pgm: events_africa.tsv + priogrid_cellshp + cm_data.csv : ICEWS at prio grid month level with structural variables and further identifiers
 
-data_escalation.csv: Aggregated ICEWS dataset according to Blair and Sambanis per country
+data_escalation.csv: Aggregated ICEWS dataset according to Blair and Sambanis per country and month
 
-data_escalation_prio.csv: data_escalation.csv +  priogrid_cellshp : Aggregated ICEWS dataset per grid cell
+data_escalation_prio.csv: data_escalation.csv +  priogrid_cellshp : Aggregated ICEWS dataset per grid cell and month
 
 
 ---------------------------------------------------------------------------------------------------------
 Data for Predictions: 
 
 
-cm_icews_data.csv:  cm_data.csv + data_escalation.csv : Structural and conflict Variables with aggregated Events at country level
+cm_icews_data.csv:  cm_data.csv + data_escalation.csv : Structural and conflict Variables with observations at country-month level
 
-pgm_icews_data.csv: pgm_data.Rdata + data_escalation.csv : Structural and conflict Variables with aggregated Events at prio grid level prio grids from pgm_data.Rdata are used
+pgm_icews_data.csv: pgm_data.Rdata + data_escalation.csv : Structural and conflict Variables with observations at prio grid-month level (conflict escalation proxies at CM level)
 
-pgm_icews_data_pg.csv: data_escalation_prio.csv + cm_data.csv : Structural and conflict Variables with aggregated Events at prio grid level prio grids from data_escalation_prio.csv are used
+pgm_icews_data_pg.csv: data_escalation_prio.csv + cm_data.csv : Structural and conflict Variables with observations at prio grid-month level (conflict escalation proxies at PGM level)
 
 
 
@@ -55,11 +55,11 @@ https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/28075
 ** Shapefiles are taken from: 
 https://grid.prio.org/#/extensions
 
-*** They are taken from: 
+*** Taken from: 
 "The role of governmental weapons procurements in forecasting monthly fatalities in intrastate conflicts:
-A semiparametric hierarchical hurdle model"  by C. Fritz, M. Mehl, P. W. Thurner, G. Kauermann
+A semiparametric hierarchical hurdle model"  by C. Fritz, M. Mehl, P. W. Thurner, G. Kauermann (2021)
 
-**** Is taken from: 
-Forecasting Civil Wars: Theory and Structure in an Age of "Big Data" and Machine Learning by A. Blair , N. Sambanis 
+**** Taken from: 
+"Forecasting Civil Wars: Theory and Structure in an Age of "Big Data" and Machine Learning" by A. Blair , N. Sambanis (2020)
 
 
